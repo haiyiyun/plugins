@@ -14,7 +14,7 @@ type CacheCfg struct {
 	CacheCleanupInterval   config.Duration `json:"cache_cleanup_interval"`
 }
 
-type UserRBACCfg struct {
+type UrbacCfg struct {
 	WebRouter            bool                `json:"web_router"`
 	WebRouterRootPath    string              `json:"web_router_root_path"`
 	CheckRight           bool                `json:"check_right"`
@@ -37,6 +37,6 @@ type FrontCfg struct {
 type Config struct {
 	MongodbCfg
 	CacheCfg
-	UserRBACCfg
+	UrbacCfg
 	FrontCfg
 }

@@ -7,12 +7,12 @@ import (
 
 	"github.com/haiyiyun/plugins/urbac/database/schema"
 	"github.com/haiyiyun/plugins/urbac/service"
-	userRBACServiceApplication "github.com/haiyiyun/plugins/urbac/service/application"
-	userRBACServiceAuth "github.com/haiyiyun/plugins/urbac/service/auth"
-	userRBACServiceProfile "github.com/haiyiyun/plugins/urbac/service/profile"
-	userRBACServiceRole "github.com/haiyiyun/plugins/urbac/service/role"
-	userRBACServiceToken "github.com/haiyiyun/plugins/urbac/service/token"
-	userRBACServiceUser "github.com/haiyiyun/plugins/urbac/service/user"
+	urbacServiceApplication "github.com/haiyiyun/plugins/urbac/service/application"
+	urbacServiceAuth "github.com/haiyiyun/plugins/urbac/service/auth"
+	urbacServiceProfile "github.com/haiyiyun/plugins/urbac/service/profile"
+	urbacServiceRole "github.com/haiyiyun/plugins/urbac/service/role"
+	urbacServiceToken "github.com/haiyiyun/plugins/urbac/service/token"
+	urbacServiceUser "github.com/haiyiyun/plugins/urbac/service/user"
 
 	"github.com/haiyiyun/cache"
 	"github.com/haiyiyun/config"
@@ -23,56 +23,56 @@ import (
 )
 
 func init() {
-	userRBACConfFile := flag.String("config.plugins.urbac", "../config/plugins/urbac/urbac.conf", "urbac config file")
-	var userRBACConf service.Config
-	config.Files(*userRBACConfFile).Load(&userRBACConf)
+	urbacConfFile := flag.String("config.plugins.urbac", "../config/plugins/urbac/urbac.conf", "urbac config file")
+	var urbacConf service.Config
+	config.Files(*urbacConfFile).Load(&urbacConf)
 
-	userRBACCache := cache.New(userRBACConf.CacheDefaultExpiration.Duration, userRBACConf.CacheCleanupInterval.Duration)
-	userRBACDB := mongodb.NewMongoPool("", userRBACConf.MongoDatabaseName, 100, options.Client().ApplyURI(userRBACConf.MongoDNS))
-	webrouter.SetCloser(func() { userRBACDB.Disconnect(context.TODO()) })
+	urbacCache := cache.New(urbacConf.CacheDefaultExpiration.Duration, urbacConf.CacheCleanupInterval.Duration)
+	urbacDB := mongodb.NewMongoPool("", urbacConf.MongoDatabaseName, 100, options.Client().ApplyURI(urbacConf.MongoDNS))
+	webrouter.SetCloser(func() { urbacDB.Disconnect(context.TODO()) })
 
-	userRBACDB.M().InitCollection(schema.User)
-	userRBACDB.M().InitCollection(schema.Role)
-	userRBACDB.M().InitCollection(schema.Application)
-	userRBACDB.M().InitCollection(schema.Token)
+	urbacDB.M().InitCollection(schema.User)
+	urbacDB.M().InitCollection(schema.Role)
+	urbacDB.M().InitCollection(schema.Application)
+	urbacDB.M().InitCollection(schema.Token)
 
-	userRBACService := service.NewService(&userRBACConf, userRBACCache, userRBACDB)
+	urbacService := service.NewService(&urbacConf, urbacCache, urbacDB)
 
-	if userRBACConf.WebRouter {
+	if urbacConf.WebRouter {
 		//Init Begin
-		userRBACServiceUserService := userRBACServiceUser.NewService(userRBACService)
-		userRBACServiceTokenService := userRBACServiceToken.NewService(userRBACService)
-		userRBACServiceRoleService := userRBACServiceRole.NewService(userRBACService)
-		userRBACServiceAuthService := userRBACServiceAuth.NewService(userRBACService)
-		userRBACServiceProfileService := userRBACServiceProfile.NewService(userRBACService)
-		userRBACServiceApplicationService := userRBACServiceApplication.NewService(userRBACService)
+		urbacServiceUserService := urbacServiceUser.NewService(urbacService)
+		urbacServiceTokenService := urbacServiceToken.NewService(urbacService)
+		urbacServiceRoleService := urbacServiceRole.NewService(urbacService)
+		urbacServiceAuthService := urbacServiceAuth.NewService(urbacService)
+		urbacServiceProfileService := urbacServiceProfile.NewService(urbacService)
+		urbacServiceApplicationService := urbacServiceApplication.NewService(urbacService)
 		//Init End
 
 		//Go Begin
 		//Go End
 
 		//Register Begin
-		webrouter.Register(userRBACConf.WebRouterRootPath+"token/", userRBACServiceTokenService)
-		webrouter.Register(userRBACConf.WebRouterRootPath+"user/", userRBACServiceUserService)
-		webrouter.Register(userRBACConf.WebRouterRootPath+"role/", userRBACServiceRoleService)
-		webrouter.Register(userRBACConf.WebRouterRootPath+"auth/", userRBACServiceAuthService)
-		webrouter.Register(userRBACConf.WebRouterRootPath+"profile/", userRBACServiceProfileService)
-		webrouter.Register(userRBACConf.WebRouterRootPath+"application/", userRBACServiceApplicationService)
+		webrouter.Register(urbacConf.WebRouterRootPath+"token/", urbacServiceTokenService)
+		webrouter.Register(urbacConf.WebRouterRootPath+"user/", urbacServiceUserService)
+		webrouter.Register(urbacConf.WebRouterRootPath+"role/", urbacServiceRoleService)
+		webrouter.Register(urbacConf.WebRouterRootPath+"auth/", urbacServiceAuthService)
+		webrouter.Register(urbacConf.WebRouterRootPath+"profile/", urbacServiceProfileService)
+		webrouter.Register(urbacConf.WebRouterRootPath+"application/", urbacServiceApplicationService)
 		//Register End
 	}
 
 	webrouter.Injector("urbac", "", 996, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 		reqPath := r.URL.Path
 		checkLogin := true
-		if checkMethods, found := userRBACConf.IgnoreCheckLoginPath[reqPath]; found {
+		if checkMethods, found := urbacConf.IgnoreCheckLoginPath[reqPath]; found {
 			if len(checkMethods) == 0 || help.NewSlice(checkMethods).CheckPartItem(r.Method, "") {
 				checkLogin = false
 			}
 		}
 
 		if checkLogin {
-			if u, found := userRBACService.GetUserInfo(r); found {
-				if allow := userRBACService.CheckRight(reqPath, r.Method, u.ID); !allow {
+			if u, found := urbacService.GetUserInfo(r); found {
+				if allow := urbacService.CheckRight(reqPath, r.Method, u.ID); !allow {
 					rw.WriteHeader(http.StatusForbidden)
 					return true
 				}
