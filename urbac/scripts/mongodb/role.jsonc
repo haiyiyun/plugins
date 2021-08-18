@@ -1,0 +1,12 @@
+{
+    "delete": false,
+    "name": "超级管理员",
+    "users": [
+        ObjectId("610391769c0caa393be20c08")
+    ],
+    "status": NumberInt("1"),
+    "right": {
+        "scope": NumberInt("3"),
+        "applications": null
+    }
+}

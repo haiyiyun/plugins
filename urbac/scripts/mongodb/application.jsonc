@@ -1,0 +1,611 @@
+// 1
+{
+    "enable": true,
+    "type": "virtual",
+    "name": "Dashboard",
+    "path": "/dashboard/",
+    "default_module_action": "welcome/index",
+    "meta": {
+        "title": "Dashboard",
+        "affix": true,
+        "hide_breadcrumb": true,
+        "hide_children_in_menu": true,
+        "hide_tab": true,
+        "hide_menu": true,
+    },
+    "modules": {
+        "welcome/": {
+            "type": "virtual",
+            "name": "Welcome",
+            "enable": true,
+            "path": "welcome/",
+            "order": NumberLong("100"),
+            "meta": {
+                "title": "Welcome",
+            },
+            "actions": {
+                "index": {
+                    "type": "virtual",
+                    "name": "Welcome",
+                    "enable": true,
+                    "icon": "&#xe7e6;",
+                    "path": "index",
+                    "meta": {
+                        "title": "Welcome",
+                    },
+                    "order": NumberLong("0")
+                }
+            }
+        }
+    },
+    "order": NumberLong("-1")
+}
+// 1
+{
+    "_id": ObjectId("611b7439f7cdabb6e6d4b0a8"),
+    "create_time": ISODate("2021-08-17T08:32:57.449Z"),
+    "name": "系统管理",
+    "path": "/urbac/",
+    "enable": true,
+    "modules": {
+        "user/": {
+            "type": "code",
+            "name": "用户管理",
+            "path": "user/",
+            "order": NumberInt("0"),
+            "meta": {
+                "title": "用户管理",
+                "affix": false,
+                "icon": "",
+                "frame_src": "",
+                "hide_breadcrumb": true,
+                "carry_param": false,
+                "hide_children_in_menu": false,
+                "hide_tab": true,
+                "hide_menu": false
+            },
+            "enable": true,
+            "actions": {
+                "update": {
+                    "type": "code",
+                    "name": "update",
+                    "path": "update",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "update",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "create": {
+                    "type": "code",
+                    "name": "create",
+                    "path": "create",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
+                },
+                "delete": {
+                    "type": "code",
+                    "name": "delete",
+                    "path": "delete",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "delete",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "DELETE",
+                        "POST"
+                    ]
+                },
+                "index": {
+                    "type": "code",
+                    "name": "用户列表",
+                    "path": "index",
+                    "order": NumberInt("-1"),
+                    "meta": {
+                        "title": "用户列表",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                },
+                "enable": {
+                    "type": "code",
+                    "name": "enable",
+                    "path": "enable",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "enable",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "reset-password": {
+                    "type": "code",
+                    "name": "reset-password",
+                    "path": "reset-password",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "reset-password",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                }
+            }
+        },
+        "role/": {
+            "type": "code",
+            "name": "角色管理",
+            "path": "role/",
+            "order": NumberInt("0"),
+            "meta": {
+                "title": "角色管理",
+                "affix": false,
+                "icon": "",
+                "frame_src": "",
+                "hide_breadcrumb": true,
+                "carry_param": false,
+                "hide_children_in_menu": false,
+                "hide_tab": true,
+                "hide_menu": false
+            },
+            "enable": true,
+            "actions": {
+                "enable": {
+                    "type": "code",
+                    "name": "enable",
+                    "path": "enable",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "enable",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "update": {
+                    "type": "code",
+                    "name": "update",
+                    "path": "update",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "update",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "create": {
+                    "type": "code",
+                    "name": "create",
+                    "path": "create",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
+                },
+                "delete": {
+                    "type": "code",
+                    "name": "delete",
+                    "path": "delete",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "delete",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "DELETE",
+                        "POST"
+                    ]
+                },
+                "index": {
+                    "type": "code",
+                    "name": "角色列表",
+                    "path": "index",
+                    "order": NumberInt("-1"),
+                    "meta": {
+                        "title": "角色列表",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                }
+            }
+        },
+        "application/": {
+            "type": "code",
+            "name": "应用管理",
+            "path": "application/",
+            "order": NumberInt("0"),
+            "meta": {
+                "title": "应用管理",
+                "affix": false,
+                "icon": "",
+                "frame_src": "",
+                "hide_breadcrumb": true,
+                "carry_param": false,
+                "hide_children_in_menu": false,
+                "hide_tab": true,
+                "hide_menu": false
+            },
+            "enable": true,
+            "actions": {
+                "delete": {
+                    "type": "code",
+                    "name": "delete",
+                    "path": "delete",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "delete",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "DELETE"
+                    ]
+                },
+                "index": {
+                    "type": "code",
+                    "name": "应用列表",
+                    "path": "index",
+                    "order": NumberInt("-1"),
+                    "meta": {
+                        "title": "应用列表",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                },
+                "route-list": {
+                    "type": "code",
+                    "name": "route-list",
+                    "path": "route-list",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "route-list",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": true
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                },
+                "hide": {
+                    "type": "code",
+                    "name": "hide",
+                    "path": "hide",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "hide",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "read-code-application": {
+                    "type": "code",
+                    "name": "read-code-application",
+                    "path": "read-code-application",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "read-code-application",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "update": {
+                    "type": "code",
+                    "name": "update",
+                    "path": "update",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "update",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "create-virtual-application": {
+                    "type": "code",
+                    "name": "create-virtual-application",
+                    "path": "create-virtual-application",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create-virtual-application",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
+                },
+                "enable": {
+                    "type": "code",
+                    "name": "enable",
+                    "path": "enable",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "enable",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "create-code-application": {
+                    "type": "code",
+                    "name": "create-code-application",
+                    "path": "create-code-application",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create-code-application",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
+                }
+            }
+        },
+        "token/": {
+            "type": "code",
+            "name": "Token管理",
+            "path": "token/",
+            "order": NumberInt("0"),
+            "meta": {
+                "title": "Token管理",
+                "affix": false,
+                "icon": "",
+                "frame_src": "",
+                "hide_breadcrumb": true,
+                "carry_param": false,
+                "hide_children_in_menu": false,
+                "hide_tab": true,
+                "hide_menu": false
+            },
+            "enable": true,
+            "actions": {
+                "delete": {
+                    "type": "code",
+                    "name": "delete",
+                    "path": "delete",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "delete",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "DELETE"
+                    ]
+                },
+                "index": {
+                    "type": "code",
+                    "name": "在线列表",
+                    "path": "index",
+                    "order": NumberInt("-1"),
+                    "meta": {
+                        "title": "在线列表",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                }
+            }
+        }
+    },
+    "update_time": ISODate("2021-08-17T08:39:18.036Z"),
+    "type": "code",
+    "order": NumberLong("0"),
+    "meta": {
+        "hide_tab": true,
+        "hide_menu": false,
+        "affix": false,
+        "icon": "",
+        "frame_src": "",
+        "hide_breadcrumb": true,
+        "hide_children_in_menu": false,
+        "title": "系统管理",
+        "carry_param": false
+    },
+    "default_module_action": ""
+}

@@ -1,0 +1,16 @@
+{
+    "_id": ObjectId("610391769c0caa393be20c08"),
+    "name": "fook",
+    "real_name": "",
+    "email": "fook@haiyiyun.com",
+    "status": NumberInt("1"),
+    "delete": false,
+    "setting": {
+        "home_path": "",
+        "profile": null,
+        "style": null
+    },
+    "password": "0c4fafcb97fd4953e52c4c11d63c69c4",
+    "avatar": "",
+    "description": ""
+}
