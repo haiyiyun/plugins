@@ -1,16 +1,18 @@
 {
     "_id": ObjectId("610391769c0caa393be20c08"),
-    "name": "fook",
-    "real_name": "",
-    "email": "fook@haiyiyun.com",
-    "status": NumberInt("1"),
-    "delete": false,
+    "name": "goboss",
+    "real_name": "goboss",
+    "email": "goboss@haiyiyun.com",
+    "password": "6bc016752359cb2e743b316b23e60361", //haiyiyun
+    "description": "goboss是基于haiyiyun的webrouter golang框架",
+    "avatar": "",
     "setting": {
         "home_path": "",
         "profile": null,
         "style": null
     },
-    "password": "0c4fafcb97fd4953e52c4c11d63c69c4",
-    "avatar": "",
-    "description": ""
+    "enable": true,
+    "delete": false,
+    "create_time": ISODate("2021-08-18T14:41:01.874Z"),
+    "update_time": ISODate("2021-08-18T14:41:01.874Z")
 }

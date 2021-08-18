@@ -52,7 +52,7 @@
             "type": "code",
             "name": "用户管理",
             "path": "user/",
-            "order": NumberInt("0"),
+            "order": NumberInt("97"),
             "meta": {
                 "title": "用户管理",
                 "affix": false,
@@ -66,48 +66,6 @@
             },
             "enable": true,
             "actions": {
-                "update": {
-                    "type": "code",
-                    "name": "update",
-                    "path": "update",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "update",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "POST"
-                    ]
-                },
-                "create": {
-                    "type": "code",
-                    "name": "create",
-                    "path": "create",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "create",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "PUT"
-                    ]
-                },
                 "delete": {
                     "type": "code",
                     "name": "delete",
@@ -134,7 +92,7 @@
                     "type": "code",
                     "name": "用户列表",
                     "path": "index",
-                    "order": NumberInt("-1"),
+                    "order": NumberLong("-1"),
                     "meta": {
                         "title": "用户列表",
                         "affix": false,
@@ -192,6 +150,48 @@
                     "method": [
                         "POST"
                     ]
+                },
+                "update": {
+                    "type": "code",
+                    "name": "update",
+                    "path": "update",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "update",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "create": {
+                    "type": "code",
+                    "name": "create",
+                    "path": "create",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
                 }
             }
         },
@@ -199,7 +199,7 @@
             "type": "code",
             "name": "角色管理",
             "path": "role/",
-            "order": NumberInt("0"),
+            "order": NumberInt("98"),
             "meta": {
                 "title": "角色管理",
                 "affix": false,
@@ -213,6 +213,27 @@
             },
             "enable": true,
             "actions": {
+                "index": {
+                    "type": "code",
+                    "name": "角色列表",
+                    "path": "index",
+                    "order": NumberLong("-1"),
+                    "meta": {
+                        "title": "角色列表",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                },
                 "enable": {
                     "type": "code",
                     "name": "enable",
@@ -297,27 +318,6 @@
                         "DELETE",
                         "POST"
                     ]
-                },
-                "index": {
-                    "type": "code",
-                    "name": "角色列表",
-                    "path": "index",
-                    "order": NumberInt("-1"),
-                    "meta": {
-                        "title": "角色列表",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "GET"
-                    ]
                 }
             }
         },
@@ -325,7 +325,7 @@
             "type": "code",
             "name": "应用管理",
             "path": "application/",
-            "order": NumberInt("0"),
+            "order": NumberInt("96"),
             "meta": {
                 "title": "应用管理",
                 "affix": false,
@@ -339,6 +339,90 @@
             },
             "enable": true,
             "actions": {
+                "read-code-application": {
+                    "type": "code",
+                    "name": "read-code-application",
+                    "path": "read-code-application",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "read-code-application",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "update": {
+                    "type": "code",
+                    "name": "update",
+                    "path": "update",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "update",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
+                    ]
+                },
+                "create-code-application": {
+                    "type": "code",
+                    "name": "create-code-application",
+                    "path": "create-code-application",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create-code-application",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
+                },
+                "create-virtual-application": {
+                    "type": "code",
+                    "name": "create-virtual-application",
+                    "path": "create-virtual-application",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "create-virtual-application",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "PUT"
+                    ]
+                },
                 "delete": {
                     "type": "code",
                     "name": "delete",
@@ -364,7 +448,7 @@
                     "type": "code",
                     "name": "应用列表",
                     "path": "index",
-                    "order": NumberInt("-1"),
+                    "order": NumberLong("-1"),
                     "meta": {
                         "title": "应用列表",
                         "affix": false,
@@ -379,6 +463,27 @@
                     "enable": true,
                     "method": [
                         "GET"
+                    ]
+                },
+                "enable": {
+                    "type": "code",
+                    "name": "enable",
+                    "path": "enable",
+                    "order": NumberLong("0"),
+                    "meta": {
+                        "title": "enable",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "POST"
                     ]
                 },
                 "route-list": {
@@ -422,111 +527,6 @@
                     "method": [
                         "POST"
                     ]
-                },
-                "read-code-application": {
-                    "type": "code",
-                    "name": "read-code-application",
-                    "path": "read-code-application",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "read-code-application",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "POST"
-                    ]
-                },
-                "update": {
-                    "type": "code",
-                    "name": "update",
-                    "path": "update",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "update",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "POST"
-                    ]
-                },
-                "create-virtual-application": {
-                    "type": "code",
-                    "name": "create-virtual-application",
-                    "path": "create-virtual-application",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "create-virtual-application",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "PUT"
-                    ]
-                },
-                "enable": {
-                    "type": "code",
-                    "name": "enable",
-                    "path": "enable",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "enable",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "POST"
-                    ]
-                },
-                "create-code-application": {
-                    "type": "code",
-                    "name": "create-code-application",
-                    "path": "create-code-application",
-                    "order": NumberLong("0"),
-                    "meta": {
-                        "title": "create-code-application",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "PUT"
-                    ]
                 }
             }
         },
@@ -534,7 +534,7 @@
             "type": "code",
             "name": "Token管理",
             "path": "token/",
-            "order": NumberInt("0"),
+            "order": NumberInt("99"),
             "meta": {
                 "title": "Token管理",
                 "affix": false,
@@ -548,6 +548,27 @@
             },
             "enable": true,
             "actions": {
+                "index": {
+                    "type": "code",
+                    "name": "在线列表",
+                    "path": "index",
+                    "order": NumberLong("-1"),
+                    "meta": {
+                        "title": "在线列表",
+                        "affix": false,
+                        "icon": "",
+                        "frame_src": "",
+                        "hide_breadcrumb": false,
+                        "carry_param": false,
+                        "hide_children_in_menu": false,
+                        "hide_tab": false,
+                        "hide_menu": false
+                    },
+                    "enable": true,
+                    "method": [
+                        "GET"
+                    ]
+                },
                 "delete": {
                     "type": "code",
                     "name": "delete",
@@ -568,34 +589,13 @@
                     "method": [
                         "DELETE"
                     ]
-                },
-                "index": {
-                    "type": "code",
-                    "name": "在线列表",
-                    "path": "index",
-                    "order": NumberInt("-1"),
-                    "meta": {
-                        "title": "在线列表",
-                        "affix": false,
-                        "icon": "",
-                        "frame_src": "",
-                        "hide_breadcrumb": false,
-                        "carry_param": false,
-                        "hide_children_in_menu": false,
-                        "hide_tab": false,
-                        "hide_menu": false
-                    },
-                    "enable": true,
-                    "method": [
-                        "GET"
-                    ]
                 }
             }
         }
     },
-    "update_time": ISODate("2021-08-17T08:39:18.036Z"),
+    "update_time": ISODate("2021-08-18T14:45:27.142Z"),
     "type": "code",
-    "order": NumberLong("0"),
+    "order": NumberInt("100"),
     "meta": {
         "hide_tab": true,
         "hide_menu": false,

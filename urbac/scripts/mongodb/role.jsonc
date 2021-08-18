@@ -4,7 +4,7 @@
     "users": [
         ObjectId("610391769c0caa393be20c08")
     ],
-    "status": NumberInt("1"),
+    "enable": true,
     "right": {
         "scope": NumberInt("3"),
         "applications": null
