@@ -20,7 +20,7 @@ func (self *Model) GetUserByID(userID primitive.ObjectID) (u model.User, err err
 		{"enable", true},
 		{"delete", false},
 	}...)
-	sr := self.FindOne(context.TODO(), self.FilterByID(userID))
+	sr := self.FindOne(context.TODO(), filter)
 	err = sr.Decode(&u)
 
 	return

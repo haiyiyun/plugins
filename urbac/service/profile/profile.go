@@ -2,69 +2,54 @@ package profile
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/haiyiyun/plugins/urbac/database/model/user"
-
 	"github.com/haiyiyun/utils/help"
+	"github.com/haiyiyun/utils/http/response"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (self *Service) Route_POST_InfoUpdate(rw http.ResponseWriter, r *http.Request) (b bool) {
+func (self *Service) Route_POST_InfoUpdate(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	u, _ := self.GetUserInfo(r)
-	username := u.Name
-	if _, ok := r.Form["ajax"]; ok {
-		b = true
-
-		m := help.M{
-			"status":  "1",
-			"message": "",
-		}
-		if !ok {
-			m["status"] = "0"
-			m["message"] = "修改用户时必须指定用户名"
-		}
+	if u, found := self.GetUserInfo(r); found {
+		realName := r.FormValue("real_name")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		avatar := r.FormValue("avatar")
+		description := r.FormValue("description")
 
 		userModel := user.NewModel(self.M)
+		filter := userModel.FilterByID(u.ID)
+		change := bson.D{}
 
-		filter := bson.D{
-			{"name", username},
-			{"delete", false},
+		if realName != "" {
+			change = append(change, bson.E{"real_name", realName})
 		}
-		cnt, err := userModel.CountDocuments(context.Background(), filter)
-		if err != nil || cnt == 0 {
-			m["status"] = "0"
-			m["message"] = "用户不存在!"
-		} else {
-			email := r.FormValue("email")
-			password := r.FormValue("password")
-			change := bson.D{}
 
-			if email != "" {
-				change = append(change, bson.E{"email", email})
-			}
-			if password != "" {
-				password = help.Strings(password).Md5()
-				change = append(change, bson.E{"password", password})
-			}
-			if email != "" || password != "" {
-				_, err := userModel.Set(context.Background(), filter, change)
-				if err != nil {
-					m["status"] = "0"
-					m["message"] = "用户资料更新失败"
-				} else {
-					m["message"] = "用户资料更新成功"
-				}
-			} else {
-				m["status"] = "0"
-				m["message"] = "请输入需要更新的资料"
-			}
+		if email != "" {
+			change = append(change, bson.E{"email", email})
 		}
-		ret, _ := json.Marshal(m)
-		rw.Write(ret)
+
+		if password != "" {
+			password = help.Strings(password).Md5()
+			change = append(change, bson.E{"password", password})
+		}
+
+		if avatar != "" {
+			change = append(change, bson.E{"avatar", avatar})
+		}
+
+		if description != "" {
+			change = append(change, bson.E{"description", description})
+		}
+
+		if ur, err := userModel.Set(context.Background(), filter, change); err == nil && ur.ModifiedCount > 0 {
+			response.JSON(rw, 0, nil, "")
+			return
+		}
 	}
 
-	return
+	response.JSON(rw, http.StatusUnauthorized, nil, "")
+
 }
