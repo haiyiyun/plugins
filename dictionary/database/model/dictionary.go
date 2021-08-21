@@ -7,12 +7,11 @@ import (
 )
 
 type DictionaryValue struct {
-	Type   int         `bson:"type" json:"type" map:"type"`
-	Name   string      `bson:"name" json:"name" map:"name"`
-	Key    string      `bson:"key" json:"key" map:"key"`
-	Value  interface{} `bson:"value" json:"value" map:"value"`
-	Order  int         `bson:"order" json:"order" map:"order"`
-	Enable bool        `bson:"enable" json:"enable" map:"enable"`
+	Lable  string `bson:"lable" json:"lable" map:"lable"` //标签
+	Key    string `bson:"key" json:"key" map:"key"`       //键名
+	Value  int    `bson:"value" json:"value" map:"value"` //键值
+	Order  int    `bson:"order" json:"order" map:"order"` //排序
+	Enable bool   `bson:"enable" json:"enable" map:"enable"`
 }
 
 type Dictionary struct {

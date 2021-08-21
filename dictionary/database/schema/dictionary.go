@@ -27,12 +27,6 @@ var (
 			},
 			{
 				bson.D{
-					{"name", 1},
-				},
-				options.Index().SetUnique(true),
-			},
-			{
-				bson.D{
 					{"key", 1},
 					{"values.key", 1},
 				},
@@ -41,21 +35,14 @@ var (
 			{
 				bson.D{
 					{"key", 1},
-					{"values.name", 1},
+					{"values.lable", 1},
 				},
 				options.Index().SetUnique(true),
 			},
 			{
 				bson.D{
-					{"name", 1},
-					{"values.key", 1},
-				},
-				options.Index().SetUnique(true),
-			},
-			{
-				bson.D{
-					{"name", 1},
-					{"values.name", 1},
+					{"key", 1},
+					{"values.value", 1},
 				},
 				options.Index().SetUnique(true),
 			},
