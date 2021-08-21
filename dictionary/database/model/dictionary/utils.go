@@ -28,7 +28,7 @@ func (self *Model) FilterByKey(key string) bson.D {
 }
 
 func (self *Model) sort(values []*model.DictionaryValue) []*model.DictionaryValue {
-	sort.Slice(&values, func(i, j int) bool {
+	sort.Slice(values, func(i, j int) bool {
 		return values[i].Order < values[j].Order
 	})
 
