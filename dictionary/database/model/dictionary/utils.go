@@ -56,7 +56,9 @@ func (self *Model) FindSliceLable(key string) []string {
 	if vals := self.FindValues(self.FilterByKey(key)); vals != nil {
 		ss := []string{}
 		for _, v := range vals {
-			ss = append(ss, v.Lable)
+			if v.Enable {
+				ss = append(ss, v.Lable)
+			}
 		}
 
 		return ss
@@ -69,7 +71,9 @@ func (self *Model) FindMapLable(key string) map[string]string {
 	if vals := self.FindValues(self.FilterByKey(key)); vals != nil {
 		m := map[string]string{}
 		for _, v := range vals {
-			m[v.Key] = v.Lable
+			if v.Enable {
+				m[v.Key] = v.Lable
+			}
 		}
 
 		return m
@@ -82,7 +86,9 @@ func (self *Model) FindSliceValue(key string) []int {
 	if vals := self.FindValues(self.FilterByKey(key)); vals != nil {
 		is := []int{}
 		for _, v := range vals {
-			is = append(is, v.Value)
+			if v.Enable {
+				is = append(is, v.Value)
+			}
 		}
 
 		return is
@@ -95,7 +101,9 @@ func (self *Model) FindMapValue(key string) map[string]int {
 	if vals := self.FindValues(self.FilterByKey(key)); vals != nil {
 		m := map[string]int{}
 		for _, v := range vals {
-			m[v.Key] = v.Value
+			if v.Enable {
+				m[v.Key] = v.Value
+			}
 		}
 
 		return m
@@ -108,13 +116,14 @@ func (self *Model) FindSliceLableValue(key string) []help.M {
 	if vals := self.FindValues(self.FilterByKey(key)); vals != nil {
 		ms := []help.M{}
 		for _, v := range vals {
-			m := help.M{
-				"lable": v.Lable,
-				"value": v.Value,
+			if v.Enable {
+				m := help.M{
+					"lable": v.Lable,
+					"value": v.Value,
+				}
+
+				ms = append(ms, m)
 			}
-
-			ms = append(ms, m)
-
 		}
 
 		return ms
@@ -127,9 +136,11 @@ func (self *Model) FindMapLableValue(key string) help.M {
 	if vals := self.FindValues(self.FilterByKey(key)); vals != nil {
 		m := help.M{}
 		for _, v := range vals {
-			m[v.Key] = help.M{
-				"lable": v.Lable,
-				"value": v.Value,
+			if v.Enable {
+				m[v.Key] = help.M{
+					"lable": v.Lable,
+					"value": v.Value,
+				}
 			}
 		}
 
