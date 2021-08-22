@@ -4,17 +4,17 @@ import (
 	"github.com/haiyiyun/config"
 )
 
-type MongodbCfg struct {
+type MongodbConfig struct {
 	MongoDNS          string `json:"mongo_dns"`
 	MongoDatabaseName string `json:"mongo_database_name"`
 }
 
-type CacheCfg struct {
+type CacheConfig struct {
 	CacheDefaultExpiration config.Duration `json:"cache_default_expiration"`
 	CacheCleanupInterval   config.Duration `json:"cache_cleanup_interval"`
 }
 
-type BaseCfg struct {
+type BaseConfig struct {
 	CheckRight           bool                `json:"check_right"`
 	DefaultEnableApp     bool                `json:"default_enable_app"`
 	DefaultEnableModule  bool                `json:"default_enable_module"`
@@ -27,14 +27,14 @@ type BaseCfg struct {
 	AllowMultiLoginNum   int64               `json:"allow_multi_login_num"`
 }
 
-type FrontCfg struct {
+type FrontConfig struct {
 	DefaultRoute    map[string]interface{} `json:"default_route"`
 	DefaultHomePath string                 `json:"default_home_path"`
 }
 
 type Config struct {
-	MongodbCfg
-	CacheCfg
-	BaseCfg
-	FrontCfg
+	MongodbConfig
+	CacheConfig
+	BaseConfig
+	FrontConfig
 }

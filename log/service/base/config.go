@@ -4,17 +4,17 @@ import (
 	"github.com/haiyiyun/config"
 )
 
-type MongodbCfg struct {
+type MongodbConfig struct {
 	MongoDNS          string `json:"mongo_dns"`
 	MongoDatabaseName string `json:"mongo_database_name"`
 }
 
-type CacheCfg struct {
+type CacheConfig struct {
 	CacheDefaultExpiration config.Duration `json:"cache_default_expiration"`
 	CacheCleanupInterval   config.Duration `json:"cache_cleanup_interval"`
 }
 
-type BaseCfg struct {
+type BaseConfig struct {
 	DefaultDeleteDuration        config.Duration `json:"default_delete_duration"`
 	DefaultLoginDeleteDuration   config.Duration `json:"default_login_delete_duration"`
 	DefaultAuthDeleteDuration    config.Duration `json:"default_auth_delete_duration"`
@@ -25,7 +25,7 @@ type BaseCfg struct {
 }
 
 type Config struct {
-	MongodbCfg
-	CacheCfg
-	BaseCfg
+	MongodbConfig
+	CacheConfig
+	BaseConfig
 }

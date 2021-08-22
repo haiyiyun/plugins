@@ -4,7 +4,7 @@ import (
 	"github.com/haiyiyun/plugins/upload/service/base"
 )
 
-type UploadCfg struct {
+type UploadConfig struct {
 	WebRouter                 bool   `json:"web_router"`
 	WebRouterRootPath         string `json:"web_router_root_path"`
 	BuildInFileServer         bool   `json:"build_in_file_server"`
@@ -15,5 +15,5 @@ type UploadCfg struct {
 
 type Config struct {
 	base.Config
-	UploadCfg
+	UploadConfig
 }

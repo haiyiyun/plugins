@@ -4,7 +4,7 @@ import (
 	"github.com/haiyiyun/plugins/log/service/base"
 )
 
-type LogCfg struct {
+type LogConfig struct {
 	Log               bool   `json:"log"`
 	WebRouter         bool   `json:"web_router"`
 	WebRouterRootPath string `json:"web_router_root_path"`
@@ -12,5 +12,5 @@ type LogCfg struct {
 
 type Config struct {
 	base.Config
-	LogCfg
+	LogConfig
 }

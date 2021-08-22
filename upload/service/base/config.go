@@ -2,17 +2,17 @@ package base
 
 import "github.com/haiyiyun/config"
 
-type MongodbCfg struct {
+type MongodbConfig struct {
 	MongoDNS          string `json:"mongo_dns"`
 	MongoDatabaseName string `json:"mongo_database_name"`
 }
 
-type CacheCfg struct {
+type CacheConfig struct {
 	CacheDefaultExpiration config.Duration `json:"cache_default_expiration"`
 	CacheCleanupInterval   config.Duration `json:"cache_cleanup_interval"`
 }
 
-type BaseCfg struct {
+type BaseConfig struct {
 	AllowUploadLocal           bool   `json:"allow_upload_local"`
 	UploadDirectory            string `json:"upload_directory"`
 	UploadImageDirectory       string `json:"upload_image_directory"`
@@ -23,7 +23,7 @@ type BaseCfg struct {
 }
 
 type Config struct {
-	MongodbCfg
-	CacheCfg
-	BaseCfg
+	MongodbConfig
+	CacheConfig
+	BaseConfig
 }
