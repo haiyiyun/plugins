@@ -27,7 +27,7 @@ func (self *Model) FilterByKey(key string) bson.D {
 	return filter
 }
 
-func (self *Model) sort(values []*model.DictionaryValue) []*model.DictionaryValue {
+func (self *Model) sort(values []model.DictionaryValue) []model.DictionaryValue {
 	sort.Slice(values, func(i, j int) bool {
 		return values[i].Order < values[j].Order
 	})
@@ -35,7 +35,7 @@ func (self *Model) sort(values []*model.DictionaryValue) []*model.DictionaryValu
 	return values
 }
 
-func (self *Model) FindValues(filter bson.D) []*model.DictionaryValue {
+func (self *Model) FindValues(filter bson.D) []model.DictionaryValue {
 	filter = append(filter, self.FilterByEnable()...)
 	opt := self.ProjectionOne(bson.D{
 		{"_id", 0},
