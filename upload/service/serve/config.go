@@ -1,4 +1,4 @@
-package manage
+package serve
 
 import (
 	"github.com/haiyiyun/plugins/upload/service/base"

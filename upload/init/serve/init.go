@@ -3,25 +3,25 @@ package upload
 import (
 	"context"
 	"flag"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/haiyiyun/plugins/upload/database/schema"
 	"github.com/haiyiyun/plugins/upload/service/base"
-	"github.com/haiyiyun/plugins/upload/service/manage"
-	manageUpload "github.com/haiyiyun/plugins/upload/service/manage/upload"
+	"github.com/haiyiyun/plugins/upload/service/serve"
+	serveUpload "github.com/haiyiyun/plugins/upload/service/serve/upload"
 
 	"github.com/haiyiyun/cache"
 	"github.com/haiyiyun/config"
+	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/mongodb"
 	"github.com/haiyiyun/webrouter"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func init() {
-	baseConfFile := flag.String("config.plugins.upload.manage.base", "../config/plugins/upload/base.conf", "base config file")
+	baseConfFile := flag.String("config.plugins.upload.serve.base", "../config/plugins/upload/base.conf", "base config file")
 	var baseConf base.Config
 	config.Files(*baseConfFile).Load(&baseConf)
 
@@ -38,27 +38,27 @@ func init() {
 
 	baseService := base.NewService(&baseConf, baseCache, baseDB)
 
-	manageConfFile := flag.String("config.plugins.upload.manage", "../config/plugins/upload/manage.conf", "manage config file")
-	var manageConf manage.Config
-	config.Files(*manageConfFile).Load(&manageConf)
+	serveConfFile := flag.String("config.plugins.upload.serve", "../config/plugins/upload/serve.conf", "serve config file")
+	var serveConf serve.Config
+	config.Files(*serveConfFile).Load(&serveConf)
 
-	if manageConf.WebRouter {
-		manageConf.Config = baseConf
-		if manageConf.BuildInFileServer && manageConf.AllowDownloadLocal {
-			webrouter.Handle(manageConf.DownloadLocalUrlDirectory, http.StripPrefix(manageConf.DownloadLocalUrlDirectory, http.FileServer(http.Dir(baseConf.UploadDirectory))))
+	if serveConf.WebRouter {
+		serveConf.Config = baseConf
+		if serveConf.BuildInFileServer && serveConf.AllowDownloadLocal {
+			webrouter.Handle(serveConf.DownloadLocalUrlDirectory, http.StripPrefix(serveConf.DownloadLocalUrlDirectory, http.FileServer(http.Dir(baseConf.UploadDirectory))))
 		}
 
-		manageService := manage.NewService(&manageConf, baseService)
+		serveService := serve.NewService(&serveConf, baseService)
 
 		//Init Begin
-		manageUploadService := manageUpload.NewService(manageService)
+		serveUploadService := serveUpload.NewService(serveService)
 		//Init End
 
 		//Go Begin
 		//Go End
 
 		//Register Begin
-		webrouter.Register(manageConf.WebRouterRootPath+"upload/", manageUploadService)
+		webrouter.Register(serveConf.WebRouterRootPath+"upload/", serveUploadService)
 		//Register End
 	}
 

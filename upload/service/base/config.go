@@ -13,6 +13,7 @@ type CacheCfg struct {
 }
 
 type BaseCfg struct {
+	AllowUploadLocal           bool   `json:"allow_upload_local"`
 	UploadDirectory            string `json:"upload_directory"`
 	UploadImageDirectory       string `json:"upload_image_directory"`
 	UploadMediaDirectory       string `json:"upload_media_directory"`

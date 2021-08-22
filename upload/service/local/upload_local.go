@@ -1,4 +1,4 @@
-package base
+package local
 
 import (
 	"context"
@@ -16,23 +16,28 @@ import (
 	"github.com/haiyiyun/plugins/upload/database/model"
 	"github.com/haiyiyun/plugins/upload/database/model/upload"
 	"github.com/haiyiyun/plugins/upload/predefined"
-
-	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/utils/http/request"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type UploadLocal struct {
-	*Service
+func (self *Service) SetUserID(userID primitive.ObjectID) {
+	self.userID = userID
 }
 
-func NewUploadLocal(s *Service) *UploadLocal {
-	return &UploadLocal{
-		Service: s,
+func (self *Service) SetUserIDFromRequestClaims(r *http.Request) error {
+	if claims := request.GetClaims(r); claims != nil {
+		if uid, err := primitive.ObjectIDFromHex(claims.Issuer); err == nil {
+			self.userID = uid
+			return nil
+		} else {
+			return errors.New(predefined.ErrorNotFoundUserIDFromRequestClaims)
+		}
+	} else {
+		return errors.New(predefined.ErrorNotFoundClaimsFromRequest)
 	}
 }
 
-func (ufl *UploadLocal) generateUploadName(contentType, originalFileName string) (fileType, fileDir, fileName, fileExt string) {
+func (self *Service) generateUploadName(contentType, originalFileName string) (fileType, fileDir, fileName, fileExt string, err error) {
 	if contentTypes := strings.Split(contentType, "/"); len(contentTypes) > 1 {
 		if originalFileName == "" {
 			fileExt = "." + contentTypes[1]
@@ -44,16 +49,16 @@ func (ufl *UploadLocal) generateUploadName(contentType, originalFileName string)
 
 		//类型过滤
 		fileType = predefined.UploadTypeFile
-		pathType := ufl.Config.UploadDirectory
+		pathType := self.Config.UploadDirectory
 		switch contentTypes[0] {
 		case predefined.UploadTypeImage:
 			fileType = predefined.UploadTypeImage
-			pathType = ufl.Config.UploadImageDirectory
+			pathType = self.Config.UploadImageDirectory
 		case predefined.UploadTypeMedia:
 			switch fileType {
 			case ".mp3", ".wav", ".wma", ".wmv", ".mid", ".avi", ".mpg", ".asf", ".rm", ".rmvb":
 				fileType = predefined.UploadTypeMedia
-				pathType = ufl.Config.UploadMediaDirectory
+				pathType = self.Config.UploadMediaDirectory
 			}
 		case "application":
 			switch contentTypes[1] {
@@ -66,28 +71,26 @@ func (ufl *UploadLocal) generateUploadName(contentType, originalFileName string)
 				"vnd.openxmlformats-officedocument.presentationml.presentation",
 				"pdf":
 				fileType = predefined.UploadTypeDocument
-				pathType = ufl.Config.UploadDocumentDirectory
+				pathType = self.Config.UploadDocumentDirectory
 			case "x-zip-compressed":
 				fileType = predefined.UploadTypeCompression
-				pathType = ufl.Config.UploadCompressionDirectory
+				pathType = self.Config.UploadCompressionDirectory
 			case "octet-stream":
 				switch fileExt {
 				case ".xmind", ".rp":
 					fileType = predefined.UploadTypeDocument
-					pathType = ufl.Config.UploadDocumentDirectory
+					pathType = self.Config.UploadDocumentDirectory
 				case ".rar", ".gz", ".bz2":
 					fileType = predefined.UploadTypeCompression
-					pathType = ufl.Config.UploadCompressionDirectory
+					pathType = self.Config.UploadCompressionDirectory
 				}
 			}
 		}
 
 		now := time.Now()
-		fileDir = filepath.Clean(fmt.Sprintf("%s/%d/%d/%d", pathType, now.Year(), now.Month(), now.Day()))
-		if _, err := os.Stat(fileDir); err != nil {
-			if err := os.MkdirAll(fileDir, 0755); err != nil {
-				log.Error(err)
-			}
+		fileDir = filepath.Clean(fmt.Sprintf("%s%s/%d/%d/%d", self.Config.UploadDirectory, pathType, now.Year(), now.Month(), now.Day()))
+		if _, err = os.Stat(fileDir); err != nil {
+			err = os.MkdirAll(fileDir, 0755)
 		}
 
 		random := rand.New(rand.NewSource(now.UnixNano()))
@@ -97,19 +100,19 @@ func (ufl *UploadLocal) generateUploadName(contentType, originalFileName string)
 	return
 }
 
-func (ufl *UploadLocal) filePathToURL(sPath string) (sURL string) {
-	uploadDir := filepath.Clean(ufl.Config.UploadDirectory)
-	sURL = sPath
+func (self *Service) relativePath(sPath string) (newPath string) {
+	uploadDir := filepath.Clean(self.Config.UploadDirectory)
+	newPath = sPath
 	if iPos := strings.Index(sPath, uploadDir); iPos > -1 {
-		sURL = sPath[iPos+len(uploadDir):]
+		newPath = sPath[iPos+len(uploadDir):]
 	}
 
-	return
+	return strings.TrimLeft(newPath, "/")
 }
 
-func (ufl *UploadLocal) saveFileToPath(contentType, originalFileName string, fileData []byte, appendFileExt bool) (*model.Upload, error) {
-	err := errors.New("Fail to save file")
-	if fileType, fileDir, fileName, fileExt := ufl.generateUploadName(contentType, originalFileName); fileDir != "" {
+func (self *Service) saveFileToPath(contentType, originalFileName string, fileData []byte, appendFileExt bool) (*model.Upload, error) {
+	err := errors.New(predefined.ErrorFalidSaveFile)
+	if fileType, fileDir, fileName, fileExt, fileErr := self.generateUploadName(contentType, originalFileName); fileErr == nil {
 		if originalFileName == "" {
 			originalFileName = fileName + fileExt
 		}
@@ -120,31 +123,34 @@ func (ufl *UploadLocal) saveFileToPath(contentType, originalFileName string, fil
 
 		filePath := fileDir + "/" + fileName
 		if err = ioutil.WriteFile(filePath, fileData, 0755); err == nil {
-			sURL := ufl.filePathToURL(filePath)
 			var fileinfo os.FileInfo
 			if fileinfo, err = os.Stat(filePath); err == nil {
 				mf := &model.Upload{
+					ID:               primitive.NewObjectID(),
 					Type:             fileType,
 					Storage:          predefined.UploadStorageLocal,
+					UserID:           self.userID,
 					ContentType:      contentType,
 					OriginalFileName: originalFileName,
 					FileName:         fileName,
 					FileExt:          fileExt,
-					Path:             filePath,
-					URL:              sURL,
+					Path:             self.relativePath(filePath),
+					URL:              self.relativePath(filePath),
 					Size:             fileinfo.Size(),
 				}
 
 				return mf, nil
 			}
 		}
+	} else {
+		err = fileErr
 	}
 
 	return nil, err
 }
 
-func (ufl *UploadLocal) encodeDataToFile(encode_string string, appendFileExt bool) (*model.Upload, error) {
-	err := errors.New("Not Found encode data")
+func (self *Service) encodeDataToFile(encode_string string, appendFileExt bool) (*model.Upload, error) {
+	err := errors.New(predefined.ErrorNotFoundEncodeData)
 	if encode_strings := strings.Split(encode_string, ";"); len(encode_strings) > 1 {
 		if encode_datas := strings.Split(encode_strings[1], ","); len(encode_datas) > 1 {
 			encode_type := encode_datas[0]
@@ -153,7 +159,7 @@ func (ufl *UploadLocal) encodeDataToFile(encode_string string, appendFileExt boo
 			case "base64":
 				var file_data []byte
 				if file_data, err = base64.StdEncoding.DecodeString(encode_data); err == nil {
-					return ufl.saveFileToPath(encode_strings[0], "", file_data, appendFileExt)
+					return self.saveFileToPath(encode_strings[0], "", file_data, appendFileExt)
 				}
 			}
 		}
@@ -162,17 +168,17 @@ func (ufl *UploadLocal) encodeDataToFile(encode_string string, appendFileExt boo
 	return nil, err
 }
 
-func (ufl *UploadLocal) saveFormFile(r *http.Request, fileFormName string, bEncode bool) (fm *model.Upload, err error) {
+func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode bool) (fm *model.Upload, err error) {
 	//TODO 后期改为配置控制
 	appendFileExt := true
 	if bEncode {
 		form_value := r.FormValue(fileFormName)
 		if form_value != "" {
 			if datas := strings.Split(form_value, ":"); len(datas) > 1 {
-				fm, err = ufl.encodeDataToFile(datas[1], appendFileExt)
+				fm, err = self.encodeDataToFile(datas[1], appendFileExt)
 			}
 		} else {
-			err = errors.New("Not found form data")
+			err = errors.New(predefined.ErrorNotFoundFormData)
 		}
 	} else {
 		if f, fh, fErr := r.FormFile(fileFormName); fErr != nil {
@@ -181,25 +187,33 @@ func (ufl *UploadLocal) saveFormFile(r *http.Request, fileFormName string, bEnco
 			if fileData, ioErr := ioutil.ReadAll(f); ioErr != nil {
 				err = ioErr
 			} else {
-				fm, err = ufl.saveFileToPath(fh.Header.Get("Content-Type"), fh.Filename, fileData, appendFileExt)
+				fm, err = self.saveFileToPath(fh.Header.Get("Content-Type"), fh.Filename, fileData, appendFileExt)
 			}
 		}
 	}
 
 	if err == nil && fm != nil {
-		claims := request.GetClaims(r)
-		fm.UserID, _ = primitive.ObjectIDFromHex(claims.Issuer)
-		uploadModel := upload.NewModel(ufl.M)
+		uploadModel := upload.NewModel(self.M)
 		_, err = uploadModel.Create(context.Background(), fm)
 	}
 
 	return
 }
 
-func (ufl *UploadLocal) SaveEncodeFile(r *http.Request, fileFormName string) (fm *model.Upload, err error) {
-	return ufl.saveFormFile(r, fileFormName, true)
+func (self *Service) SaveEncodeFile(r *http.Request, fileFormName string) (fm *model.Upload, err error) {
+	if !self.AllowUploadLocal {
+		err = errors.New(predefined.ErrorNotAllowUploadLocal)
+		return
+	}
+
+	return self.saveFormFile(r, fileFormName, true)
 }
 
-func (ufl *UploadLocal) SaveFormFile(r *http.Request, fileFormName string) (fm *model.Upload, err error) {
-	return ufl.saveFormFile(r, fileFormName, false)
+func (self *Service) SaveFormFile(r *http.Request, fileFormName string) (fm *model.Upload, err error) {
+	if !self.AllowUploadLocal {
+		err = errors.New(predefined.ErrorNotAllowUploadLocal)
+		return
+	}
+
+	return self.saveFormFile(r, fileFormName, false)
 }
