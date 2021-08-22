@@ -64,8 +64,8 @@ func (self *Service) Login(username, password, ip, userAgent string) (m help.M, 
 					ExpiredTime: ExpiredTime,
 				}); err == nil {
 					m = map[string]interface{}{
-						"userId": u.ID.Hex(),
-						"token":  tokenString,
+						"user_id": u.ID.Hex(),
+						"token":   tokenString,
 					}
 				}
 			} else {
