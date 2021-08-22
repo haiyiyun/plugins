@@ -165,7 +165,7 @@ func (self *Service) Route_DELETE_File(rw http.ResponseWriter, r *http.Request) 
 				if dr, err := uploadModel.DeleteOne(r.Context(), filter); err != nil || dr.DeletedCount == 0 {
 					response.JSON(rw, http.StatusNotFound, nil, "")
 				} else {
-					response.JSON(rw, http.StatusOK, nil, "")
+					response.JSON(rw, 0, nil, "")
 				}
 			}
 		} else {
