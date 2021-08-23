@@ -51,7 +51,7 @@ func (self *Service) Login(username, password, ip, userAgent string) (m help.M, 
 
 			jwtToken := jwt.NewWithClaims(predefined.JWTSigningMethod, claims)
 			if tokenString, jwtErr := jwtToken.SignedString([]byte(u.Password)); jwtErr == nil {
-				if _, err = tokenModel.Create(ctx, model.Token{
+				if _, err = tokenModel.Create(ctx, &model.Token{
 					ID:        jwtID,
 					UserID:    u.ID,
 					UserName:  u.Name,
