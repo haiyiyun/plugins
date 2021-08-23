@@ -18,6 +18,7 @@ import (
 
 func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 	fileIDStr := r.URL.Query().Get("id")
+
 	valid := &validator.Validation{}
 	valid.Required(fileIDStr).Key("id").Message("id字段为空")
 
@@ -51,11 +52,20 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
-	fileType := r.FormValue("fileType")
-	sBase64 := r.FormValue("base64")
-	if sBase64 == "1" {
-		fileFormName := "img_base64_data"
+func (self *Service) Route_PUT_File(rw http.ResponseWriter, r *http.Request) {
+	fileType := r.FormValue("file_type")
+	fileBase64Data := r.FormValue(predefined.FormNameFileBase64Data)
+	remark := r.FormValue("remark")
+
+	valid := &validator.Validation{}
+	valid.Required(fileType).Key("file_type").Message("file_type字段为空")
+
+	if valid.HasErrors() {
+		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+		return
+	}
+
+	if fileBase64Data != "" {
 		if fileType == predefined.UploadTypeImage {
 			uploadLocal := local.NewService(self.Service.Service)
 			setUIDErr := uploadLocal.SetUserIDFromRequestClaims(r)
@@ -66,7 +76,7 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if fm, err := uploadLocal.SaveEncodeFile(r, fileFormName); err != nil {
+			if fm, err := uploadLocal.SaveEncodeFile(r, predefined.FormNameFileBase64Data, remark); err != nil {
 				log.Error(err)
 
 				if err.Error() == predefined.ErrorNotAllowUploadLocal {
@@ -83,7 +93,6 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
-		fileFormName := "imgFile"
 		switch fileType {
 		case predefined.UploadTypeImage, predefined.UploadTypeMedia, predefined.UploadTypeFile, "":
 			uploadLocal := local.NewService(self.Service.Service)
@@ -95,7 +104,7 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if fm, err := uploadLocal.SaveFormFile(r, fileFormName); err != nil {
+			if fm, err := uploadLocal.SaveFormFile(r, predefined.FormNameFile, remark); err != nil {
 				log.Error(err)
 
 				if err.Error() == predefined.ErrorNotAllowUploadLocal {
@@ -134,6 +143,7 @@ func (self *Service) Route_DELETE_File(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	fileIDStr := r.URL.Query().Get("id")
+
 	valid := &validator.Validation{}
 	valid.Required(fileIDStr).Key("id").Message("id字段为空")
 

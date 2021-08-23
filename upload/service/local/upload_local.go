@@ -168,7 +168,7 @@ func (self *Service) encodeDataToFile(encode_string string, appendFileExt bool) 
 	return nil, err
 }
 
-func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode bool) (fm *model.Upload, err error) {
+func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode bool, remark string) (fm *model.Upload, err error) {
 	//TODO 后期改为配置控制
 	appendFileExt := true
 	if bEncode {
@@ -194,26 +194,30 @@ func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode 
 
 	if err == nil && fm != nil {
 		uploadModel := upload.NewModel(self.M)
+		if remark != "" {
+			fm.Remark = remark
+		}
+
 		_, err = uploadModel.Create(context.Background(), fm)
 	}
 
 	return
 }
 
-func (self *Service) SaveEncodeFile(r *http.Request, fileFormName string) (fm *model.Upload, err error) {
+func (self *Service) SaveEncodeFile(r *http.Request, fileFormName, remark string) (fm *model.Upload, err error) {
 	if !self.AllowUploadLocal {
 		err = errors.New(predefined.ErrorNotAllowUploadLocal)
 		return
 	}
 
-	return self.saveFormFile(r, fileFormName, true)
+	return self.saveFormFile(r, fileFormName, true, remark)
 }
 
-func (self *Service) SaveFormFile(r *http.Request, fileFormName string) (fm *model.Upload, err error) {
+func (self *Service) SaveFormFile(r *http.Request, fileFormName, remark string) (fm *model.Upload, err error) {
 	if !self.AllowUploadLocal {
 		err = errors.New(predefined.ErrorNotAllowUploadLocal)
 		return
 	}
 
-	return self.saveFormFile(r, fileFormName, false)
+	return self.saveFormFile(r, fileFormName, false, remark)
 }

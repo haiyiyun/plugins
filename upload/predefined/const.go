@@ -13,6 +13,11 @@ const (
 )
 
 const (
+	FormNameFile           = "file"
+	FormNameFileBase64Data = "file_base64_data"
+)
+
+const (
 	ErrorNotFoundUserIDFromRequestClaims = "not found user_id from request claims"
 	ErrorNotFoundClaimsFromRequest       = "not found claims from request"
 	ErrorFalidSaveFile                   = "Fail to save file"
