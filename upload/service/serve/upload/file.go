@@ -52,7 +52,7 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) Route_PUT_File(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 	fileType := r.FormValue("file_type")
 	fileBase64Data := r.FormValue(predefined.FormNameFileBase64Data)
 	remark := r.FormValue("remark")
