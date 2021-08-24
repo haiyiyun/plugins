@@ -84,10 +84,15 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 					return
 				}
 			} else {
-				response.JSON(rw, 0, help.M{
-					"id":  fm.ID.Hex(),
-					"url": self.Config.DownloadLocalUrlDirectory + fm.URL,
-				}, "上传成功")
+				result := help.M{
+					"id": fm.ID.Hex(),
+				}
+
+				if self.Config.PublishDownloadUrl {
+					result["url"] = self.Config.DownloadLocalUrlDirectory + fm.URL
+				}
+
+				response.JSON(rw, 0, result, "上传成功")
 
 				return
 			}
@@ -112,10 +117,15 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 					return
 				}
 			} else {
-				response.JSON(rw, 0, help.M{
-					"id":  fm.ID.Hex(),
-					"url": self.Config.DownloadLocalUrlDirectory + fm.URL,
-				}, "上传成功")
+				result := help.M{
+					"id": fm.ID.Hex(),
+				}
+
+				if self.Config.PublishDownloadUrl {
+					result["url"] = self.Config.DownloadLocalUrlDirectory + fm.URL
+				}
+
+				response.JSON(rw, 0, result, "上传成功")
 
 				return
 			}
