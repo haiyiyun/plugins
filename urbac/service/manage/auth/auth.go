@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/haiyiyun/plugins/urbac/predefined"
 	"github.com/haiyiyun/utils/http/response"
@@ -13,7 +14,15 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 	self.Logout(r)
 	username := r.FormValue("username")
 	password := r.FormValue("password")
-	if m, err := self.Login(username, password, realip.RealIP(r), r.Header.Get("User-Agent")); err != nil {
+	geoLongitudeStr := r.FormValue("longitude") //经度
+	geoLatitudeStr := r.FormValue("latitude")   //维度
+	geoLongitude, _ := strconv.ParseFloat(geoLongitudeStr, 64)
+	geoLatitude, _ := strconv.ParseFloat(geoLatitudeStr, 64)
+	geo := [2]float64{
+		geoLongitude, geoLatitude,
+	}
+
+	if m, err := self.Login(username, password, realip.RealIP(r), r.Header.Get("User-Agent"), geo); err != nil {
 		if err.Error() == predefined.StatusCodeLoginLimitText {
 			response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 		} else {
@@ -21,6 +30,32 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		response.JSON(rw, 0, m, "")
+	}
+}
+
+func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request) {
+	if u, found := self.GetUserInfo(r); found {
+		r.ParseForm()
+		self.Logout(r)
+		geoLongitudeStr := r.FormValue("longitude") //经度
+		geoLatitudeStr := r.FormValue("latitude")   //维度
+		geoLongitude, _ := strconv.ParseFloat(geoLongitudeStr, 64)
+		geoLatitude, _ := strconv.ParseFloat(geoLatitudeStr, 64)
+		geo := [2]float64{
+			geoLongitude, geoLatitude,
+		}
+
+		if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), geo); err != nil {
+			if err.Error() == predefined.StatusCodeLoginLimitText {
+				response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
+			} else {
+				response.JSON(rw, http.StatusUnauthorized, nil, "")
+			}
+		} else {
+			response.JSON(rw, 0, m, "")
+		}
+	} else {
+		response.JSON(rw, http.StatusNotFound, nil, "")
 	}
 }
 

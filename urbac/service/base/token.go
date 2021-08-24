@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (self *Service) Login(username, password, ip, userAgent string) (m help.M, err error) {
+func (self *Service) Login(username, password, ip, userAgent string, geo [2]float64) (m help.M, err error) {
 	passwordMd5 := help.Strings(password).Md5()
 
 	userModel := user.NewModel(self.M)
@@ -33,47 +33,7 @@ func (self *Service) Login(username, password, ip, userAgent string) (m help.M, 
 	ctx := context.TODO()
 	sr := userModel.FindOne(ctx, filter)
 	if err = sr.Decode(&u); err == nil {
-		tokenModel := token.NewModel(self.M)
-		cnt, _ := tokenModel.CountDocuments(ctx, tokenModel.FilterByUserID(u.ID))
-		if cnt == 0 || (self.AllowMultiLogin && (self.AllowMultiLoginNum == 0 || cnt < self.AllowMultiLoginNum)) {
-			ExpiredTime := time.Now().Add(self.Config.TokenExpireDuration.Duration)
-			jwtID := primitive.NewObjectID()
-			claims := &predefined.JWTTokenClaims{
-				StandardClaims: &jwt.StandardClaims{
-					Id:        jwtID.Hex(),
-					Audience:  u.ID.Hex(),
-					Issuer:    u.ID.Hex(),
-					Subject:   u.Name,
-					ExpiresAt: ExpiredTime.Unix(),
-				},
-				TokenType: predefined.TokenTypeSelf,
-			}
-
-			jwtToken := jwt.NewWithClaims(predefined.JWTSigningMethod, claims)
-			if tokenString, jwtErr := jwtToken.SignedString([]byte(u.Password)); jwtErr == nil {
-				if _, err = tokenModel.Create(ctx, &model.Token{
-					ID:        jwtID,
-					UserID:    u.ID,
-					UserName:  u.Name,
-					TokenType: predefined.TokenTypeSelf,
-					Token:     tokenString,
-					SignInfo: model.TokenSignInfo{
-						IP:        ip,
-						UserAgent: userAgent,
-					},
-					ExpiredTime: ExpiredTime,
-				}); err == nil {
-					m = map[string]interface{}{
-						"user_id": u.ID.Hex(),
-						"token":   tokenString,
-					}
-				}
-			} else {
-				err = jwtErr
-			}
-		} else {
-			err = errors.New(predefined.StatusCodeLoginLimitText)
-		}
+		m, err = self.CreateToken(ctx, u, ip, userAgent, geo)
 	}
 
 	return
@@ -91,6 +51,53 @@ func (self *Service) Logout(r *http.Request) {
 			self.Cache.Delete(cacheApplicationsInfoKey)
 		}
 	}
+}
+
+func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgent string, geo [2]float64) (m help.M, err error) {
+	tokenModel := token.NewModel(self.M)
+	cnt, _ := tokenModel.CountDocuments(ctx, tokenModel.FilterByUserID(u.ID))
+	if cnt == 0 || (self.AllowMultiLogin && (self.AllowMultiLoginNum == 0 || cnt < self.AllowMultiLoginNum)) {
+		ExpiredTime := time.Now().Add(self.Config.TokenExpireDuration.Duration)
+		jwtID := primitive.NewObjectID()
+		claims := &predefined.JWTTokenClaims{
+			StandardClaims: &jwt.StandardClaims{
+				Id:        jwtID.Hex(),
+				Audience:  u.ID.Hex(),
+				Issuer:    u.ID.Hex(),
+				Subject:   u.Name,
+				ExpiresAt: ExpiredTime.Unix(),
+			},
+			TokenType: predefined.TokenTypeSelf,
+		}
+
+		jwtToken := jwt.NewWithClaims(predefined.JWTSigningMethod, claims)
+		if tokenString, jwtErr := jwtToken.SignedString([]byte(u.Password)); jwtErr == nil {
+			if _, err = tokenModel.Create(ctx, &model.Token{
+				ID:        jwtID,
+				UserID:    u.ID,
+				UserName:  u.Name,
+				TokenType: predefined.TokenTypeSelf,
+				Token:     tokenString,
+				SignInfo: model.TokenSignInfo{
+					IP:        ip,
+					UserAgent: userAgent,
+					Geo:       geo,
+				},
+				ExpiredTime: ExpiredTime,
+			}); err == nil {
+				m = map[string]interface{}{
+					"user_id": u.ID.Hex(),
+					"token":   tokenString,
+				}
+			}
+		} else {
+			err = jwtErr
+		}
+	} else {
+		err = errors.New(predefined.StatusCodeLoginLimitText)
+	}
+
+	return
 }
 
 func (self *Service) GetClaims(r *http.Request) (claims *predefined.JWTTokenClaims) {

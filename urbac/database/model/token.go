@@ -7,8 +7,9 @@ import (
 )
 
 type TokenSignInfo struct {
-	IP        string `bson:"ip" json:"ip" map:"ip"`
-	UserAgent string `bson:"user_agent" json:"user_agent" map:"user_agent"`
+	IP        string     `bson:"ip" json:"ip" map:"ip"`
+	UserAgent string     `bson:"user_agent" json:"user_agent" map:"user_agent"`
+	Geo       [2]float64 `bson:"geo" json:"geo" map:"geo"`
 }
 
 type Token struct {
