@@ -77,6 +77,10 @@ func (mdl *Database) Pull(ctx context.Context, filter, pullFilters bson.D, opts 
 	return mdl.UpdateOne(ctx, filter, mdl.DataPull(pullFilters), opts...)
 }
 
+func (mdl *Database) Push(ctx context.Context, filter, pushFilters bson.D, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	return mdl.UpdateOne(ctx, filter, mdl.DataPush(pushFilters), opts...)
+}
+
 func (mdl *Database) Create(ctx context.Context, m interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	mm := help.NewStruct(m).StructToMap()
 
