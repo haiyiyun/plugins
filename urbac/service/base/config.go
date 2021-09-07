@@ -16,6 +16,8 @@ type CacheConfig struct {
 
 type BaseConfig struct {
 	CheckRight           bool                `json:"check_right"`
+	TokenByUrlQuery      bool                `json:"token_by_url_query"`
+	TokenByUrlQueryName  string              `json:"token_by_url_query_name"`
 	DefaultEnableApp     bool                `json:"default_enable_app"`
 	DefaultEnableModule  bool                `json:"default_enable_module"`
 	DefaultEnableAction  bool                `json:"default_enable_action"`

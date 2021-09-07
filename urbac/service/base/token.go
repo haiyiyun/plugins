@@ -179,5 +179,14 @@ func (self *Service) BearerAuth(r *http.Request) (string, bool) {
 		token = auth[len(prefix):]
 	}
 
+	if token == "" && self.Config.TokenByUrlQuery {
+		queryName := "token"
+		if self.TokenByUrlQueryName != "" {
+			queryName = self.TokenByUrlQueryName
+		}
+
+		token = r.URL.Query().Get(queryName)
+	}
+
 	return token, token != ""
 }
