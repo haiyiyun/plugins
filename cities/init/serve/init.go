@@ -17,7 +17,7 @@ import (
 )
 
 func init() {
-	baseConfFile := flag.String("config.plugins.webrouter_plugin_template.serve.base", "../config/plugins/webrouter_plugin_template/base.conf", "base config file")
+	baseConfFile := flag.String("config.plugins.cities.serve.base", "../config/plugins/cities/base.conf", "base config file")
 	var baseConf base.Config
 	config.Files(*baseConfFile).Load(&baseConf)
 
@@ -33,7 +33,7 @@ func init() {
 
 	baseService := base.NewService(&baseConf, baseCache, baseDB)
 
-	serveConfFile := flag.String("config.webrouter_plugin_template.serve", "../config/plugins/webrouter_plugin_template/serve.conf", "serve config file")
+	serveConfFile := flag.String("config.cities.serve", "../config/plugins/cities/serve.conf", "serve config file")
 	var serveConf serve.Config
 	config.Files(*serveConfFile).Load(&serveConf)
 
