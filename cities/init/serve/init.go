@@ -1,0 +1,55 @@
+package serve
+
+import (
+	"context"
+	"flag"
+
+	"github.com/haiyiyun/plugins/cities/database/schema"
+	"github.com/haiyiyun/plugins/cities/service/base"
+	"github.com/haiyiyun/plugins/cities/service/serve"
+	serveCities "github.com/haiyiyun/plugins/cities/service/serve/cities"
+
+	"github.com/haiyiyun/cache"
+	"github.com/haiyiyun/config"
+	"github.com/haiyiyun/mongodb"
+	"github.com/haiyiyun/webrouter"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func init() {
+	baseConfFile := flag.String("config.plugins.webrouter_plugin_template.serve.base", "../config/plugins/webrouter_plugin_template/base.conf", "base config file")
+	var baseConf base.Config
+	config.Files(*baseConfFile).Load(&baseConf)
+
+	baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
+	baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
+	webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })
+
+	baseDB.M().InitCollection(schema.Province)
+	baseDB.M().InitCollection(schema.City)
+	baseDB.M().InitCollection(schema.Area)
+	baseDB.M().InitCollection(schema.Street)
+	baseDB.M().InitCollection(schema.Village)
+
+	baseService := base.NewService(&baseConf, baseCache, baseDB)
+
+	serveConfFile := flag.String("config.webrouter_plugin_template.serve", "../config/plugins/webrouter_plugin_template/serve.conf", "serve config file")
+	var serveConf serve.Config
+	config.Files(*serveConfFile).Load(&serveConf)
+
+	if serveConf.WebRouter {
+		serveConf.Config = baseConf
+		serveService := serve.NewService(&serveConf, baseService)
+
+		//Init Begin
+		serveCitiesService := serveCities.NewService(serveService)
+		//Init End
+
+		//Go Begin
+		//Go End
+
+		//Register Begin
+		webrouter.Register(serveConf.WebRouterRootPath+"", serveCitiesService)
+		//Register End
+	}
+}
