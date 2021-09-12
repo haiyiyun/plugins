@@ -13,14 +13,21 @@ func (self *Service) Route_GET_Area(rw http.ResponseWriter, req *http.Request) {
 	cityID := req.URL.Query().Get("city")
 
 	if cityID != "" {
-		areaModel := area.NewModel(self.M)
-		areas := []model.Area{}
-		if cur, err := areaModel.Find(req.Context(), bson.D{
-			{"city_id", cityID},
-		}); err == nil {
-			if err := cur.All(req.Context(), &areas); err == nil {
-				response.JSON(rw, 0, areas, "")
-				return
+		cacheKey := "cities.area." + cityID
+		if areas, found := self.Cache.Get(cacheKey); found {
+			response.JSON(rw, 0, areas, "")
+			return
+		} else {
+			areaModel := area.NewModel(self.M)
+			areas := []model.Area{}
+			if cur, err := areaModel.Find(req.Context(), bson.D{
+				{"city_id", cityID},
+			}); err == nil {
+				if err := cur.All(req.Context(), &areas); err == nil {
+					self.Cache.Set(cacheKey, areas, -1)
+					response.JSON(rw, 0, areas, "")
+					return
+				}
 			}
 		}
 	}

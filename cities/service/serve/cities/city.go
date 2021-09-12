@@ -13,14 +13,21 @@ func (self *Service) Route_GET_City(rw http.ResponseWriter, req *http.Request) {
 	provinceID := req.URL.Query().Get("province")
 
 	if provinceID != "" {
-		cityModel := city.NewModel(self.M)
-		cities := []model.City{}
-		if cur, err := cityModel.Find(req.Context(), bson.D{
-			{"province_id", provinceID},
-		}); err == nil {
-			if err := cur.All(req.Context(), &cities); err == nil {
-				response.JSON(rw, 0, cities, "")
-				return
+		cacheKey := "cities.city." + provinceID
+		if cities, found := self.Cache.Get(cacheKey); found {
+			response.JSON(rw, 0, cities, "")
+			return
+		} else {
+			cityModel := city.NewModel(self.M)
+			cities := []model.City{}
+			if cur, err := cityModel.Find(req.Context(), bson.D{
+				{"province_id", provinceID},
+			}); err == nil {
+				if err := cur.All(req.Context(), &cities); err == nil {
+					self.Cache.Set(cacheKey, cities, -1)
+					response.JSON(rw, 0, cities, "")
+					return
+				}
 			}
 		}
 	}

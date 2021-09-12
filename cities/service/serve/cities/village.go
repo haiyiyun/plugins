@@ -13,16 +13,24 @@ func (self *Service) Route_GET_Village(rw http.ResponseWriter, req *http.Request
 	streetID := req.URL.Query().Get("street")
 
 	if streetID != "" {
-		villageModel := village.NewModel(self.M)
-		villages := []model.Village{}
-		if cur, err := villageModel.Find(req.Context(), bson.D{
-			{"street_id", streetID},
-		}); err == nil {
-			if err := cur.All(req.Context(), &villages); err == nil {
-				response.JSON(rw, 0, villages, "")
-				return
+		cacheKey := "cities.village." + streetID
+		if villages, found := self.Cache.Get(cacheKey); found {
+			response.JSON(rw, 0, villages, "")
+			return
+		} else {
+			villageModel := village.NewModel(self.M)
+			villages := []model.Village{}
+			if cur, err := villageModel.Find(req.Context(), bson.D{
+				{"street_id", streetID},
+			}); err == nil {
+				if err := cur.All(req.Context(), &villages); err == nil {
+					self.Cache.Set(cacheKey, villages, -1)
+					response.JSON(rw, 0, villages, "")
+					return
+				}
 			}
 		}
+
 	}
 
 	response.JSON(rw, http.StatusBadRequest, nil, "")

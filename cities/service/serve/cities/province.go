@@ -10,12 +10,20 @@ import (
 )
 
 func (self *Service) Route_GET_Province(rw http.ResponseWriter, req *http.Request) {
-	provinceModel := province.NewModel(self.M)
-	provinces := []model.Province{}
-	if cur, err := provinceModel.Find(req.Context(), bson.D{}); err == nil {
-		if err := cur.All(req.Context(), &provinces); err == nil {
-			response.JSON(rw, 0, provinces, "")
-			return
+	cacheKey := "cities.province"
+
+	if provinces, found := self.Cache.Get(cacheKey); found {
+		response.JSON(rw, 0, provinces, "")
+		return
+	} else {
+		provinceModel := province.NewModel(self.M)
+		provinces := []model.Province{}
+		if cur, err := provinceModel.Find(req.Context(), bson.D{}); err == nil {
+			if err := cur.All(req.Context(), &provinces); err == nil {
+				self.Cache.Set(cacheKey, provinces, -1)
+				response.JSON(rw, 0, provinces, "")
+				return
+			}
 		}
 	}
 
