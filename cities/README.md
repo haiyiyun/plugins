@@ -1,6 +1,6 @@
-#中国省市地区
+# 中国省市地区
 
-##数据库备份
+## 数据库备份
 
 1. mongoexport
 
@@ -18,8 +18,7 @@
 
         使用Navicat导出js脚本: cities.js
 
-
-##数据库恢复
+## 数据库恢复
 
 1. mongoimport
 
