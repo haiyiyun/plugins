@@ -17,6 +17,11 @@ const (
 )
 
 const (
+	ProfileInfoSexFemale = iota //女
+	ProfileInfoSexMale          //男
+)
+
+const (
 	ProfileInfoBasicMarriageUnmarried = iota //未结婚
 	ProfileInfoBasicMarriageDivorced         //离异
 	ProfileInfoBasicMarriageMarried          //已婚

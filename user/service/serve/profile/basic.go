@@ -34,24 +34,24 @@ func (self *Service) Route_POST_Basic(rw http.ResponseWriter, r *http.Request) {
 	constellation, _ := strconv.Atoi(constellationStr)
 
 	valid := validator.Validation{}
-	valid.Digital(sexStr).Key("sex").Message("sex必须为数字")
-	valid.Have(sex, 0, 1).Key("type").Message("请提供支持的sex")
+	valid.Digital(sexStr).Key("sexStr").Message("sex必须为数字")
+	valid.Have(sex, predefined.ProfileInfoSexFemale, predefined.ProfileInfoSexMale).Key("sex").Message("请提供支持的sex")
 	valid.Digital(birghYearStr).Key("birth_year").Message("birth_year必须为数字")
-	valid.Digital(birthMonthStr).Key("birth_month").Message("birth_month必须为数字")
+	valid.Digital(birthMonthStr).Key("birth_month_str").Message("birth_month必须为数字")
 	valid.Range(birthMonth, 0, 11).Key("birth_month").Message("birth_month必须在0-11之间")
-	valid.Digital(birthDayStr).Key("birth_day").Message("birth_day必须为数字")
+	valid.Digital(birthDayStr).Key("birth_day_str").Message("birth_day必须为数字")
 	valid.Range(birthDay, 0, 30).Key("birth_day").Message("birth_day必须在0-30之间")
-	valid.Digital(heightStr).Key("height").Message("height必须为数字")
+	valid.Digital(heightStr).Key("height_str").Message("height必须为数字")
 	valid.Range(height, 140, 250).Key("height").Message("height必须在140-250之间")
-	valid.Digital(weightStr).Key("weight").Message("weight必须为数字")
+	valid.Digital(weightStr).Key("weight_str").Message("weight必须为数字")
 	valid.Range(weight, 50, 250).Key("weight").Message("weight必须在50-250之间")
-	valid.Digital(marriageStr).Key("marriage").Message("marriage必须为数字")
+	valid.Digital(marriageStr).Key("marriage_str").Message("marriage必须为数字")
 	valid.Have(marriage,
 		predefined.ProfileInfoBasicMarriageUnmarried,
 		predefined.ProfileInfoBasicMarriageMarried,
 		predefined.ProfileInfoBasicMarriageDivorced,
 	).Key("marriage").Message("请提供支持的marriage")
-	valid.Digital(constellationStr).Key("constellation").Message("constellation必须为数字")
+	valid.Digital(constellationStr).Key("constellatione_str").Message("constellation必须为数字")
 	valid.Have(constellation,
 		predefined.ProfileInfoConstellationAries,
 		predefined.ProfileInfoConstellationTaurus,

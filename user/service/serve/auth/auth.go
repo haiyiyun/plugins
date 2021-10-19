@@ -59,6 +59,7 @@ func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request)
 			if err.Error() == predefined.StatusCodeLoginLimitText {
 				response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 			} else {
+				log.Debug(err)
 				response.JSON(rw, http.StatusUnauthorized, nil, "")
 			}
 		} else {

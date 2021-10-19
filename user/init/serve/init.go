@@ -10,6 +10,7 @@ import (
 	userAuth "github.com/haiyiyun/plugins/user/service/serve/auth"
 	userProfile "github.com/haiyiyun/plugins/user/service/serve/profile"
 	userUser "github.com/haiyiyun/plugins/user/service/serve/user"
+	userVisitor "github.com/haiyiyun/plugins/user/service/serve/visitor"
 
 	"github.com/haiyiyun/cache"
 	"github.com/haiyiyun/config"
@@ -77,6 +78,7 @@ func init() {
 		userAuthService := userAuth.NewService(serveService)
 		userUserService := userUser.NewService(serveService)
 		userProfileService := userProfile.NewService(serveService)
+		userVisitorService := userVisitor.NewService(serveService)
 		//Init End
 
 		//Go Begin
@@ -86,6 +88,7 @@ func init() {
 		webrouter.Register(serveConf.WebRouterRootPath+"auth/", userAuthService)
 		webrouter.Register(serveConf.WebRouterRootPath+"user/", userUserService)
 		webrouter.Register(serveConf.WebRouterRootPath+"profile/", userProfileService)
+		webrouter.Register(serveConf.WebRouterRootPath+"visitor/", userVisitorService)
 		//Register End
 	}
 }

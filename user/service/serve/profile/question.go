@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (self *Service) Route_POST_CreateQuestionValues(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_CreateQuestion(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	typStr := r.FormValue("type")
 	typ, _ := strconv.Atoi(typStr)
@@ -52,7 +52,7 @@ func (self *Service) Route_POST_CreateQuestionValues(rw http.ResponseWriter, r *
 	}
 }
 
-func (self *Service) Route_POST_UpdateQuestionValues(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_UpdateQuestion(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	typStr := r.FormValue("type")
 	typ, _ := strconv.Atoi(typStr)
@@ -100,7 +100,7 @@ func (self *Service) Route_POST_UpdateQuestionValues(rw http.ResponseWriter, r *
 	}
 }
 
-func (self *Service) Route_POST_DeleteQuestionValues(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_DeleteQuestion(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	typStr := r.FormValue("type")
 	typ, _ := strconv.Atoi(typStr)

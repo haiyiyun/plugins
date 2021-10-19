@@ -13,6 +13,8 @@ func (self *Service) Route_GET_Profile(rw http.ResponseWriter, r *http.Request) 
 		profileModel := profile.NewModel(self.M)
 
 		if pf, err := profileModel.GetInfo(u.ID); err == nil {
+			pf["user_id"] = pf["_id"]
+			delete(pf, "_id")
 			response.JSON(rw, 0, pf, "")
 			return
 		}

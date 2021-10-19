@@ -10,7 +10,6 @@ import (
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/realip"
-	"github.com/haiyiyun/validator"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -27,14 +26,14 @@ func (self *Service) Route_POST_Online(rw http.ResponseWriter, r *http.Request) 
 	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
 	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
 
-	valid := validator.Validation{}
-	valid.Float(longitude).Key("longitude").Message("longitude必须是正确的经度坐标点")
-	valid.Float(latitude).Key("latitude").Message("latitude必须是正确的纬度坐标点")
+	// valid := validator.Validation{}
+	// valid.Float(longitude).Key("longitude").Message("longitude必须是正确的经度坐标点")
+	// valid.Float(latitude).Key("latitude").Message("latitude必须是正确的纬度坐标点")
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
-		return
-	}
+	// if valid.HasErrors() {
+	// 	response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	// 	return
+	// }
 
 	ip := realip.RealIP(r)
 
@@ -72,14 +71,14 @@ func (self *Service) Route_POST_Offline(rw http.ResponseWriter, r *http.Request)
 	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
 	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
 
-	valid := validator.Validation{}
-	valid.Float(longitude).Key("longitude").Message("longitude必须是正确的经度坐标点")
-	valid.Float(latitude).Key("latitude").Message("latitude必须是正确的纬度坐标点")
+	// valid := validator.Validation{}
+	// valid.Float(longitude).Key("longitude").Message("longitude必须是正确的经度坐标点")
+	// valid.Float(latitude).Key("latitude").Message("latitude必须是正确的纬度坐标点")
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
-		return
-	}
+	// if valid.HasErrors() {
+	// 	response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	// 	return
+	// }
 
 	ip := realip.RealIP(r)
 
