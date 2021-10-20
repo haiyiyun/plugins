@@ -119,7 +119,7 @@ func (self *Service) GetValidClaims(r *http.Request) (claims *predefined.JWTToke
 			u = claimsAndUser["user"].(model.User)
 		} else {
 			uTmp := model.User{}
-			token, _ := jwt.ParseWithClaims(tokenString, &predefined.JWTTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
+			if token, err := jwt.ParseWithClaims(tokenString, &predefined.JWTTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
 				claimsTmp := t.Claims.(*predefined.JWTTokenClaims)
 
 				var key []byte
@@ -154,15 +154,15 @@ func (self *Service) GetValidClaims(r *http.Request) (claims *predefined.JWTToke
 				}
 
 				return key, err
-			})
-
-			if token.Valid {
-				claims = token.Claims.(*predefined.JWTTokenClaims)
-				u = uTmp
-				self.Cache.Set(cacheKey, help.M{
-					"claims": claims,
-					"user":   u,
-				}, time.Until(time.Unix(claims.ExpiresAt, 0)))
+			}); err == nil {
+				if token.Valid {
+					claims = token.Claims.(*predefined.JWTTokenClaims)
+					u = uTmp
+					self.Cache.Set(cacheKey, help.M{
+						"claims": claims,
+						"user":   u,
+					}, time.Until(time.Unix(claims.ExpiresAt, 0)))
+				}
 			}
 		}
 	}
