@@ -159,16 +159,19 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		}
 
 		userID = ior.InsertedID.(primitive.ObjectID)
-		profileModel := profile.NewModel(self.M)
-		_, err = profileModel.Create(r.Context(), model.Profile{
-			UserID: userID,
-			Enable: true,
-		})
 
-		if err != nil {
-			sctx.AbortTransaction(sctx)
-			log.Error("Create profile error:", err)
-			return err
+		if self.Config.EnableProfile {
+			profileModel := profile.NewModel(self.M)
+			_, err = profileModel.Create(r.Context(), model.Profile{
+				UserID: userID,
+				Enable: true,
+			})
+
+			if err != nil {
+				sctx.AbortTransaction(sctx)
+				log.Error("Create profile error:", err)
+				return err
+			}
 		}
 
 		sctx.CommitTransaction(sctx)

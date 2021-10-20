@@ -1,16 +1,15 @@
-package serve
+package manage
 
 import (
-	"github.com/haiyiyun/plugins/user/service/base"
+	"github.com/haiyiyun/plugins/user_profile/service/base"
 )
 
-type UserConfig struct {
+type WebrouterPluginTemplateConfig struct {
 	WebRouter         bool   `json:"web_router"`
 	WebRouterRootPath string `json:"web_router_root_path"`
-	EnableProfile     bool   `json:"enable_profile"`
 }
 
 type Config struct {
 	base.Config
-	UserConfig
+	WebrouterPluginTemplateConfig
 }

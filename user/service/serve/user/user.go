@@ -42,12 +42,10 @@ func (self *Service) Route_POST_Online(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	change := bson.D{
-		{"online", bson.D{
-			{"online", true},
-			{"ip", ip},
-			{"location", geometry.NewPoint(coordinates)},
-			{"online_time", time.Now()},
-		}},
+		{"online.online", true},
+		{"online.ip", ip},
+		{"online.location", geometry.NewPoint(coordinates)},
+		{"online.online_time", time.Now()},
 	}
 
 	userModel := user.NewModel(self.M)
@@ -87,12 +85,10 @@ func (self *Service) Route_POST_Offline(rw http.ResponseWriter, r *http.Request)
 	}
 
 	change := bson.D{
-		{"online", bson.D{
-			{"online", false},
-			{"ip", ip},
-			{"location", geometry.NewPoint(coordinates)},
-			{"offline_time", time.Now()},
-		}},
+		{"online.online", false},
+		{"online.ip", ip},
+		{"online.location", geometry.NewPoint(coordinates)},
+		{"online.offline_time", time.Now()},
 	}
 
 	userModel := user.NewModel(self.M)
