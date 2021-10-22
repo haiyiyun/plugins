@@ -7,6 +7,7 @@ import (
 	"github.com/haiyiyun/plugins/content/database/model"
 	"github.com/haiyiyun/plugins/content/database/model/subject"
 	"github.com/haiyiyun/plugins/content/predefined"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/haiyiyun/mongodb/geometry"
@@ -98,9 +99,10 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 
 	typeStr := r.URL.Query().Get("type")
 	typ, _ := strconv.Atoi(typeStr)
-	visibilityStr := r.FormValue("visibility")
+	visibilityStr := r.URL.Query().Get("visibility")
 	visibility, _ := strconv.Atoi(visibilityStr)
-	publishUserIdStr := r.FormValue("publish_user_id")
+	tags := r.URL.Query()["tags[]"]
+	publishUserIdStr := r.URL.Query().Get("publish_user_id")
 	publishUserId, _ := primitive.ObjectIDFromHex(publishUserIdStr)
 
 	longitudeStr := r.URL.Query().Get("longitude") //经度
@@ -162,6 +164,14 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		} else {
 			filter = append(filter, subjectModel.FilterByVisibilityOrAll(visibility)...)
 		}
+	}
+
+	if len(tags) > 0 {
+		filter = append(filter, bson.E{
+			"tags", bson.D{
+				{"$in", tags},
+			},
+		})
 	}
 
 	if coordinates != geometry.NilPointCoordinates {
