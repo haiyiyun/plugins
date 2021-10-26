@@ -26,10 +26,10 @@ type Content struct {
 	Type           int                  `json:"type" bson:"type" map:"type"`                               //动态类型：文章，动态等。详见：predefined.ContentTypeXXX
 	AssociateType  int                  `json:"associate_type" bson:"associate_type" map:"associate_type"` //关联内容类型
 	AssociateID    primitive.ObjectID   `json:"associate_id" bson:"associate_id" map:"associate_id"`       //关联内容ID
-	Category       primitive.ObjectID   `json:"category" bson:"category" map:"category"`                   //分类ID
-	Subject        primitive.ObjectID   `json:"subject" bson:"subject" map:"subject"`                      //主题ID
+	CategoryID     primitive.ObjectID   `json:"category_id" bson:"category_id" map:"category_id"`          //分类ID
+	SubjectID      primitive.ObjectID   `json:"subject_id" bson:"subject_id" map:"subject_id"`             //主题ID
 	Title          string               `json:"title" bson:"title" map:"title"`                            //标题
-	AtUser         []primitive.ObjectID `json:"at_user" bson:"at_user" map:"at_user"`                      //@用户user_id
+	AtUsers        []primitive.ObjectID `json:"at_users" bson:"at_users" map:"at_users"`                   //@用户user_id
 	Cover          string               `json:"cover" bson:"cover" map:"cover"`                            //封面图片
 	Description    string               `json:"description" bson:"description" map:"description"`          //描述
 	Author         string               `json:"author" bson:"author" map:"author"`                         //作者

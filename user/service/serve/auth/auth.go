@@ -150,7 +150,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			u.Location = geometry.NewPoint(coordinates)
 		}
 
-		ior, err := userModel.Create(r.Context(), u)
+		ior, err := userModel.Create(sctx, u)
 
 		if err != nil {
 			sctx.AbortTransaction(sctx)
@@ -162,7 +162,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 
 		if self.Config.EnableProfile {
 			profileModel := profile.NewModel(self.M)
-			_, err = profileModel.Create(r.Context(), model.Profile{
+			_, err = profileModel.Create(sctx, model.Profile{
 				UserID: userID,
 				Enable: true,
 			})

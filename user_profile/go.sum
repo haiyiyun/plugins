@@ -41,8 +41,8 @@ github.com/haiyiyun/config v0.0.0-20210818124838-26216c3fefa7/go.mod h1:hIKo1E8c
 github.com/haiyiyun/log v0.0.0-20210818123520-98d7ea08ab9d/go.mod h1:qOSp3CB3NDgn5XvRlezO3flE7MxjImjD5eIEL5v0mfA=
 github.com/haiyiyun/log v0.0.0-20210818124914-8d331595b3c9 h1:ugUR3faTo4FDa9k6py98if9P3qIVzB7Hamhnh1i1+fI=
 github.com/haiyiyun/log v0.0.0-20210818124914-8d331595b3c9/go.mod h1:qOSp3CB3NDgn5XvRlezO3flE7MxjImjD5eIEL5v0mfA=
-github.com/haiyiyun/mongodb v0.0.0-20210828160702-6720438b1b12 h1:lqCkPzeRFAGM6ppW7rCqySmCJ4BZPWXGkZqeHbW1HBg=
-github.com/haiyiyun/mongodb v0.0.0-20210828160702-6720438b1b12/go.mod h1:b7CnlMhUgu/hB3ZNCLzmw2/XwY2I7aE/wbgdUhicPzE=
+github.com/haiyiyun/mongodb v0.0.0-20211021133531-505a2b958bfc h1:27X7/FvoLiSOkUw0APM1Pw2g0Vtqr/L8IuMZdfKRrjA=
+github.com/haiyiyun/mongodb v0.0.0-20211021133531-505a2b958bfc/go.mod h1:b7CnlMhUgu/hB3ZNCLzmw2/XwY2I7aE/wbgdUhicPzE=
 github.com/haiyiyun/utils v0.0.0-20210823143651-1762e474b7af h1:guQSJbmG6MOzwQJ0SV0uFqnGjFaRw01xVV3sbbiKqX4=
 github.com/haiyiyun/utils v0.0.0-20210823143651-1762e474b7af/go.mod h1:MA6sokHhHIbc2c8cxSBp/uPyMqXAncKeo0pFOyBwp84=
 github.com/haiyiyun/uuid v0.0.0-20210818123649-71f3ed2232fd h1:7b6mdMWN+AAYwMSg203iwWd4IrAXiVUoHjsPJ7dQs/Y=

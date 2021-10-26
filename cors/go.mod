@@ -2,4 +2,4 @@ module github.com/haiyiyun/plugins/cors
 
 go 1.16
 
-require github.com/haiyiyun/webrouter v0.0.0-20210818130015-911aeee3b7a4
+require github.com/haiyiyun/webrouter v0.0.0-20210926052749-dff1e1c17abc

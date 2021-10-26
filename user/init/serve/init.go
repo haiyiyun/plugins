@@ -30,7 +30,6 @@ func init() {
 
 	baseDB.M().InitCollection(schema.User)
 	baseDB.M().InitCollection(schema.Token)
-	baseDB.M().InitCollection(schema.Profile)
 
 	baseService := base.NewService(&baseConf, baseCache, baseDB)
 
@@ -62,6 +61,9 @@ func init() {
 	if serveConf.WebRouter {
 		serveConf.Config = baseConf
 		serveService := serve.NewService(&serveConf, baseService)
+		if serveConf.EnableProfile {
+			baseDB.M().InitCollection(schema.Profile)
+		}
 
 		//Init Begin
 		userAuthService := userAuth.NewService(serveService)
