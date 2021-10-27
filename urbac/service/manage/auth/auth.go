@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/haiyiyun/plugins/urbac/database/model/user"
 	"github.com/haiyiyun/plugins/urbac/predefined"
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/realip"
+	"github.com/haiyiyun/validator"
 )
 
 func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
@@ -63,6 +65,33 @@ func (self *Service) Route_GET_Logout(rw http.ResponseWriter, r *http.Request) {
 	self.Logout(r)
 
 	response.JSON(rw, 0, nil, "")
+
+}
+
+func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.Request) {
+	u, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+	password := r.FormValue("password")
+
+	valid := validator.Validation{}
+	valid.Required(password).Key("password").Message("password不能为空")
+
+	if valid.HasErrors() {
+		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+		return
+	}
+
+	userModel := user.NewModel(self.M)
+	if err := userModel.ChangePassword(u.ID, password); err == nil {
+		response.JSON(rw, 0, nil, "")
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
+	}
 
 }
 

@@ -15,7 +15,6 @@ import (
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/realip"
 	"github.com/haiyiyun/validator"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -207,14 +206,11 @@ func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.R
 	}
 
 	userModel := user.NewModel(self.M)
-	if _, err := userModel.Set(r.Context(), userModel.FilterByID(u.ID), bson.D{
-		{"password", help.NewString(password).Md5()},
-	}); err == nil {
+	if err := userModel.ChangePassword(u.ID, password); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
-
 }
 
 func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
