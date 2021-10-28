@@ -115,6 +115,11 @@ func (self *Service) Route_GET_Check(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) {
+	if self.Config.ProhibitCreateUser {
+		response.JSON(rw, http.StatusForbidden, nil, "")
+		return
+	}
+
 	r.ParseForm()
 	username := r.FormValue("username")
 	password := r.FormValue("password")
