@@ -86,6 +86,11 @@ func (self *Service) Route_GET_GetUserInfo(rw http.ResponseWriter, r *http.Reque
 }
 
 func (self *Service) Route_GET_Check(rw http.ResponseWriter, r *http.Request) {
+	if self.Config.ProhibitCreateUser {
+		response.JSON(rw, http.StatusForbidden, nil, "")
+		return
+	}
+
 	r.ParseForm()
 	username := r.FormValue("username")
 
