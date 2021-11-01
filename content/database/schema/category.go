@@ -3,6 +3,7 @@ package schema
 import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 /*
@@ -15,7 +16,50 @@ import (
 
 var (
 	Category = bson.M{
-		"name":  "category",
-		"index": []mongo.IndexModel{},
+		"name": "category",
+		"index": []mongo.IndexModel{
+			{
+				bson.D{
+					{"type", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"parent_id", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"tags", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"location", "2dsphere"},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"visibility", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"status", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"enable", 1},
+				},
+				options.Index(),
+			},
+		},
 	}
 )

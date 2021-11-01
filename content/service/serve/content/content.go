@@ -311,7 +311,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	pg := pagination.Parse(r, cnt)
 
 	opt := options.Find().SetSort(bson.D{
-		{"update_time", -1},
+		{"create_time", -1},
 	}).SetProjection(bson.D{}).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
 
 	if cur, err := contentModel.Find(r.Context(), filter, opt); err != nil {

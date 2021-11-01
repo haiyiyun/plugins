@@ -20,6 +20,12 @@ var (
 		"index": []mongo.IndexModel{
 			{
 				bson.D{
+					{"publish_user_id", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"type", 1},
 				},
 				options.Index(),
@@ -32,7 +38,31 @@ var (
 			},
 			{
 				bson.D{
+					{"tags", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"location", "2dsphere"},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"visibility", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"status", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"enable", 1},
 				},
 				options.Index(),
 			},
