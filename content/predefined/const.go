@@ -75,6 +75,16 @@ const (
 )
 
 const (
+	ContentTypeSystemVideoShort = iota + 999 //系统类型：短视频
+	ContentTypeSystemVideoLong               //系统类型：长视频
+	ContentTypeSystemVoiceShort              //系统类型：短语音
+	ContentTypeSystemVoiceLong               //系统类型：长语音
+	ContentTypeSystemImageText               //系统类型：图文
+	ContentTypeSystemImage                   //系统类型：纯图片
+	ContentTypeSystemText                    //系统类型：纯文本
+)
+
+const (
 	ContentAssociateTypeSelf       = iota //关联类型：自己
 	ContentAssociateTypeForward           //关联类型：转发
 	ContentAssociateTypeCollection        //关联类型：集合
@@ -112,10 +122,10 @@ const (
 	VisibilityTypeRelationship        //关系人，如：联系人，好友，回答者等
 	VisibilityTypeStranger            //陌生人
 	VisibilityTypeSubject             //主题
-	VisibilityTypeNearly              //附近
-	VisibilityTypeCity                //城市
-	VisibilityTypeProvince            //省
-	VisibilityTypeNation              //国
+	VisibilityTypeNearly              //附近：依赖坐标点控制
+	VisibilityTypeCity                //城市：依赖坐标点控制
+	VisibilityTypeProvince            //省：依赖坐标点控制
+	VisibilityTypeNation              //国：依赖坐标点控制
 	VisibilityTypeAll                 //所有
 )
 

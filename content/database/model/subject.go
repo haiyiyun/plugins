@@ -18,7 +18,8 @@ type Subject struct {
 	Images        []string           `json:"images" bson:"images" map:"images"`                            //图片
 	Video         string             `json:"video" bson:"video" map:"video"`                               //视频
 	Voice         string             `json:"voice" bson:"voice" map:"voice"`                               //语音
-	Tags          []string           `json:"tags" bson:"tags" map:"tags"`                                  //标签
+	UserTags      []string           `json:"user_tags" bson:"user_tags" map:"user_tags"`                   //用户可编辑的标签
+	Tags          []string           `json:"tags" bson:"tags" map:"tags"`                                  //标签，包括用户标签
 	Location      geometry.Point     `json:"location" bson:"location,omitempty" map:"location,omitempty"`
 	Visibility    int                `json:"visibility" bson:"visibility" map:"visibility"` //可见度
 	Status        int                `json:"status" bson:"status" map:"status"`

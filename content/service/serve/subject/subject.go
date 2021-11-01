@@ -9,8 +9,10 @@ import (
 	"github.com/haiyiyun/plugins/content/predefined"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/haiyiyun/mongodb/geometry"
+	"github.com/haiyiyun/utils/http/pagination"
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/validator"
@@ -34,6 +36,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	typeStr := r.FormValue("type")
 	typ, _ := strconv.Atoi(typeStr)
 	subjectStr := r.FormValue("subject")
+	userTags := r.Form["user_tags[]"]
 	visibilityStr := r.FormValue("visibility")
 	visibility, _ := strconv.Atoi(visibilityStr)
 
@@ -62,6 +65,10 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		predefined.VisibilityTypeStranger,
 		predefined.VisibilityTypeSubject,
 		predefined.VisibilityTypeNearly,
+		predefined.VisibilityTypeCity,
+		predefined.VisibilityTypeProvince,
+		predefined.VisibilityTypeNation,
+		predefined.VisibilityTypeAll,
 	).Key("visibility").Message("visibility必须是支持的类型")
 
 	if valid.HasErrors() {
@@ -69,12 +76,17 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	tags := []string{}
+	tags = append(tags, userTags...)
+
 	subjectModel := subject.NewModel(self.M)
 	if _, err := subjectModel.Create(r.Context(), model.Subject{
 		PublishUserID: userID,
 		Type:          typ,
 		Subject:       subjectStr,
 		Enable:        true,
+		UserTags:      userTags,
+		Tags:          tags,
 		Location:      geometry.NewPoint(coordinates),
 	}); err != nil {
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
@@ -102,8 +114,8 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	visibilityStr := r.URL.Query().Get("visibility")
 	visibility, _ := strconv.Atoi(visibilityStr)
 	tags := r.URL.Query()["tags[]"]
-	publishUserIdStr := r.URL.Query().Get("publish_user_id")
-	publishUserId, _ := primitive.ObjectIDFromHex(publishUserIdStr)
+	publishUserIDStr := r.URL.Query().Get("publish_user_id")
+	publishUserID, _ := primitive.ObjectIDFromHex(publishUserIDStr)
 
 	longitudeStr := r.URL.Query().Get("longitude") //经度
 	latitudeStr := r.URL.Query().Get("latitude")   //维度
@@ -141,8 +153,8 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		predefined.VisibilityTypeAll,
 	).Key("visibility").Message("visibility必须是支持的类型")
 
-	if publishUserIdStr != "" {
-		valid.BsonObjectID(publishUserIdStr).Key("publish_user_id").Message("publish_user_id必须支持的格式")
+	if publishUserIDStr != "" {
+		valid.BsonObjectID(publishUserIDStr).Key("publish_user_id").Message("publish_user_id必须支持的格式")
 	}
 
 	if valid.HasErrors() {
@@ -158,8 +170,8 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, subjectModel.FilterByPublishUserID(userID)...)
 		filter = append(filter, subjectModel.FilterByVisibility(visibility)...)
 	} else {
-		if publishUserId != primitive.NilObjectID {
-			filter = append(filter, subjectModel.FilterByPublishUserID(publishUserId)...)
+		if publishUserID != primitive.NilObjectID {
+			filter = append(filter, subjectModel.FilterByPublishUserID(publishUserID)...)
 			filter = append(filter, subjectModel.FilterByVisibility(visibility)...)
 		} else {
 			filter = append(filter, subjectModel.FilterByVisibilityOrAll(visibility)...)
@@ -178,14 +190,26 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, subjectModel.FilterByLocation(geometry.NewPoint(coordinates), maxDistance, minDistance)...)
 	}
 
-	if cur, err := subjectModel.Find(r.Context(), filter); err != nil {
+	cnt, _ := subjectModel.CountDocuments(r.Context(), filter)
+	pg := pagination.Parse(r, cnt)
+
+	opt := options.Find().SetSort(bson.D{
+		{"update_time", -1},
+	}).SetProjection(bson.D{}).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
+
+	if cur, err := subjectModel.Find(r.Context(), filter, opt); err != nil {
 		response.JSON(rw, http.StatusNotFound, nil, "")
 	} else {
-		subjects := []model.Subject{}
-		if err := cur.All(r.Context(), &subjects); err != nil {
+		items := []model.Subject{}
+		if err := cur.All(r.Context(), &items); err != nil {
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 		} else {
-			response.JSON(rw, 0, subjects, "")
+			rpr := response.ResponsePaginationResult{
+				Total: cnt,
+				Items: items,
+			}
+
+			response.JSON(rw, 0, rpr, "")
 		}
 	}
 }
