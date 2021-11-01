@@ -79,6 +79,9 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	tags := []string{}
 	tags = append(tags, userTags...)
 
+	//TODO 发布干预
+	status := predefined.PublishStatusNormal
+
 	subjectModel := subject.NewModel(self.M)
 	if _, err := subjectModel.Create(r.Context(), model.Subject{
 		PublishUserID: userID,
@@ -88,6 +91,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		UserTags:      userTags,
 		Tags:          tags,
 		Location:      geometry.NewPoint(coordinates),
+		Status:        status,
 	}); err != nil {
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
@@ -133,10 +137,10 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	valid := validator.Validation{}
 	valid.Digital(typeStr).Key("type_str").Message("type必须数字")
 	valid.Have(typ,
-		predefined.SubjectTypeSystemDynamic,
-		predefined.SubjectTypeSystemArticle,
 		predefined.SubjectTypeUserDynamic,
 		predefined.SubjectTypeUserArticle,
+		predefined.SubjectTypeSystemDynamic,
+		predefined.SubjectTypeSystemArticle,
 	).Key("type").Message("type必须是支持的类型")
 
 	valid.Digital(visibilityStr).Key("visibility_str").Message("visibility必须数字")

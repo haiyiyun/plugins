@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/database/model"
 	"github.com/haiyiyun/plugins/content/database/model/content"
@@ -166,6 +167,9 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	tags := []string{}
 	tags = append(tags, userTags...)
 
+	//TODO 发布干预
+	status := predefined.PublishStatusNormal
+
 	contentModel := content.NewModel(self.M)
 	ctnt := &model.Content{
 		PublishUserID:  userID,
@@ -193,6 +197,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		ForbidDownload: forbidDownload,
 		ForbidDiscuss:  forbidDiscuss,
 		Tags:           tags,
+		Status:         status,
 	}
 
 	if ior, err := contentModel.Create(r.Context(), ctnt); err != nil || ior.InsertedID == nil {
@@ -307,8 +312,11 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterByLocation(geometry.NewPoint(coordinates), maxDistance, minDistance)...)
 	}
 
-	cnt, _ := contentModel.CountDocuments(r.Context(), filter)
+	cnt, err := contentModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
+	log.Debug(filter)
+	log.Debug(cnt)
+	log.Debug(err)
 
 	opt := options.Find().SetSort(bson.D{
 		{"create_time", -1},
@@ -319,6 +327,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		items := []model.Content{}
 		if err := cur.All(r.Context(), &items); err != nil {
+			log.Debug(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 		} else {
 			rpr := response.ResponsePaginationResult{

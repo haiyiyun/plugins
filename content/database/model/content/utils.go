@@ -9,7 +9,6 @@ import (
 
 func (self *Model) FilterNormalContent() bson.D {
 	filter := bson.D{
-		{"enable", true},
 		{"status", predefined.PublishStatusNormal},
 	}
 
