@@ -312,11 +312,8 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterByLocation(geometry.NewPoint(coordinates), maxDistance, minDistance)...)
 	}
 
-	cnt, err := contentModel.CountDocuments(r.Context(), filter)
+	cnt, _ := contentModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
-	log.Debug(filter)
-	log.Debug(cnt)
-	log.Debug(err)
 
 	opt := options.Find().SetSort(bson.D{
 		{"create_time", -1},
