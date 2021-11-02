@@ -105,7 +105,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		predefined.ContentPublishTypeArticle,
 		predefined.ContentPublishTypeQuestion,
 		predefined.ContentPublishTypeAnswer,
-	).Key("type").Message("type必须支持的类型")
+	).Key("publish_type").Message("publish_type必须支持的类型")
 
 	valid.Digital(associateTypeStr).Key("associate_type_str").Message("associate_type必须数字")
 
@@ -140,7 +140,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		valid.Required(images).Key("images[]").Message("images[]不能为空")
 		valid.Required(contentStr).Key("content").Message("content不能为空")
 	case predefined.ContentTypeImage:
-		valid.Required(associateIDStr).Key("images[]").Message("images[]不能为空")
+		valid.Required(images).Key("images[]").Message("images[]不能为空")
 	case predefined.ContentTypeText:
 		valid.Required(contentStr).Key("content").Message("content不能为空")
 	}
@@ -324,7 +324,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		items := []model.Content{}
 		if err := cur.All(r.Context(), &items); err != nil {
-			log.Debug(err)
+			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 		} else {
 			rpr := response.ResponsePaginationResult{

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/plugins/content/database/model"
 	"github.com/haiyiyun/plugins/content/database/model/subject"
 	"github.com/haiyiyun/plugins/content/predefined"
@@ -206,6 +207,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		items := []model.Subject{}
 		if err := cur.All(r.Context(), &items); err != nil {
+			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 		} else {
 			rpr := response.ResponsePaginationResult{
