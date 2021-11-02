@@ -120,32 +120,35 @@ func (self *Service) GetValidClaims(r *http.Request) (claims *predefined.JWTToke
 		} else {
 			uTmp := model.User{}
 			if token, err := jwt.ParseWithClaims(tokenString, &predefined.JWTTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
-				claimsTmp := t.Claims.(*predefined.JWTTokenClaims)
-
 				var key []byte
-				var jwtID primitive.ObjectID
-				var userID primitive.ObjectID
-				jwtIDHex := claimsTmp.Id
-				userIDHex := claimsTmp.Issuer
+				var err error
+				if t.Claims != nil {
+					if claimsTmp, ok := t.Claims.(*predefined.JWTTokenClaims); ok {
+						var jwtID primitive.ObjectID
+						var userID primitive.ObjectID
+						jwtIDHex := claimsTmp.Id
+						userIDHex := claimsTmp.Issuer
 
-				jwtID, err := primitive.ObjectIDFromHex(jwtIDHex)
-				if err == nil {
-					tokenModel := token.NewModel(self.M)
-					var cnt int64
-					if cnt, err = tokenModel.CountDocumentsByIDAndToken(jwtID, tokenString); err == nil && cnt > 0 {
-						if userID, err = primitive.ObjectIDFromHex(userIDHex); err == nil {
-							tokenType := ""
-							if self.Config.AllowMultiLogin {
-								tokenType = predefined.TokenTypeSelf
-							}
+						jwtID, err = primitive.ObjectIDFromHex(jwtIDHex)
+						if err == nil {
+							tokenModel := token.NewModel(self.M)
+							var cnt int64
+							if cnt, err = tokenModel.CountDocumentsByIDAndToken(jwtID, tokenString); err == nil && cnt > 0 {
+								if userID, err = primitive.ObjectIDFromHex(userIDHex); err == nil {
+									tokenType := ""
+									if self.Config.AllowMultiLogin {
+										tokenType = predefined.TokenTypeSelf
+									}
 
-							cnt, err = tokenModel.CountDocumentsByUserIDAndType(userID, tokenType)
-							if err == nil && cnt > 0 {
-								if cnt == 1 || (self.Config.AllowMultiLogin && (self.Config.AllowMultiLoginNum == 0 || cnt <= self.Config.AllowMultiLoginNum)) {
-									u, err := self.getUser(userID)
-									if err == nil {
-										uTmp = u
-										key = []byte(u.Password)
+									cnt, err = tokenModel.CountDocumentsByUserIDAndType(userID, tokenType)
+									if err == nil && cnt > 0 {
+										if cnt == 1 || (self.Config.AllowMultiLogin && (self.Config.AllowMultiLoginNum == 0 || cnt <= self.Config.AllowMultiLoginNum)) {
+											u, err := self.getUser(userID)
+											if err == nil {
+												uTmp = u
+												key = []byte(u.Password)
+											}
+										}
 									}
 								}
 							}
