@@ -133,9 +133,6 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	latitudeStr := r.FormValue("latitude")   //维度
 	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
 	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
-	coordinates := geometry.PointCoordinates{
-		longitude, latitude,
-	}
 
 	valid := validator.Validation{}
 	valid.Required(username).Key("username").Message("username不能为空")
@@ -146,47 +143,8 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	userModel := user.NewModel(self.M)
-	ctx := r.Context()
 	var userID primitive.ObjectID
-	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
-		u := model.User{
-			Name:     username,
-			Password: help.NewString(password).Md5(),
-			Enable:   true,
-		}
-
-		if coordinates != geometry.NilPointCoordinates {
-			u.Location = geometry.NewPoint(coordinates)
-		}
-
-		ior, err := userModel.Create(sctx, u)
-
-		if err != nil {
-			sctx.AbortTransaction(sctx)
-			log.Error("Create user error:", err)
-			return err
-		}
-
-		userID = ior.InsertedID.(primitive.ObjectID)
-
-		if self.Config.EnableProfile {
-			profileModel := profile.NewModel(self.M)
-			_, err = profileModel.Create(sctx, model.Profile{
-				UserID: userID,
-				Enable: true,
-			})
-
-			if err != nil {
-				sctx.AbortTransaction(sctx)
-				log.Error("Create profile error:", err)
-				return err
-			}
-		}
-
-		sctx.CommitTransaction(sctx)
-		return err
-	})
+	userID, err := self.CreateUser(r.Context(), username, password, longitude, latitude, self.Config.EnableProfile)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
