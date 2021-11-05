@@ -102,8 +102,7 @@ func (self *Service) Route_GET_Check(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userModel := user.NewModel(self.M)
-	if cnt, err := userModel.CountDocuments(r.Context(), userModel.FilterByName(username)); err == nil {
+	if cnt, err := self.CheckUser(r.Context(), username); err == nil {
 		if cnt == 0 {
 			response.JSON(rw, 0, help.M{
 				"exist": false,

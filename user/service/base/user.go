@@ -31,6 +31,11 @@ func (self *Service) getUser(userID primitive.ObjectID) (u model.User, err error
 	return
 }
 
+func (self *Service) CheckUser(ctx context.Context, username string) (int64, error) {
+	userModel := user.NewModel(self.M)
+	return userModel.CountDocuments(ctx, userModel.FilterByName(username))
+}
+
 func (self *Service) CreateUser(ctx context.Context, username, password string, longitude, latitude float64, enableProfile bool) (primitive.ObjectID, error) {
 	coordinates := geometry.PointCoordinates{
 		longitude, latitude,
