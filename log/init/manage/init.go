@@ -14,6 +14,7 @@ import (
 	"github.com/haiyiyun/config"
 	"github.com/haiyiyun/mongodb"
 	"github.com/haiyiyun/webrouter"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -36,39 +37,33 @@ func init() {
 
 	if manageConf.Log {
 		webrouter.Injector("loglogin", "", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			if logIDHex := baseService.LogRequestLogin(r); logIDHex != "" {
-				lrw := &base.ResponseWriter{
-					ResponseWriter: rw,
+			if logID := baseService.LogRequestLogin(r); logID != primitive.NilObjectID {
+				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+					lrw.SetGetResData(true)
+					lrw.SetData("log_id", logID)
 				}
-
-				lrw.SetID(logIDHex)
-				webrouter.ResponseWriter(lrw)
 			}
 
 			return
 		})
 
 		webrouter.Injector("logauth", "loglogin", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			if logIDHex := baseService.LogRequestAuth(r); logIDHex != "" {
-				lrw := &base.ResponseWriter{
-					ResponseWriter: rw,
+			if logID := baseService.LogRequestAuth(r); logID != primitive.NilObjectID {
+				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+					lrw.SetGetResData(true)
+					lrw.SetData("log_id", logID)
 				}
-
-				lrw.SetID(logIDHex)
-				webrouter.ResponseWriter(lrw)
 			}
 
 			return
 		})
 
 		webrouter.Injector("logoperate", "logauth", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			if logIDHex := baseService.LogRequestOperate(r); logIDHex != "" {
-				lrw := &base.ResponseWriter{
-					ResponseWriter: rw,
+			if logID := baseService.LogRequestOperate(r); logID != primitive.NilObjectID {
+				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+					lrw.SetGetResData(true)
+					lrw.SetData("log_id", logID)
 				}
-
-				lrw.SetID(logIDHex)
-				webrouter.ResponseWriter(lrw)
 			}
 
 			return
@@ -76,19 +71,16 @@ func init() {
 
 		webrouter.Releasor("loglogin", "logauth", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 			baseService.LogResponseLogin(rw, r)
-
 			return
 		})
 
 		webrouter.Releasor("logauth", "logoperate", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 			baseService.LogResponseAuth(rw, r)
-
 			return
 		})
 
 		webrouter.Releasor("logoperate", "urbac", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 			baseService.LogResponseOperate(rw, r)
-
 			return
 		})
 	}

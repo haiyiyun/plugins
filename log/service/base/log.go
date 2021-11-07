@@ -10,6 +10,7 @@ import (
 	"github.com/haiyiyun/plugins/log/database/model"
 	modelLog "github.com/haiyiyun/plugins/log/database/model/log"
 	"github.com/haiyiyun/plugins/log/predefined"
+	"github.com/haiyiyun/webrouter"
 
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/realip"
@@ -17,12 +18,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (self *Service) LogRequestLogin(r *http.Request) string {
+func (self *Service) LogRequestLogin(r *http.Request) primitive.ObjectID {
 	if self.logLoginPath(r.URL.Path) {
 		return self.LogRequest(r, predefined.LogTypeLogin, self.Config.DefaultLoginDeleteDuration.Duration)
 	}
 
-	return ""
+	return primitive.NilObjectID
 }
 
 func (self *Service) LogResponseLogin(rw http.ResponseWriter, r *http.Request) {
@@ -31,12 +32,12 @@ func (self *Service) LogResponseLogin(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) LogRequestAuth(r *http.Request) string {
+func (self *Service) LogRequestAuth(r *http.Request) primitive.ObjectID {
 	if self.logAuthPath(r.URL.Path) {
 		return self.LogRequest(r, predefined.LogTypeAuth, self.Config.DefaultAuthDeleteDuration.Duration)
 	}
 
-	return ""
+	return primitive.NilObjectID
 }
 
 func (self *Service) LogResponseAuth(rw http.ResponseWriter, r *http.Request) {
@@ -45,12 +46,12 @@ func (self *Service) LogResponseAuth(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) LogRequestOperate(r *http.Request) string {
+func (self *Service) LogRequestOperate(r *http.Request) primitive.ObjectID {
 	if self.excludeLogOperatePath(r.URL.Path) {
 		return self.LogRequest(r, predefined.LogTypeOperate, self.Config.DefaultOperateDeleteDuration.Duration)
 	}
 
-	return ""
+	return primitive.NilObjectID
 }
 
 func (self *Service) LogResponseOperate(rw http.ResponseWriter, r *http.Request) {
@@ -59,7 +60,7 @@ func (self *Service) LogResponseOperate(rw http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (self *Service) LogRequest(r *http.Request, typ string, deleteDuration time.Duration) string {
+func (self *Service) LogRequest(r *http.Request, typ string, deleteDuration time.Duration) primitive.ObjectID {
 	referer := r.Header.Get("Referer")
 	ip := self.GetRequestAllIP(r)
 	header := r.Header
@@ -78,17 +79,18 @@ func (self *Service) LogRequest(r *http.Request, typ string, deleteDuration time
 	logID := primitive.NewObjectID()
 	go self.logRequest(logID, userID, userName, typ, r.Method, referer, r.URL.Path, r.URL.Query().Encode(), header, payload, ip, deleteDuration)
 
-	return logID.Hex()
+	return logID
 }
 
 func (self *Service) LogResponse(rw http.ResponseWriter, r *http.Request) {
-	if lrw, ok := rw.(*ResponseWriter); ok {
-		logIDHex := lrw.GetID()
-
-		if logID, err := primitive.ObjectIDFromHex(logIDHex); err == nil {
-			header := rw.Header()
-			data := lrw.GetData()
-			go self.logResponse(logID, header, string(data))
+	if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+		if logIDI, found := lrw.GetData("log_id"); found {
+			if logID, ok := logIDI.(primitive.ObjectID); ok {
+				header := rw.Header()
+				data := lrw.GetResData()
+				lrw.SetGetResData(false)
+				go self.logResponse(logID, header, string(data))
+			}
 		}
 	}
 }
