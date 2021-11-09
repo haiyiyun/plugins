@@ -36,7 +36,7 @@ func (self *Service) CheckUser(ctx context.Context, username string) (int64, err
 	return userModel.CountDocuments(ctx, userModel.FilterByName(username))
 }
 
-func (self *Service) CreateUser(ctx context.Context, username, password string, longitude, latitude float64, enableProfile bool) (primitive.ObjectID, error) {
+func (self *Service) CreateUser(ctx context.Context, username, password string, longitude, latitude float64, enableProfile bool, extensionID int) (primitive.ObjectID, error) {
 	coordinates := geometry.PointCoordinates{
 		longitude, latitude,
 	}
@@ -45,9 +45,10 @@ func (self *Service) CreateUser(ctx context.Context, username, password string, 
 	var userID primitive.ObjectID
 	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
 		u := model.User{
-			Name:     username,
-			Password: help.NewString(password).Md5(),
-			Enable:   true,
+			ExtensionID: extensionID,
+			Name:        username,
+			Password:    help.NewString(password).Md5(),
+			Enable:      true,
 		}
 
 		if coordinates != geometry.NilPointCoordinates {

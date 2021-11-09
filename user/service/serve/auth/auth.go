@@ -143,7 +143,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	var userID primitive.ObjectID
-	userID, err := self.CreateUser(r.Context(), username, password, longitude, latitude, self.Config.EnableProfile)
+	userID, err := self.CreateUser(r.Context(), username, password, longitude, latitude, self.Config.EnableProfile, 0)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")

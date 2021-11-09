@@ -24,16 +24,17 @@ type UserOnline struct {
 }
 
 type User struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty" json:"user_id" map:"_id"`
-	Name       string             `bson:"name" json:"name" map:"name"`
-	Password   string             `bson:"password" json:"-" map:"password"`
-	Guest      bool               `bson:"guest" json:"guest" map:"guest"` //是否来宾
-	Level      int                `json:"level" bson:"level" map:"level"`
-	Role       []UserRole         `json:"role" bson:"role" map:"role"`
-	Online     UserOnline         `json:"online" bson:"online" map:"online"`
-	Location   geometry.Point     `json:"location" bson:"location,omitempty" map:"location,omitempty"`
-	Enable     bool               `bson:"enable" json:"enable" map:"enable"`
-	Delete     bool               `bson:"delete" json:"delete" map:"delete"`
-	CreateTime time.Time          `bson:"create_time" json:"create_time" map:"create_time"` //创建时间
-	UpdateTime time.Time          `bson:"update_time" json:"update_time" map:"update_time"` //更新时间
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"user_id" map:"_id"`
+	ExtensionID int                `bson:"extension_id" json:"extension_id" map:"extension_id"` //扩展ID，0值代表无需和其他库同步，同步其他数据库时的自增ID，如mysql的user表的id
+	Name        string             `bson:"name" json:"name" map:"name"`
+	Password    string             `bson:"password" json:"-" map:"password"`
+	Guest       bool               `bson:"guest" json:"guest" map:"guest"` //是否来宾
+	Level       int                `json:"level" bson:"level" map:"level"`
+	Role        []UserRole         `json:"role" bson:"role" map:"role"`
+	Online      UserOnline         `json:"online" bson:"online" map:"online"`
+	Location    geometry.Point     `json:"location" bson:"location,omitempty" map:"location,omitempty"`
+	Enable      bool               `bson:"enable" json:"enable" map:"enable"`
+	Delete      bool               `bson:"delete" json:"delete" map:"delete"`
+	CreateTime  time.Time          `bson:"create_time" json:"create_time" map:"create_time"` //创建时间
+	UpdateTime  time.Time          `bson:"update_time" json:"update_time" map:"update_time"` //更新时间
 }

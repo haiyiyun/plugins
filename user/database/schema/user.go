@@ -32,6 +32,12 @@ var (
 			},
 			{
 				bson.D{
+					{"extension_id", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"guest", 1},
 				},
 				options.Index(),
