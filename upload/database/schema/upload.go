@@ -47,7 +47,25 @@ var (
 			},
 			{
 				bson.D{
+					{"content_type", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"original_file_name", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"file_name", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"file_ext", 1},
 				},
 				options.Index(),
 			},

@@ -79,10 +79,8 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 			if fm, err := uploadLocal.SaveEncodeFile(r, predefined.FormNameFileBase64Data, remark); err != nil {
 				log.Error(err)
 
-				if err.Error() == predefined.ErrorNotAllowUploadLocal {
-					response.JSON(rw, http.StatusServiceUnavailable, nil, "")
-					return
-				}
+				response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+				return
 			} else {
 				result := help.M{
 					"id": fm.ID.Hex(),
