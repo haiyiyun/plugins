@@ -13,6 +13,7 @@ type CacheConfig struct {
 }
 
 type BaseConfig struct {
+	AppendFileExt              bool   `json:"append_file_ext"`
 	AllowUploadLocal           bool   `json:"allow_upload_local"`
 	UploadDirectory            string `json:"upload_directory"`
 	UploadImageDirectory       string `json:"upload_image_directory"`

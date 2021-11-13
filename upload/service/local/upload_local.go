@@ -169,13 +169,11 @@ func (self *Service) encodeDataToFile(encode_string string, appendFileExt bool) 
 }
 
 func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode bool, remark string) (fm *model.Upload, err error) {
-	//TODO 后期改为配置控制
-	appendFileExt := true
 	if bEncode {
 		form_value := r.FormValue(fileFormName)
 		if form_value != "" {
 			if datas := strings.Split(form_value, ":"); len(datas) > 1 {
-				fm, err = self.encodeDataToFile(datas[1], appendFileExt)
+				fm, err = self.encodeDataToFile(datas[1], self.Config.AppendFileExt)
 			}
 		} else {
 			err = errors.New(predefined.ErrorNotFoundFormData)
@@ -187,7 +185,7 @@ func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode 
 			if fileData, ioErr := ioutil.ReadAll(f); ioErr != nil {
 				err = ioErr
 			} else {
-				fm, err = self.saveFileToPath(fh.Header.Get("Content-Type"), fh.Filename, fileData, appendFileExt)
+				fm, err = self.saveFileToPath(fh.Header.Get("Content-Type"), fh.Filename, fileData, self.Config.AppendFileExt)
 			}
 		}
 	}

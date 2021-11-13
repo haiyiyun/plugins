@@ -99,7 +99,11 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		switch fileType {
-		case predefined.UploadTypeImage, predefined.UploadTypeMedia, predefined.UploadTypeFile, "":
+		case predefined.UploadTypeImage,
+			predefined.UploadTypeMedia,
+			predefined.UploadTypeDocument,
+			predefined.UploadTypeCompression,
+			predefined.UploadTypeFile:
 			uploadLocal := local.NewService(self.Service.Service)
 			setUIDErr := uploadLocal.SetUserIDFromRequestClaims(r)
 			if self.Config.CheckUser {
@@ -112,10 +116,8 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 			if fm, err := uploadLocal.SaveFormFile(r, predefined.FormNameFile, remark); err != nil {
 				log.Error(err)
 
-				if err.Error() == predefined.ErrorNotAllowUploadLocal {
-					response.JSON(rw, http.StatusServiceUnavailable, nil, "")
-					return
-				}
+				response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+				return
 			} else {
 				result := help.M{
 					"id": fm.ID.Hex(),
