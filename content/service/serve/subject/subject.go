@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/haiyiyun/mongodb/geometry"
+	"github.com/haiyiyun/utils/help"
 	"github.com/haiyiyun/utils/http/pagination"
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
@@ -198,14 +199,24 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	cnt, _ := subjectModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
 
+	projection := bson.D{
+		{"_id", 1},
+		{"publish_user_id", 1},
+		{"type", 1},
+		{"subject", 1},
+		{"cover", 1},
+		{"description", 1},
+		{"status", 1},
+	}
+
 	opt := options.Find().SetSort(bson.D{
 		{"create_time", -1},
-	}).SetProjection(bson.D{}).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
+	}).SetProjection(projection).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
 
 	if cur, err := subjectModel.Find(r.Context(), filter, opt); err != nil {
 		response.JSON(rw, http.StatusNotFound, nil, "")
 	} else {
-		items := []model.Subject{}
+		items := []help.M{}
 		if err := cur.All(r.Context(), &items); err != nil {
 			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")

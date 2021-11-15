@@ -23,6 +23,22 @@ func (self *Model) FilterByPublishUserID(publishUserID primitive.ObjectID) bson.
 	return filter
 }
 
+func (self *Model) FilterByCategoryID(categoryID primitive.ObjectID) bson.D {
+	filter := bson.D{
+		{"category_id", categoryID},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterBySubjectID(subjectID primitive.ObjectID) bson.D {
+	filter := bson.D{
+		{"subject_id", subjectID},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByType(typ int) bson.D {
 	filter := bson.D{
 		{"type", typ},

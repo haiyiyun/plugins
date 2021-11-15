@@ -4,9 +4,9 @@ go 1.17
 
 require (
 	github.com/haiyiyun/cache v0.0.0-20210818124739-0b1b279f594d
-	github.com/haiyiyun/config v0.0.0-20211026032001-39d7a1cfde0b
-	github.com/haiyiyun/log v0.0.0-20210818124914-8d331595b3c9
-	github.com/haiyiyun/mongodb v0.0.0-20211026045048-d6b49f1aadfc
+	github.com/haiyiyun/config v0.0.0-20211115100328-3a3b03ce7d35
+	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c
+	github.com/haiyiyun/mongodb v0.0.0-20211115100838-8a708fd25a5e
 	github.com/haiyiyun/utils v0.0.0-20211105034731-d0029224e45e
 	github.com/haiyiyun/validator v0.0.0-20211026045534-83ffedc816f8
 	github.com/haiyiyun/webrouter v0.0.0-20211107031526-f4f3bb9116f2

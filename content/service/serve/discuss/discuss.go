@@ -253,14 +253,16 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	cnt, _ := discussModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
 
+	projection := bson.D{}
+
 	opt := options.Find().SetSort(bson.D{
 		{"create_time", -1},
-	}).SetProjection(bson.D{}).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
+	}).SetProjection(projection).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
 
 	if cur, err := discussModel.Find(r.Context(), filter, opt); err != nil {
 		response.JSON(rw, http.StatusNotFound, nil, "")
 	} else {
-		items := []model.Content{}
+		items := []help.M{}
 		if err := cur.All(r.Context(), &items); err != nil {
 			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")

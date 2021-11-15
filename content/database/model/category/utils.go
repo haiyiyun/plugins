@@ -4,6 +4,7 @@ import (
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/predefined"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (self *Model) FilterNormalCategory() bson.D {
@@ -18,6 +19,14 @@ func (self *Model) FilterNormalCategory() bson.D {
 func (self *Model) FilterByType(typ int) bson.D {
 	filter := bson.D{
 		{"type", typ},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByParentID(parentID primitive.ObjectID) bson.D {
+	filter := bson.D{
+		{"parent_id", parentID},
 	}
 
 	return filter
