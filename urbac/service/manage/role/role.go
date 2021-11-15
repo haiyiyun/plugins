@@ -82,7 +82,7 @@ func (self *Service) Route_GET_Index(rw http.ResponseWriter, r *http.Request) {
 	response.JSON(rw, 0, rpr, "")
 }
 
-func (self *Service) Route_PUT_Create(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	name := r.FormValue("name")

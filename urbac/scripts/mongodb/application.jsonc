@@ -190,7 +190,7 @@
                     },
                     "enable": true,
                     "method": [
-                        "PUT"
+                        "POST"
                     ]
                 }
             }
@@ -294,7 +294,7 @@
                     },
                     "enable": true,
                     "method": [
-                        "PUT"
+                        "POST"
                     ]
                 },
                 "delete": {
@@ -399,7 +399,7 @@
                     },
                     "enable": true,
                     "method": [
-                        "PUT"
+                        "POST"
                     ]
                 },
                 "create-virtual-application": {
@@ -420,7 +420,7 @@
                     },
                     "enable": true,
                     "method": [
-                        "PUT"
+                        "POST"
                     ]
                 },
                 "delete": {

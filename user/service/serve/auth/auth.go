@@ -198,6 +198,10 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 	userModel := user.NewModel(self.M)
 	ctx := r.Context()
 	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
+		if err := sctx.StartTransaction(); err != nil {
+			return err
+		}
+
 		u := model.User{
 			ID:       userID,
 			Name:     username,
@@ -213,7 +217,6 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 		_, err := userModel.Create(r.Context(), u)
 		if err != nil {
 			sctx.AbortTransaction(sctx)
-			log.Error("Create user error:", err)
 			return err
 		}
 
@@ -225,12 +228,10 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			sctx.AbortTransaction(sctx)
-			log.Error("Create profile error:", err)
 			return err
 		}
 
-		sctx.CommitTransaction(sctx)
-		return err
+		return sctx.CommitTransaction(sctx)
 	})
 
 	if err != nil {

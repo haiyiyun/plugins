@@ -382,7 +382,7 @@ func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) 
 	return
 }
 
-func (self *Service) Route_PUT_CreateVirtualApplication(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	parentPath := r.FormValue("parent_path")
 	typ := r.FormValue("type")
@@ -530,7 +530,7 @@ func (self *Service) Route_PUT_CreateVirtualApplication(rw http.ResponseWriter, 
 	return
 }
 
-func (self *Service) Route_PUT_CreateCodeApplication(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r *http.Request) {
 	responseMsg := "创建应用失败"
 
 	applicationName := r.FormValue("name")
