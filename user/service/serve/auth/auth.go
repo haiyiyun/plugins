@@ -54,7 +54,7 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) Route_POST_TokensByUsernameAndPassword(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_GetTokens(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	var requestUP predefined.RequestServeAuthUsernamePassword
@@ -80,7 +80,7 @@ func (self *Service) Route_POST_TokensByUsernameAndPassword(rw http.ResponseWrit
 	}
 }
 
-func (self *Service) Route_DELETE_TokenByUsernameAndPassword(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_DeleteToken(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	var requestTUP predefined.RequestServeAuthTokenByUsernameAndPassword
