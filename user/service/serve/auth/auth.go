@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/haiyiyun/plugins/user/database/model"
 	"github.com/haiyiyun/plugins/user/database/model/profile"
@@ -15,6 +14,7 @@ import (
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/realip"
 	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/validator/form"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -22,17 +22,28 @@ import (
 func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	self.Logout(r)
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	longitudeStr := r.FormValue("longitude") //经度
-	latitudeStr := r.FormValue("latitude")   //维度
-	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
-	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
-	coordinates := geometry.PointCoordinates{
-		longitude, latitude,
+
+	var requestLogin predefined.RequestServeAuthLogin
+
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestLogin, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
 	}
 
-	if m, err := self.Login(username, password, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
+	validate := validator.New()
+	err = validate.Struct(requestLogin)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	coordinates := geometry.PointCoordinates{
+		requestLogin.Longitude, requestLogin.Latitude,
+	}
+
+	if m, err := self.Login(requestLogin.Username, requestLogin.Password, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
 		if err.Error() == predefined.StatusCodeLoginLimitText {
 			response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 		} else {
@@ -44,33 +55,47 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request) {
-	if u, found := self.GetUserInfo(r); found {
-		r.ParseForm()
-		self.Logout(r)
-		longitudeStr := r.FormValue("longitude") //经度
-		latitudeStr := r.FormValue("latitude")   //维度
-		longitude, _ := strconv.ParseFloat(longitudeStr, 64)
-		latitude, _ := strconv.ParseFloat(latitudeStr, 64)
-		coordinates := geometry.PointCoordinates{
-			longitude, latitude,
-		}
+	u, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
 
-		if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
-			if err.Error() == predefined.StatusCodeLoginLimitText {
-				response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
-			} else {
-				log.Debug(err)
-				response.JSON(rw, http.StatusUnauthorized, nil, "")
-			}
+	r.ParseForm()
+	self.Logout(r)
+
+	var requestRefresh predefined.RequestServeAuthRefresh
+
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestRefresh, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	coordinates := geometry.PointCoordinates{
+		requestRefresh.Longitude, requestRefresh.Latitude,
+	}
+
+	if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
+		if err.Error() == predefined.StatusCodeLoginLimitText {
+			response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 		} else {
-			response.JSON(rw, 0, m, "")
+			log.Debug(err)
+			response.JSON(rw, http.StatusUnauthorized, nil, "")
 		}
 	} else {
-		response.JSON(rw, http.StatusNotFound, nil, "")
+		response.JSON(rw, 0, m, "")
 	}
 }
 
 func (self *Service) Route_GET_Logout(rw http.ResponseWriter, r *http.Request) {
+	_, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
 	self.Logout(r)
 
 	response.JSON(rw, 0, nil, "")
@@ -81,7 +106,7 @@ func (self *Service) Route_GET_GetUserInfo(rw http.ResponseWriter, r *http.Reque
 	if u, found := self.GetUserInfo(r); found {
 		response.JSON(rw, 0, u, "")
 	} else {
-		response.JSON(rw, http.StatusNotFound, nil, "")
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
 	}
 }
 
@@ -92,17 +117,24 @@ func (self *Service) Route_GET_Check(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	username := r.FormValue("username")
 
-	valid := validator.Validation{}
-	valid.Required(username).Key("username").Message("username不能为空")
+	var requestCheck predefined.RequestServeAuthCheck
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestCheck, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if cnt, err := self.CheckUser(r.Context(), username); err == nil {
+	validate := validator.New()
+	err = validate.Struct(requestCheck)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	if cnt, err := self.CheckUser(r.Context(), requestCheck.Username); err == nil {
 		if cnt == 0 {
 			response.JSON(rw, 0, help.M{
 				"exist": false,
@@ -125,25 +157,25 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	r.ParseForm()
-	username := r.FormValue("username")
-	password := r.FormValue("password")
 
-	longitudeStr := r.FormValue("longitude") //经度
-	latitudeStr := r.FormValue("latitude")   //维度
-	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
-	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
+	var requestCreate predefined.RequestServeAuthCreate
 
-	valid := validator.Validation{}
-	valid.Required(username).Key("username").Message("username不能为空")
-	valid.Required(password).Key("password").Message("password不能为空")
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestCreate, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	validate := validator.New()
+	err = validate.Struct(requestCreate)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	var userID primitive.ObjectID
-	userID, err := self.CreateUser(r.Context(), username, password, longitude, latitude, self.Config.EnableProfile, 0)
+	userID, err = self.CreateUser(r.Context(), requestCreate.Username, requestCreate.Password, requestCreate.Longitude, requestCreate.Latitude, self.Config.EnableProfile, 0)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
@@ -162,18 +194,25 @@ func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.R
 	}
 
 	r.ParseForm()
-	password := r.FormValue("password")
 
-	valid := validator.Validation{}
-	valid.Required(password).Key("password").Message("password不能为空")
+	var requestChangePassword predefined.RequestServeAuthChangePassword
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestChangePassword, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestChangePassword)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	userModel := user.NewModel(self.M)
-	if err := userModel.ChangePassword(u.ID, password); err == nil {
+	if err := userModel.ChangePassword(u.ID, requestChangePassword.Password); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
@@ -190,12 +229,17 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
-	longitudeStr := r.FormValue("longitude") //经度
-	latitudeStr := r.FormValue("latitude")   //维度
-	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
-	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
+	var requestGuest predefined.RequestServeAuthGuest
+
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestGuest, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
 	coordinates := geometry.PointCoordinates{
-		longitude, latitude,
+		requestGuest.Longitude, requestGuest.Latitude,
 	}
 
 	userID := primitive.NewObjectID()
@@ -205,7 +249,7 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 
 	userModel := user.NewModel(self.M)
 	ctx := r.Context()
-	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
+	err = userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
 		if err := sctx.StartTransaction(); err != nil {
 			return err
 		}
@@ -264,20 +308,25 @@ func (self *Service) Route_POST_GuestToUser(rw http.ResponseWriter, r *http.Requ
 	}
 
 	r.ParseForm()
-	username := r.FormValue("username")
-	password := r.FormValue("password")
 
-	valid := validator.Validation{}
-	valid.Required(username).Key("username").Message("username不能为空")
-	valid.Required(password).Key("password").Message("password不能为空")
+	var requestGuestToUser predefined.RequestServeAuthGuestToUser
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestGuestToUser, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestGuestToUser)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	userModel := user.NewModel(self.M)
-	if err := userModel.GuestToUser(u.ID, username, password); err == nil {
+	if err := userModel.GuestToUser(u.ID, requestGuestToUser.Username, requestGuestToUser.Password); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
