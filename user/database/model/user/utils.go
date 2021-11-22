@@ -40,3 +40,13 @@ func (self *Model) ChangePassword(userID primitive.ObjectID, password string) er
 
 	return err
 }
+
+func (self *Model) GuestToUser(userID primitive.ObjectID, username, password string) error {
+	_, err := self.Set(context.TODO(), self.FilterByID(userID), bson.D{
+		{"name", username},
+		{"password", help.NewString(password).Md5()},
+		{"guest", false},
+	})
+
+	return err
+}

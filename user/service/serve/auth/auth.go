@@ -180,7 +180,14 @@ func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.R
 	}
 }
 
+//username => user_id
+//password => md5(username)
 func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
+	if self.Config.ProhibitCreateUser {
+		response.JSON(rw, http.StatusForbidden, nil, "")
+		return
+	}
+
 	r.ParseForm()
 
 	longitudeStr := r.FormValue("longitude") //经度
@@ -192,8 +199,9 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := primitive.NewObjectID()
-	username := "访客" + userID.Hex()
-	password := help.NewString("").Md5()
+	username := userID.Hex()
+	usernameMd5 := help.NewString(username).Md5()
+	password := help.NewString(usernameMd5).Md5()
 
 	userModel := user.NewModel(self.M)
 	ctx := r.Context()
@@ -238,7 +246,40 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
 	} else {
 		response.JSON(rw, 0, help.M{
-			"user_id": userID,
+			"user_id": userID, //调用guset方需要将user_id永久保存,作为guest的username登录
 		}, "")
+	}
+}
+
+func (self *Service) Route_POST_GuestToUser(rw http.ResponseWriter, r *http.Request) {
+	if self.Config.ProhibitCreateUser {
+		response.JSON(rw, http.StatusForbidden, nil, "")
+		return
+	}
+
+	u, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	valid := validator.Validation{}
+	valid.Required(username).Key("username").Message("username不能为空")
+	valid.Required(password).Key("password").Message("password不能为空")
+
+	if valid.HasErrors() {
+		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+		return
+	}
+
+	userModel := user.NewModel(self.M)
+	if err := userModel.GuestToUser(u.ID, username, password); err == nil {
+		response.JSON(rw, 0, nil, "")
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
 }

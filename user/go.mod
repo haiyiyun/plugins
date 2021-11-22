@@ -8,9 +8,9 @@ require (
 	github.com/haiyiyun/config v0.0.0-20211115100328-3a3b03ce7d35
 	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c
 	github.com/haiyiyun/mongodb v0.0.0-20211115100838-8a708fd25a5e
-	github.com/haiyiyun/utils v0.0.0-20211105034731-d0029224e45e
-	github.com/haiyiyun/validator v0.0.0-20211026045534-83ffedc816f8
-	github.com/haiyiyun/webrouter v0.0.0-20211107031526-f4f3bb9116f2
+	github.com/haiyiyun/utils v0.0.0-20211115101322-f2720732372c
+	github.com/haiyiyun/validator v0.1.0
+	github.com/haiyiyun/webrouter v0.0.0-20211115101555-6e0ff8ed84e5
 	go.mongodb.org/mongo-driver v1.7.4
 )
 
