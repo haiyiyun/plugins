@@ -48,8 +48,8 @@ github.com/haiyiyun/utils v0.0.0-20211115101322-f2720732372c h1:muwE1Fm0KH8d9sNQ
 github.com/haiyiyun/utils v0.0.0-20211115101322-f2720732372c/go.mod h1:vwwh40uSCJQQ1UWTJ07Ms9pAKOhKpX2kNWEstiraCjY=
 github.com/haiyiyun/uuid v0.0.0-20210818125821-3143cf8e1058 h1:fCOPd+41aW+xKTkkGSLwMHmi3+GHeIj43w1xiW/ZCgc=
 github.com/haiyiyun/uuid v0.0.0-20210818125821-3143cf8e1058/go.mod h1:zccimTJH4dqsZmG3j6TbDKcQev+jZrGq7ekvpu+TK7c=
-github.com/haiyiyun/validator v1.0.2 h1:WoYEw+lKYf9Ob91LXDrkmU2xEekAUK3UbimoiQyLgiI=
-github.com/haiyiyun/validator v1.0.2/go.mod h1:NguHVxzo6/5THwMeEK2hq68eoD/RTDNtanWU17Q6mZQ=
+github.com/haiyiyun/validator v1.0.3 h1:ZFBUEi633iuhiBHZgVNngStZhceEqLMlcM5vTk6RZLI=
+github.com/haiyiyun/validator v1.0.3/go.mod h1:NguHVxzo6/5THwMeEK2hq68eoD/RTDNtanWU17Q6mZQ=
 github.com/haiyiyun/webrouter v0.0.0-20211115101555-6e0ff8ed84e5 h1:QH9wxDLHyzZngdEGJhIl4GHJgy+T3Y1uQeCqhb6JH/k=
 github.com/haiyiyun/webrouter v0.0.0-20211115101555-6e0ff8ed84e5/go.mod h1:XcDxZX/KH0I32lQJRS0F3oQJGM9KmN9J6u8rxFTS3KE=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=

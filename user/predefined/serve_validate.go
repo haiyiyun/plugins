@@ -1,15 +1,22 @@
 package predefined
 
-type RequestServeAuthLogin struct {
-	Username  string  `validate:"required"`
-	Password  string  `validate:"required"`
+type RequestServeAuthUsernamePassword struct {
+	Username string `validate:"required"`
+	Password string `validate:"required"`
+}
+
+type RequestServeAuthLongitudeLatitude struct {
 	Longitude float64 `form:",omitempty"` //经度
 	Latitude  float64 `form:",omitempty"` //维度
 }
 
+type RequestServeAuthLogin struct {
+	RequestServeAuthUsernamePassword
+	RequestServeAuthLongitudeLatitude
+}
+
 type RequestServeAuthRefresh struct {
-	Longitude float64 `form:",omitempty"` //经度
-	Latitude  float64 `form:",omitempty"` //维度
+	RequestServeAuthLongitudeLatitude
 }
 
 type RequestServeAuthCheck struct {
@@ -17,10 +24,8 @@ type RequestServeAuthCheck struct {
 }
 
 type RequestServeAuthCreate struct {
-	Username  string  `validate:"required"`
-	Password  string  `validate:"required"`
-	Longitude float64 `form:",omitempty"` //经度
-	Latitude  float64 `form:",omitempty"` //维度
+	RequestServeAuthUsernamePassword
+	RequestServeAuthLongitudeLatitude
 }
 
 type RequestServeAuthChangePassword struct {
@@ -28,11 +33,18 @@ type RequestServeAuthChangePassword struct {
 }
 
 type RequestServeAuthGuest struct {
-	Longitude float64 `form:",omitempty"` //经度
-	Latitude  float64 `form:",omitempty"` //维度
+	RequestServeAuthLongitudeLatitude
 }
 
 type RequestServeAuthGuestToUser struct {
-	Username string `validate:"required"`
-	Password string `validate:"required"`
+	RequestServeAuthUsernamePassword
+}
+
+type RequestServeAuthTokenID struct {
+	TokenID string `validate:"required,bson_object_id"`
+}
+
+type RequestServeAuthTokenByUsernameAndPassword struct {
+	RequestServeAuthTokenID
+	RequestServeAuthUsernamePassword
 }

@@ -17,24 +17,14 @@ import (
 	"github.com/haiyiyun/utils/help"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (self *Service) Login(username, password, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
-	passwordMd5 := help.Strings(password).Md5()
-
 	userModel := user.NewModel(self.M)
-	filter := bson.D{
-		{"name", username},
-		{"password", passwordMd5},
-		{"enable", true},
-		{"delete", false},
-	}
 
-	u := model.User{}
-	ctx := context.TODO()
-	sr := userModel.FindOne(ctx, filter)
-	if err = sr.Decode(&u); err == nil {
-		m, err = self.CreateToken(ctx, u, ip, userAgent, coordinates)
+	if u, err := userModel.CheckNameAndPassword(username, password); err == nil {
+		m, err = self.CreateToken(context.TODO(), u, ip, userAgent, coordinates)
 	}
 
 	return
@@ -191,4 +181,74 @@ func (self *Service) BearerAuth(r *http.Request) (string, bool) {
 	}
 
 	return token, token != ""
+}
+
+func (self *Service) GetTokensByUsernameAndPassword(username, password string) (ts []help.M, err error) {
+	userModel := user.NewModel(self.M)
+
+	var u model.User
+	if u, err = userModel.CheckNameAndPassword(username, password); err == nil {
+		tokenModel := token.NewModel(self.M)
+		var cur *mongo.Cursor
+		if cur, err = tokenModel.Find(context.TODO(), tokenModel.FilterByUserID(u.ID)); err == nil {
+			err = cur.All(context.TODO(), &ts)
+		}
+	}
+
+	return
+}
+
+func (self *Service) DeleteTokenByUsernameAndPassword(tokenID primitive.ObjectID, username, password string) error {
+	userModel := user.NewModel(self.M)
+
+	u, err := userModel.CheckNameAndPassword(username, password)
+	if err == nil {
+		tokenModel := token.NewModel(self.M)
+
+		filter := tokenModel.FilterByUserID(u.ID)
+		filter = append(filter, tokenModel.FilterByID(tokenID)...)
+
+		_, err = tokenModel.DeleteOne(context.TODO(), filter)
+	}
+
+	return err
+}
+
+func (self *Service) GetTokensByToken(r *http.Request) (ts []help.M, err error) {
+	if claims, u := self.GetValidClaims(r); claims != nil {
+		tokenID, _ := primitive.ObjectIDFromHex(claims.Id)
+		tokenModel := token.NewModel(self.M)
+
+		filter := tokenModel.FilterByUserID(u.ID)
+		filter = append(filter, bson.D{
+			{"$neq", bson.D{
+				{"_id", tokenID},
+			}},
+		}...)
+
+		var cur *mongo.Cursor
+		if cur, err = tokenModel.Find(context.TODO(), filter); err == nil {
+			err = cur.All(context.TODO(), &ts)
+		}
+	} else {
+		err = errors.New("Invalid Claims")
+	}
+
+	return
+}
+
+func (self *Service) DeleteTokenByToken(tokenID primitive.ObjectID, r *http.Request) (err error) {
+	if claims, u := self.GetValidClaims(r); claims != nil {
+		tokenID, _ := primitive.ObjectIDFromHex(claims.Id)
+		tokenModel := token.NewModel(self.M)
+
+		filter := tokenModel.FilterByUserID(u.ID)
+		filter = append(filter, tokenModel.FilterByID(tokenID)...)
+
+		_, err = tokenModel.DeleteOne(context.TODO(), filter)
+	} else {
+		err = errors.New("Invalid Claims")
+	}
+
+	return
 }

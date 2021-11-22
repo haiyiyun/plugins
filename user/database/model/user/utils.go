@@ -21,6 +21,22 @@ func (self *Model) FilterByName(name string) bson.D {
 	}
 }
 
+func (self *Model) CheckNameAndPassword(name, password string) (u model.User, err error) {
+	passwordMd5 := help.Strings(password).Md5()
+
+	filter := bson.D{
+		{"name", name},
+		{"password", passwordMd5},
+		{"enable", true},
+		{"delete", false},
+	}
+
+	sr := self.FindOne(context.TODO(), filter)
+	err = sr.Decode(&u)
+
+	return
+}
+
 func (self *Model) GetUserByID(userID primitive.ObjectID) (u model.User, err error) {
 	filter := self.FilterByID(userID)
 	filter = append(filter, bson.D{

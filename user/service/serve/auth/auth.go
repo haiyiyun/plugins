@@ -54,6 +54,96 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (self *Service) Route_POST_TokensByUsernameAndPassword(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	var requestUP predefined.RequestServeAuthUsernamePassword
+
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestUP, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestUP)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	if ts, err := self.GetTokensByUsernameAndPassword(requestUP.Username, requestUP.Password); err == nil {
+		response.JSON(rw, 0, ts, "")
+	} else {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_TokenByUsernameAndPassword(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	var requestTUP predefined.RequestServeAuthTokenByUsernameAndPassword
+
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestTUP, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestTUP)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	tokenID, _ := primitive.ObjectIDFromHex(requestTUP.TokenID)
+
+	if err := self.DeleteTokenByUsernameAndPassword(tokenID, requestTUP.Username, requestTUP.Password); err == nil {
+		response.JSON(rw, 0, nil, "")
+	} else {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+	}
+}
+
+func (self *Service) Route_GET_Tokens(rw http.ResponseWriter, r *http.Request) {
+	if ts, err := self.GetTokensByToken(r); err == nil {
+		response.JSON(rw, 0, ts, "")
+	} else {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_Token(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	var requestT predefined.RequestServeAuthTokenID
+
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestT, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestT)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	tokenID, _ := primitive.ObjectIDFromHex(requestT.TokenID)
+
+	if err := self.DeleteTokenByToken(tokenID, r); err == nil {
+		response.JSON(rw, 0, nil, "")
+	} else {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+	}
+}
+
 func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request) {
 	u, found := self.GetUserInfo(r)
 	if !found {
