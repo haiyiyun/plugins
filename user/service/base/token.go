@@ -23,7 +23,8 @@ import (
 func (self *Service) Login(username, password, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
 	userModel := user.NewModel(self.M)
 
-	if u, err := userModel.CheckNameAndPassword(username, password); err == nil {
+	var u model.User
+	if u, err = userModel.CheckNameAndPassword(username, password); err == nil {
 		m, err = self.CreateToken(context.TODO(), u, ip, userAgent, coordinates)
 	}
 
