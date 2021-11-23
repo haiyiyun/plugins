@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (self *Service) Login(username, password, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
@@ -191,7 +192,9 @@ func (self *Service) GetTokensByUsernameAndPassword(username, password string) (
 	if u, err = userModel.CheckNameAndPassword(username, password); err == nil {
 		tokenModel := token.NewModel(self.M)
 		var cur *mongo.Cursor
-		if cur, err = tokenModel.Find(context.TODO(), tokenModel.FilterByUserID(u.ID)); err == nil {
+		if cur, err = tokenModel.Find(context.TODO(), tokenModel.FilterByUserID(u.ID), options.Find().SetProjection(bson.D{
+			{"token", 0},
+		})); err == nil {
 			err = cur.All(context.TODO(), &ts)
 		}
 	}
@@ -228,7 +231,9 @@ func (self *Service) GetTokensByToken(r *http.Request) (ts []help.M, err error) 
 		}...)
 
 		var cur *mongo.Cursor
-		if cur, err = tokenModel.Find(context.TODO(), filter); err == nil {
+		if cur, err = tokenModel.Find(context.TODO(), filter, options.Find().SetProjection(bson.D{
+			{"token", 0},
+		})); err == nil {
 			err = cur.All(context.TODO(), &ts)
 		}
 	} else {
