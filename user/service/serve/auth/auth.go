@@ -218,7 +218,7 @@ func (self *Service) Route_GET_Check(rw http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
-	var requestCheck predefined.RequestServeAuthCheck
+	var requestCheck predefined.RequestServeAuthUsername
 
 	decoder := form.NewDecoder()
 	err := decoder.Decode(&requestCheck, r.Form)
@@ -295,7 +295,7 @@ func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.R
 
 	r.ParseForm()
 
-	var requestChangePassword predefined.RequestServeAuthChangePassword
+	var requestChangePassword predefined.RequestServeAuthPassword
 
 	decoder := form.NewDecoder()
 	err := decoder.Decode(&requestChangePassword, r.Form)

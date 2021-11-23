@@ -1,7 +1,7 @@
 package predefined
 
 type RequestServeUploadID struct {
-	ID string `validate:"required,bson_object_id"`
+	ID string `form:"id" validate:"required,bson_object_id"`
 }
 
 type RequestServeFileType struct {
@@ -10,5 +10,5 @@ type RequestServeFileType struct {
 
 type RequestServeFile struct {
 	RequestServeFileType
-	Remark string
+	Remark string `form:"remark"`
 }
