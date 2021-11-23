@@ -212,7 +212,12 @@ func (self *Service) DeleteTokenByUsernameAndPassword(tokenID primitive.ObjectID
 		filter := tokenModel.FilterByUserID(u.ID)
 		filter = append(filter, tokenModel.FilterByID(tokenID)...)
 
-		_, err = tokenModel.DeleteOne(context.TODO(), filter)
+		var dr *mongo.DeleteResult
+		if dr, err = tokenModel.DeleteOne(context.TODO(), filter); err == nil {
+			if dr.DeletedCount == 0 {
+				err = mongo.ErrNoDocuments
+			}
+		}
 	}
 
 	return err
@@ -251,7 +256,12 @@ func (self *Service) DeleteTokenByToken(tokenID primitive.ObjectID, r *http.Requ
 		filter := tokenModel.FilterByUserID(u.ID)
 		filter = append(filter, tokenModel.FilterByID(tokenID)...)
 
-		_, err = tokenModel.DeleteOne(context.TODO(), filter)
+		var dr *mongo.DeleteResult
+		if dr, err = tokenModel.DeleteOne(context.TODO(), filter); err == nil {
+			if dr.DeletedCount == 0 {
+				err = mongo.ErrNoDocuments
+			}
+		}
 	} else {
 		err = errors.New("Invalid Claims")
 	}
