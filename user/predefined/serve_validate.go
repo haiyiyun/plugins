@@ -41,7 +41,7 @@ type RequestServeAuthGuestToUser struct {
 }
 
 type RequestServeAuthTokenID struct {
-	TokenID string `from:"token_id" validate:"required,bson_object_id"`
+	TokenID string `form:"token_id" validate:"required,bson_object_id"`
 }
 
 type RequestServeAuthTokenByUsernameAndPassword struct {
