@@ -13,25 +13,30 @@ import (
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/validator/form"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
-	fileIDStr := r.URL.Query().Get("id")
+	r.ParseForm()
 
-	valid := &validator.Validation{}
-	valid.Required(fileIDStr).Key("id").Message("id字段为空")
+	var requestUID predefined.RequestServeUploadID
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestUID, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	fileID, fileIDErr := primitive.ObjectIDFromHex(fileIDStr)
-	if fileIDErr != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	validate := validator.New()
+	err = validate.Struct(requestUID)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
+
+	fileID, _ := primitive.ObjectIDFromHex(requestUID.ID)
 
 	uploadModel := upload.NewModel(self.M)
 	sr := uploadModel.FindOne(r.Context(), uploadModel.FilterByID(fileID))
@@ -53,20 +58,28 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
-	fileType := r.FormValue("file_type")
-	fileBase64Data := r.FormValue(predefined.FormNameFileBase64Data)
-	remark := r.FormValue("remark")
+	r.ParseForm()
 
-	valid := &validator.Validation{}
-	valid.Required(fileType).Key("file_type").Message("file_type字段为空")
+	var requestF predefined.RequestServeFile
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestF, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
+	validate := validator.New()
+	err = validate.Struct(requestF)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	fileBase64Data := r.FormValue(predefined.FormNameFileBase64Data)
+
 	if fileBase64Data != "" {
-		if fileType == predefined.UploadTypeImage {
+		if requestF.FileType == predefined.UploadTypeImage {
 			uploadLocal := local.NewService(self.Service.Service)
 			setUIDErr := uploadLocal.SetUserIDFromRequestClaims(r)
 			if self.Config.CheckUser {
@@ -76,7 +89,7 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if fm, err := uploadLocal.SaveEncodeFile(r, predefined.FormNameFileBase64Data, remark); err != nil {
+			if fm, err := uploadLocal.SaveEncodeFile(r, predefined.FormNameFileBase64Data, requestF.Remark); err != nil {
 				log.Error(err)
 
 				response.JSON(rw, http.StatusServiceUnavailable, nil, "")
@@ -96,7 +109,7 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
-		switch fileType {
+		switch requestF.FileType {
 		case predefined.UploadTypeImage,
 			predefined.UploadTypeMedia,
 			predefined.UploadTypeDocument,
@@ -111,7 +124,7 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if fm, err := uploadLocal.SaveFormFile(r, predefined.FormNameFile, remark); err != nil {
+			if fm, err := uploadLocal.SaveFormFile(r, predefined.FormNameFile, requestF.Remark); err != nil {
 				log.Error(err)
 
 				response.JSON(rw, http.StatusServiceUnavailable, nil, "")
@@ -152,21 +165,25 @@ func (self *Service) Route_DELETE_File(rw http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	fileIDStr := r.URL.Query().Get("id")
+	r.ParseForm()
 
-	valid := &validator.Validation{}
-	valid.Required(fileIDStr).Key("id").Message("id字段为空")
+	var requestUID predefined.RequestServeUploadID
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	decoder := form.NewDecoder()
+	err := decoder.Decode(&requestUID, r.Form)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	fileID, fileIDErr := primitive.ObjectIDFromHex(fileIDStr)
-	if fileIDErr != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	validate := validator.New()
+	err = validate.Struct(requestUID)
+	if err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
+
+	fileID, _ := primitive.ObjectIDFromHex(requestUID.ID)
 
 	uploadModel := upload.NewModel(self.M)
 	filter := uploadModel.FilterByID(fileID)
