@@ -12,8 +12,7 @@ import (
 	"github.com/haiyiyun/utils/help"
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
-	"github.com/haiyiyun/validator"
-	"github.com/haiyiyun/validator/form"
+	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,16 +21,7 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 
 	var requestUID predefined.RequestServeUploadID
 
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestUID, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestUID)
-	if err != nil {
+	if err := validator.FormStruct(&requestUID, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -62,16 +52,7 @@ func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
 
 	var requestF predefined.RequestServeFile
 
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestF, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestF)
-	if err != nil {
+	if err := validator.FormStruct(&requestF, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -169,16 +150,7 @@ func (self *Service) Route_DELETE_File(rw http.ResponseWriter, r *http.Request) 
 
 	var requestUID predefined.RequestServeUploadID
 
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestUID, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestUID)
-	if err != nil {
+	if err := validator.FormStruct(&requestUID, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
