@@ -17,11 +17,8 @@ import (
 )
 
 func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-
 	var requestUID predefined.RequestServeUploadID
-
-	if err := validator.FormStruct(&requestUID, r.Form); err != nil {
+	if err := validator.FormStruct(&requestUID, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -48,10 +45,9 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Service) Route_POST_File(rw http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	r.ParseMultipartForm(self.Config.MaxUploadFileSize)
 
 	var requestF predefined.RequestServeFile
-
 	if err := validator.FormStruct(&requestF, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
@@ -146,11 +142,8 @@ func (self *Service) Route_DELETE_File(rw http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	r.ParseForm()
-
 	var requestUID predefined.RequestServeUploadID
-
-	if err := validator.FormStruct(&requestUID, r.Form); err != nil {
+	if err := validator.FormStruct(&requestUID, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}

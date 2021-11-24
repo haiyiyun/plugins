@@ -44,6 +44,12 @@ func init() {
 
 	if serveConf.WebRouter {
 		serveConf.Config = baseConf
+
+		if serveConf.MaxUploadFileSize == 0 {
+			//如果没设置则使用默认32M
+			serveConf.MaxUploadFileSize = 32 << 20
+		}
+
 		if serveConf.BuildInFileServer && serveConf.AllowDownloadLocal {
 			webrouter.Handle(serveConf.DownloadLocalUrlDirectory, http.StripPrefix(serveConf.DownloadLocalUrlDirectory, http.FileServer(http.Dir(baseConf.UploadDirectory))))
 		}
