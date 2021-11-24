@@ -8,16 +8,16 @@ require (
 	github.com/haiyiyun/config v0.0.0-20211115100328-3a3b03ce7d35
 	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c
 	github.com/haiyiyun/mongodb v0.0.0-20211115100838-8a708fd25a5e
-	github.com/haiyiyun/utils v0.0.0-20211115101322-f2720732372c
-	github.com/haiyiyun/validator v1.0.3
+	github.com/haiyiyun/utils v0.0.0-20211124021712-ce8114b6903b
 	github.com/haiyiyun/webrouter v0.0.0-20211115101555-6e0ff8ed84e5
-	go.mongodb.org/mongo-driver v1.7.4
+	go.mongodb.org/mongo-driver v1.8.0
 )
 
 require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/haiyiyun/uuid v0.0.0-20210818125821-3143cf8e1058 // indirect
+	github.com/haiyiyun/uuid v0.0.0-20211115101403-e9c2d7112f99 // indirect
+	github.com/haiyiyun/validator v1.0.3 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

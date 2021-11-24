@@ -13,8 +13,7 @@ import (
 	"github.com/haiyiyun/utils/help"
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/realip"
-	"github.com/haiyiyun/validator"
-	"github.com/haiyiyun/validator/form"
+	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -24,17 +23,7 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 	self.Logout(r)
 
 	var requestLogin predefined.RequestServeAuthLogin
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestLogin, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestLogin)
-	if err != nil {
+	if err := validator.FormStruct(&requestLogin, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -63,17 +52,7 @@ func (self *Service) Route_POST_GetTokens(rw http.ResponseWriter, r *http.Reques
 	r.ParseForm()
 
 	var requestUP predefined.RequestServeAuthUsernamePassword
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestUP, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestUP)
-	if err != nil {
+	if err := validator.FormStruct(&requestUP, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -94,17 +73,7 @@ func (self *Service) Route_POST_DeleteToken(rw http.ResponseWriter, r *http.Requ
 	r.ParseForm()
 
 	var requestTUP predefined.RequestServeAuthTokenByUsernameAndPassword
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestTUP, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestTUP)
-	if err != nil {
+	if err := validator.FormStruct(&requestTUP, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -127,20 +96,8 @@ func (self *Service) Route_GET_Tokens(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Service) Route_DELETE_Token(rw http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-
 	var requestT predefined.RequestServeAuthTokenID
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestT, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestT)
-	if err != nil {
+	if err := validator.FormStruct(&requestT, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -162,13 +119,11 @@ func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request)
 	}
 
 	r.ParseForm()
+
 	self.Logout(r)
 
 	var requestRefresh predefined.RequestServeAuthRefresh
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestRefresh, r.Form)
-	if err != nil {
+	if err := validator.FormStruct(&requestRefresh, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -219,17 +174,7 @@ func (self *Service) Route_GET_Check(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	var requestCheck predefined.RequestServeAuthUsername
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestCheck, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestCheck)
-	if err != nil {
+	if err := validator.FormStruct(&requestCheck, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -259,23 +204,13 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	r.ParseForm()
 
 	var requestCreate predefined.RequestServeAuthCreate
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestCreate, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestCreate)
-	if err != nil {
+	if err := validator.FormStruct(&requestCreate, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	var userID primitive.ObjectID
-	userID, err = self.CreateUser(r.Context(), requestCreate.Username, requestCreate.Password, requestCreate.Longitude, requestCreate.Latitude, self.Config.EnableProfile, 0)
+	userID, err := self.CreateUser(r.Context(), requestCreate.Username, requestCreate.Password, requestCreate.Longitude, requestCreate.Latitude, self.Config.EnableProfile, 0)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
@@ -296,17 +231,7 @@ func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.R
 	r.ParseForm()
 
 	var requestChangePassword predefined.RequestServeAuthPassword
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestChangePassword, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestChangePassword)
-	if err != nil {
+	if err := validator.FormStruct(&requestChangePassword, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -330,10 +255,7 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	var requestGuest predefined.RequestServeAuthGuest
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestGuest, r.Form)
-	if err != nil {
+	if err := validator.FormStruct(&requestGuest, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -349,7 +271,7 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 
 	userModel := user.NewModel(self.M)
 	ctx := r.Context()
-	err = userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
+	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
 		if err := sctx.StartTransaction(); err != nil {
 			return err
 		}
@@ -410,17 +332,7 @@ func (self *Service) Route_POST_GuestToUser(rw http.ResponseWriter, r *http.Requ
 	r.ParseForm()
 
 	var requestGuestToUser predefined.RequestServeAuthGuestToUser
-
-	decoder := form.NewDecoder()
-	err := decoder.Decode(&requestGuestToUser, r.Form)
-	if err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	validate := validator.New()
-	err = validate.Struct(requestGuestToUser)
-	if err != nil {
+	if err := validator.FormStruct(&requestGuestToUser, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
