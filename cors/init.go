@@ -3,6 +3,7 @@ package cors
 import (
 	"flag"
 	"net/http"
+	"os"
 
 	"github.com/haiyiyun/config"
 	"github.com/haiyiyun/webrouter"
@@ -10,8 +11,11 @@ import (
 
 func init() {
 	confFile := flag.String("config.plugins.cors", "../config/plugins/cors/cors.conf", "cors config file")
+
 	var conf Config
-	config.Files(*confFile).Load(&conf)
+	if _, err := os.Stat(*confFile); err == nil {
+		config.Files(*confFile).Load(&conf)
+	}
 
 	webrouter.Injector("cors", "", 99999, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 		origin := conf.AccessControlAllowOrigin
