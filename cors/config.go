@@ -1,6 +1,7 @@
 package cors
 
 type CorsConfig struct {
+	DeleteOrigin                  bool   `json:"delete_origin"`
 	AccessControlAllowOrigin      string `json:"access_control_allow_origin"`
 	AccessControlAllowHeaders     string `json:"access_control_allow_headers"`
 	AccessControlAllowMethods     string `json:"access_control_allow_methods"`

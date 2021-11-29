@@ -24,6 +24,10 @@ func init() {
 		}
 		rw.Header().Set("Access-Control-Allow-Origin", origin)
 
+		if conf.DeleteOrigin {
+			r.Header.Del("Origin")
+		}
+
 		accessControlAllowHeaders := conf.AccessControlAllowHeaders
 		if accessControlAllowHeaders == "" {
 			accessControlAllowHeaders = "Content-Type, AccessToken, X-CSRF-Token, Authorization, Token, X-Token, X-User-Id"
