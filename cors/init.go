@@ -24,7 +24,7 @@ func init() {
 		}
 		rw.Header().Set("Access-Control-Allow-Origin", origin)
 
-		if r.Header.Get("Upgrade") == "websocket" || conf.DeleteOrigin {
+		if (!conf.NotAutoDeleteWebsocketOrigin && r.Header.Get("Upgrade") == "websocket") || conf.DeleteOrigin {
 			r.Header.Del("Origin")
 		}
 
