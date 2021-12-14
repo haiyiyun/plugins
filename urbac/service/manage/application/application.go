@@ -14,7 +14,7 @@ import (
 	"github.com/haiyiyun/utils/http/pagination"
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
-	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/utils/validator"
 	"github.com/haiyiyun/webrouter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -247,53 +247,33 @@ func (self *Service) Route_GET_Index(rw http.ResponseWriter, r *http.Request) {
 
 func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	parentPath := r.FormValue("parent_path")
-	typ := r.FormValue("type")
-	name := r.FormValue("name")
-	pathTmp := r.FormValue("path")
-	level := r.FormValue("level")
-	orderStr := r.FormValue("order")
-	enableStr := r.FormValue("enable")
-	metaHideMenuStr := r.FormValue("meta_hide_menu")
-	metaTitle := r.FormValue("meta_title")
-	metaIcon := r.FormValue("meta_icon")
-	metaFrameSrc := r.FormValue("meta_frame_src")
 
-	valid := &validator.Validation{}
-	valid.Required(typ).Key("type").Message("type字段为空")
-	valid.Required(name).Key("name").Message("name字段为空")
-	valid.Required(pathTmp).Key("path").Message("path字段为空")
-	valid.Required(level).Key("level").Message("level字段为空")
-	valid.Required(enableStr).Key("enable").Message("enable字段为空")
-	valid.Required(metaTitle).Key("meta_title").Message("meta_title字段为空")
-	valid.Required(orderStr).Key("order").Message("order字段为空")
-	valid.Required(metaHideMenuStr).Key("meta_hide_menu").Message("meta_hide_menu字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMU predefined.RequestManageApplicationUpdate
+	if err := validator.FormStruct(&requestMU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	aPath := []string{}
 	isURL := false
 
-	if pos := strings.Index(pathTmp, "http"); pos != -1 {
+	if pos := strings.Index(requestMU.Path, "http"); pos != -1 {
 		isURL = true
-		aPath = strings.Split(parentPath, "/")
-		aPath = append(aPath, pathTmp)
+		aPath = strings.Split(requestMU.ParentPath, "/")
+		aPath = append(aPath, requestMU.Path)
 	} else {
-		aPath = strings.Split(parentPath+pathTmp, "/")
+		aPath = strings.Split(requestMU.ParentPath+requestMU.Path, "/")
 	}
 
 	if len(aPath) < 4 {
-		if level != predefined.ApplicationLevelApp {
+		if requestMU.Level != predefined.ApplicationLevelApp {
 			response.JSON(rw, http.StatusBadRequest, nil, "")
 			return
 		}
 	}
 
 	appPath := "/" + aPath[1] + "/"
-	if isURL && level == predefined.ApplicationLevelApp {
+	if isURL && requestMU.Level == predefined.ApplicationLevelApp {
 		appPath = aPath[1]
 	}
 
@@ -302,23 +282,20 @@ func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) 
 		{"path", appPath},
 	}
 
-	enable, _ := strconv.ParseBool(enableStr)
-	order, _ := strconv.Atoi(orderStr)
-	metaHideMenu, _ := strconv.ParseBool(metaHideMenuStr)
-	if typ == predefined.ApplicationTypeCode {
-		metaFrameSrc = ""
+	if requestMU.Type == predefined.ApplicationTypeCode {
+		requestMU.MetaFrameSrc = ""
 	}
 
-	switch level {
+	switch requestMU.Level {
 	case predefined.ApplicationLevelApp:
 		change := bson.D{
-			{"name", name},
-			{"enable", enable},
-			{"order", order},
-			{"meta.hide_menu", metaHideMenu},
-			{"meta.title", metaTitle},
-			{"meta.icon", metaIcon},
-			{"meta.frame_src", metaFrameSrc},
+			{"name", requestMU.Name},
+			{"enable", requestMU.Enable},
+			{"order", requestMU.Order},
+			{"meta.hide_menu", requestMU.MetaHideMenu},
+			{"meta.title", requestMU.MetaTitle},
+			{"meta.icon", requestMU.MetaIcon},
+			{"meta.frame_src", requestMU.MetaFrameSrc},
 		}
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
 			response.JSON(rw, 0, nil, "")
@@ -334,13 +311,13 @@ func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) 
 
 		moduleField := "modules." + modulePath
 		change := bson.D{
-			{moduleField + ".name", name},
-			{moduleField + ".enable", enable},
-			{moduleField + ".order", order},
-			{moduleField + ".meta.hide_menu", metaHideMenu},
-			{moduleField + ".meta.title", metaTitle},
-			{moduleField + ".meta.icon", metaIcon},
-			{moduleField + ".meta.frame_src", metaFrameSrc},
+			{moduleField + ".name", requestMU.Name},
+			{moduleField + ".enable", requestMU.Enable},
+			{moduleField + ".order", requestMU.Order},
+			{moduleField + ".meta.hide_menu", requestMU.MetaHideMenu},
+			{moduleField + ".meta.title", requestMU.MetaTitle},
+			{moduleField + ".meta.icon", requestMU.MetaIcon},
+			{moduleField + ".meta.frame_src", requestMU.MetaFrameSrc},
 		}
 
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
@@ -358,13 +335,13 @@ func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) 
 
 		actionField := "modules." + modulePath + ".actions." + actionPath
 		change := bson.D{
-			{actionField + ".name", name},
-			{actionField + ".enable", enable},
-			{actionField + ".order", order},
-			{actionField + ".meta.hide_menu", metaHideMenu},
-			{actionField + ".meta.title", metaTitle},
-			{actionField + ".meta.icon", metaIcon},
-			{actionField + ".meta.frame_src", metaFrameSrc},
+			{actionField + ".name", requestMU.Name},
+			{actionField + ".enable", requestMU.Enable},
+			{actionField + ".order", requestMU.Order},
+			{actionField + ".meta.hide_menu", requestMU.MetaHideMenu},
+			{actionField + ".meta.title", requestMU.MetaTitle},
+			{actionField + ".meta.icon", requestMU.MetaIcon},
+			{actionField + ".meta.frame_src", requestMU.MetaFrameSrc},
 		}
 
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
@@ -384,34 +361,14 @@ func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) 
 
 func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	parentPath := r.FormValue("parent_path")
-	typ := r.FormValue("type")
-	name := r.FormValue("name")
-	pathTmp := r.FormValue("path")
-	level := r.FormValue("level")
-	orderStr := r.FormValue("order")
-	enableStr := r.FormValue("enable")
-	metaHideMenuStr := r.FormValue("meta_hide_menu")
-	metaTitle := r.FormValue("meta_title")
-	metaIcon := r.FormValue("meta_icon")
-	metaFrameSrc := r.FormValue("meta_frame_src")
 
-	valid := &validator.Validation{}
-	valid.Required(typ).Key("type").Message("type字段为空")
-	valid.Required(name).Key("name").Message("name字段为空")
-	valid.Required(pathTmp).Key("path").Message("path字段为空")
-	valid.Required(level).Key("level").Message("level字段为空")
-	valid.Required(enableStr).Key("enable").Message("enable字段为空")
-	valid.Required(metaTitle).Key("meta_title").Message("meta_title字段为空")
-	valid.Required(orderStr).Key("order").Message("order字段为空")
-	valid.Required(metaHideMenuStr).Key("meta_hide_menu").Message("meta_hide_menu字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMU predefined.RequestManageApplicationUpdate
+	if err := validator.FormStruct(&requestMU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if pos := strings.Index(parentPath, "http"); pos != -1 {
+	if pos := strings.Index(requestMU.ParentPath, "http"); pos != -1 {
 		response.JSON(rw, http.StatusBadRequest, nil, "不能在外链下建立虚拟应用")
 		return
 	}
@@ -419,23 +376,23 @@ func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter,
 	aPath := []string{}
 	isURL := false
 
-	if pos := strings.Index(pathTmp, "http"); pos == 0 {
+	if pos := strings.Index(requestMU.Path, "http"); pos == 0 {
 		isURL = true
-		aPath = strings.Split(parentPath, "/")
-		aPath = append(aPath, pathTmp)
+		aPath = strings.Split(requestMU.ParentPath, "/")
+		aPath = append(aPath, requestMU.Path)
 	} else {
-		aPath = strings.Split(parentPath+pathTmp, "/")
+		aPath = strings.Split(requestMU.ParentPath+requestMU.Path, "/")
 	}
 
 	if len(aPath) < 4 {
-		if level != predefined.ApplicationLevelApp {
+		if requestMU.Level != predefined.ApplicationLevelApp {
 			response.JSON(rw, http.StatusBadRequest, nil, "")
 			return
 		}
 	}
 
 	appPath := "/" + aPath[1] + "/"
-	if isURL && level == predefined.ApplicationLevelApp {
+	if isURL && requestMU.Level == predefined.ApplicationLevelApp {
 		appPath = aPath[1]
 	}
 
@@ -444,25 +401,22 @@ func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter,
 		{"path", appPath},
 	}
 
-	enable, _ := strconv.ParseBool(enableStr)
-	order, _ := strconv.Atoi(orderStr)
-	metaHideMenu, _ := strconv.ParseBool(metaHideMenuStr)
-	if typ == predefined.ApplicationTypeCode {
-		metaFrameSrc = ""
+	if requestMU.Type == predefined.ApplicationTypeCode {
+		requestMU.MetaFrameSrc = ""
 	}
 
-	switch level {
+	switch requestMU.Level {
 	case predefined.ApplicationLevelApp:
 		change := bson.D{
 			{"type", predefined.ApplicationTypeVirtual},
-			{"name", name},
+			{"name", requestMU.Name},
 			{"path", appPath},
-			{"enable", enable},
-			{"order", order},
-			{"meta.hide_menu", metaHideMenu},
-			{"meta.title", metaTitle},
-			{"meta.icon", metaIcon},
-			{"meta.frame_src", metaFrameSrc},
+			{"enable", requestMU.Enable},
+			{"order", requestMU.Order},
+			{"meta.hide_menu", requestMU.MetaHideMenu},
+			{"meta.title", requestMU.MetaTitle},
+			{"meta.icon", requestMU.MetaIcon},
+			{"meta.frame_src", requestMU.MetaFrameSrc},
 		}
 		if _, err := appModel.SetAndSetOnInsert(r.Context(), filter, change); err == nil {
 			response.JSON(rw, 0, nil, "")
@@ -479,14 +433,14 @@ func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter,
 		moduleField := "modules." + modulePath
 		change := bson.D{
 			{moduleField + ".type", predefined.ApplicationTypeVirtual},
-			{moduleField + ".name", name},
+			{moduleField + ".name", requestMU.Name},
 			{moduleField + ".path", modulePath},
-			{moduleField + ".enable", enable},
-			{moduleField + ".order", order},
-			{moduleField + ".meta.hide_menu", metaHideMenu},
-			{moduleField + ".meta.title", metaTitle},
-			{moduleField + ".meta.icon", metaIcon},
-			{moduleField + ".meta.frame_src", metaFrameSrc},
+			{moduleField + ".enable", requestMU.Enable},
+			{moduleField + ".order", requestMU.Order},
+			{moduleField + ".meta.hide_menu", requestMU.MetaHideMenu},
+			{moduleField + ".meta.title", requestMU.MetaTitle},
+			{moduleField + ".meta.icon", requestMU.MetaIcon},
+			{moduleField + ".meta.frame_src", requestMU.MetaFrameSrc},
 		}
 
 		if _, err := appModel.SetAndSetOnInsert(r.Context(), filter, change); err == nil {
@@ -505,14 +459,14 @@ func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter,
 		actionField := "modules." + modulePath + ".actions." + actionPath
 		change := bson.D{
 			{actionField + ".type", predefined.ApplicationTypeVirtual},
-			{actionField + ".name", name},
+			{actionField + ".name", requestMU.Name},
 			{actionField + ".path", actionPath},
-			{actionField + ".enable", enable},
-			{actionField + ".order", order},
-			{actionField + ".meta.hide_menu", metaHideMenu},
-			{actionField + ".meta.title", metaTitle},
-			{actionField + ".meta.icon", metaIcon},
-			{actionField + ".meta.frame_src", metaFrameSrc},
+			{actionField + ".enable", requestMU.Enable},
+			{actionField + ".order", requestMU.Order},
+			{actionField + ".meta.hide_menu", requestMU.MetaHideMenu},
+			{actionField + ".meta.title", requestMU.MetaTitle},
+			{actionField + ".meta.icon", requestMU.MetaIcon},
+			{actionField + ".meta.frame_src", requestMU.MetaFrameSrc},
 		}
 
 		if _, err := appModel.SetAndSetOnInsert(r.Context(), filter, change); err == nil {
@@ -533,25 +487,19 @@ func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter,
 func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r *http.Request) {
 	responseMsg := "创建应用失败"
 
-	applicationName := r.FormValue("name")
-	applicationPath := r.FormValue("path")
-
-	valid := &validator.Validation{}
-	valid.Required(applicationName).Key("name").Message("name字段为空")
-	valid.Required(applicationPath).Key("path").Message("path字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMCA predefined.RequestManageNamePath
+	if err := validator.FormStruct(&requestMCA, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if applicationPath[0] == '/' && applicationPath[len(applicationPath)-1] == '/' {
+	if requestMCA.Path[0] == '/' && requestMCA.Path[len(requestMCA.Path)-1] == '/' {
 		appModel := application.NewModel(self.M)
 
 		filter := bson.D{
 			{"$or", []bson.D{
-				{{"path", applicationPath}},
-				{{"name", applicationName}},
+				{{"path", requestMCA.Path}},
+				{{"name", requestMCA.Name}},
 			}},
 		}
 
@@ -565,10 +513,10 @@ func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r 
 			var foundApp bool
 			app := model.Application{
 				Type: predefined.ApplicationTypeCode,
-				Name: applicationName,
-				Path: applicationPath,
+				Name: requestMCA.Name,
+				Path: requestMCA.Path,
 				Meta: model.ApplicationMeta{
-					Title: applicationName,
+					Title: requestMCA.Name,
 				},
 				Enable:  self.Config.DefaultEnableApp,
 				Modules: map[string]model.ApplicationModule{},
@@ -576,11 +524,11 @@ func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r 
 
 			for rPath, rI := range regroutes {
 				if !help.NewSlice(self.Config.IgnoreAppModuleInfo).CheckItem(rPath) {
-					if strings.HasPrefix(rPath, applicationPath) {
+					if strings.HasPrefix(rPath, requestMCA.Path) {
 						if !foundApp {
 							foundApp = true
 						}
-						modPath := rPath[len(applicationPath):]
+						modPath := rPath[len(requestMCA.Path):]
 
 						app.Modules[modPath] = model.ApplicationModule{
 							Type:   predefined.ApplicationTypeCode,
@@ -642,22 +590,16 @@ func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r 
 func (self *Service) Route_POST_ReadCodeApplication(rw http.ResponseWriter, r *http.Request) {
 	responseMsg := "获取应用信息失败"
 
-	applicationName := r.FormValue("name")
-	applicationPath := r.FormValue("path")
-
-	valid := &validator.Validation{}
-	valid.Required(applicationName).Key("name").Message("name字段为空")
-	valid.Required(applicationPath).Key("path").Message("path字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMCA predefined.RequestManageNamePath
+	if err := validator.FormStruct(&requestMCA, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	appModel := application.NewModel(self.M)
 	filter := bson.D{
-		{"path", applicationPath},
-		{"name", applicationName},
+		{"path", requestMCA.Path},
+		{"name", requestMCA.Name},
 	}
 
 	sr := appModel.FindOne(context.Background(), filter)
@@ -681,12 +623,12 @@ func (self *Service) Route_POST_ReadCodeApplication(rw http.ResponseWriter, r *h
 				//过滤
 				if !help.NewSlice(self.Config.IgnoreAppModuleInfo).CheckItem(rPath) {
 					//判断是否含有当前应用
-					if strings.HasPrefix(rPath, applicationPath) {
+					if strings.HasPrefix(rPath, requestMCA.Path) {
 						if foundApp == false {
 							foundApp = true
 						}
 
-						mPath := rPath[len(applicationPath):]
+						mPath := rPath[len(requestMCA.Path):]
 						//判断反射出的应用模块是否包含当前应用已经存在的模块
 						if mod, found := aModules[mPath]; found {
 							modules[mPath] = model.ApplicationModule{
@@ -823,39 +765,33 @@ func (self *Service) Route_POST_ReadCodeApplication(rw http.ResponseWriter, r *h
 func (self *Service) Route_DELETE_Delete(rw http.ResponseWriter, r *http.Request) {
 	values, _ := request.ParseDeleteForm(r)
 
-	pathTmp := values.Get("path")
-	level := values.Get("level")
-
-	valid := &validator.Validation{}
-	valid.Required(pathTmp).Key("path").Message("path字段为空")
-	valid.Required(level).Key("level").Message("level字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMD predefined.RequestManageLevelPath
+	if err := validator.FormStruct(&requestMD, values); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	aPath := []string{}
 	isURL := false
 
-	if pos := strings.Index(pathTmp, "http"); pos != -1 {
+	if pos := strings.Index(requestMD.Path, "http"); pos != -1 {
 		isURL = true
-		link := pathTmp[pos:]
-		aPath = strings.Split(pathTmp[0:pos], "/")
+		link := requestMD.Path[pos:]
+		aPath = strings.Split(requestMD.Path[0:pos], "/")
 		aPath = append(aPath, link)
 	} else {
-		aPath = strings.Split(pathTmp, "/")
+		aPath = strings.Split(requestMD.Path, "/")
 	}
 
 	if len(aPath) < 4 {
-		if level != predefined.ApplicationLevelApp {
+		if requestMD.Level != predefined.ApplicationLevelApp {
 			response.JSON(rw, http.StatusBadRequest, nil, "")
 			return
 		}
 	}
 
 	appPath := "/" + aPath[1] + "/"
-	if isURL && level == predefined.ApplicationLevelApp {
+	if isURL && requestMD.Level == predefined.ApplicationLevelApp {
 		appPath = aPath[1]
 	}
 
@@ -864,7 +800,7 @@ func (self *Service) Route_DELETE_Delete(rw http.ResponseWriter, r *http.Request
 		{"path", appPath},
 	}
 
-	switch level {
+	switch requestMD.Level {
 	case predefined.ApplicationLevelApp:
 		if dr, err := appModel.DeleteOne(context.Background(), filter); dr.DeletedCount > 0 && err == nil {
 			response.JSON(rw, 0, nil, "")
@@ -930,41 +866,33 @@ func (self *Service) Route_DELETE_Delete(rw http.ResponseWriter, r *http.Request
 func (self *Service) Route_POST_Enable(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	pathTmp := r.FormValue("path")
-	level := r.FormValue("level")
-	enableStr := r.FormValue("enable")
-
-	valid := &validator.Validation{}
-	valid.Required(pathTmp).Key("path").Message("path字段为空")
-	valid.Required(level).Key("level").Message("level字段为空")
-	valid.Required(enableStr).Key("enable").Message("enable字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMAE predefined.RequestManageApplicationEnable
+	if err := validator.FormStruct(&requestMAE, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	aPath := []string{}
 	isURL := false
 
-	if pos := strings.Index(pathTmp, "http"); pos != -1 {
+	if pos := strings.Index(requestMAE.Path, "http"); pos != -1 {
 		isURL = true
-		link := pathTmp[pos:]
-		aPath = strings.Split(pathTmp[0:pos], "/")
+		link := requestMAE.Path[pos:]
+		aPath = strings.Split(requestMAE.Path[0:pos], "/")
 		aPath = append(aPath, link)
 	} else {
-		aPath = strings.Split(pathTmp, "/")
+		aPath = strings.Split(requestMAE.Path, "/")
 	}
 
 	if len(aPath) < 4 {
-		if level != predefined.ApplicationLevelApp {
+		if requestMAE.Level != predefined.ApplicationLevelApp {
 			response.JSON(rw, http.StatusBadRequest, nil, "")
 			return
 		}
 	}
 
 	appPath := "/" + aPath[1] + "/"
-	if isURL && level == predefined.ApplicationLevelApp {
+	if isURL && requestMAE.Level == predefined.ApplicationLevelApp {
 		appPath = aPath[1]
 	}
 
@@ -973,12 +901,10 @@ func (self *Service) Route_POST_Enable(rw http.ResponseWriter, r *http.Request) 
 		{"path", appPath},
 	}
 
-	enable, _ := strconv.ParseBool(enableStr)
-
-	switch level {
+	switch requestMAE.Level {
 	case predefined.ApplicationLevelApp:
 		change := bson.D{
-			{"enable", enable},
+			{"enable", requestMAE.Enable},
 		}
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
 			response.JSON(rw, 0, nil, "")
@@ -993,7 +919,7 @@ func (self *Service) Route_POST_Enable(rw http.ResponseWriter, r *http.Request) 
 		moduleField := "modules." + modulePath
 
 		change := bson.D{
-			{moduleField + ".enable", enable},
+			{moduleField + ".enable", requestMAE.Enable},
 		}
 
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
@@ -1010,7 +936,7 @@ func (self *Service) Route_POST_Enable(rw http.ResponseWriter, r *http.Request) 
 		actionField := "modules." + modulePath + ".actions." + actionPath
 
 		change := bson.D{
-			{actionField + ".enable", enable},
+			{actionField + ".enable", requestMAE.Enable},
 		}
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
 			response.JSON(rw, 0, nil, "")
@@ -1028,41 +954,33 @@ func (self *Service) Route_POST_Enable(rw http.ResponseWriter, r *http.Request) 
 func (self *Service) Route_POST_Hide(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	pathTmp := r.FormValue("path")
-	level := r.FormValue("level")
-	hideStr := r.FormValue("hide")
-
-	valid := &validator.Validation{}
-	valid.Required(pathTmp).Key("path").Message("path字段为空")
-	valid.Required(level).Key("level").Message("level字段为空")
-	valid.Required(hideStr).Key("hide").Message("hide字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMAH predefined.RequestManageApplicationHide
+	if err := validator.FormStruct(&requestMAH, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	aPath := []string{}
 	isURL := false
 
-	if pos := strings.Index(pathTmp, "http"); pos != -1 {
+	if pos := strings.Index(requestMAH.Path, "http"); pos != -1 {
 		isURL = true
-		link := pathTmp[pos:]
-		aPath = strings.Split(pathTmp[0:pos], "/")
+		link := requestMAH.Path[pos:]
+		aPath = strings.Split(requestMAH.Path[0:pos], "/")
 		aPath = append(aPath, link)
 	} else {
-		aPath = strings.Split(pathTmp, "/")
+		aPath = strings.Split(requestMAH.Path, "/")
 	}
 
 	if len(aPath) < 4 {
-		if level != predefined.ApplicationLevelApp {
+		if requestMAH.Level != predefined.ApplicationLevelApp {
 			response.JSON(rw, http.StatusBadRequest, nil, "")
 			return
 		}
 	}
 
 	appPath := "/" + aPath[1] + "/"
-	if isURL && level == predefined.ApplicationLevelApp {
+	if isURL && requestMAH.Level == predefined.ApplicationLevelApp {
 		appPath = aPath[1]
 	}
 
@@ -1071,12 +989,10 @@ func (self *Service) Route_POST_Hide(rw http.ResponseWriter, r *http.Request) {
 		{"path", appPath},
 	}
 
-	hide, _ := strconv.ParseBool(hideStr)
-
-	switch level {
+	switch requestMAH.Level {
 	case predefined.ApplicationLevelApp:
 		change := bson.D{
-			{"meta.hide_menu", hide},
+			{"meta.hide_menu", requestMAH.Hide},
 		}
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
 			response.JSON(rw, 0, nil, "")
@@ -1091,7 +1007,7 @@ func (self *Service) Route_POST_Hide(rw http.ResponseWriter, r *http.Request) {
 		moduleField := "modules." + modulePath
 
 		change := bson.D{
-			{moduleField + ".meta.hide_menu", hide},
+			{moduleField + ".meta.hide_menu", requestMAH.Hide},
 		}
 
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
@@ -1108,7 +1024,7 @@ func (self *Service) Route_POST_Hide(rw http.ResponseWriter, r *http.Request) {
 		actionField := "modules." + modulePath + ".actions." + actionPath
 
 		change := bson.D{
-			{actionField + ".meta.hide_menu", hide},
+			{actionField + ".meta.hide_menu", requestMAH.Hide},
 		}
 		if _, err := appModel.Set(r.Context(), filter, change); err == nil {
 			response.JSON(rw, 0, nil, "")

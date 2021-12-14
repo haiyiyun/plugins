@@ -1,4 +1,4 @@
 github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c h1:u0InrUVRbnyOBVxMJslJpxAitP6eiMY4kSwF390oEQo=
 github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c/go.mod h1:D4zcedtLbRvCdKIUQycFXSvPEECNWw4oX8GRDkJ4o7s=
-github.com/haiyiyun/webrouter v0.0.0-20211107031526-f4f3bb9116f2 h1:Z6LsIQM74S8E2y1seRDOwwhAOCeYOpVZNsn6rY8Gdc4=
-github.com/haiyiyun/webrouter v0.0.0-20211107031526-f4f3bb9116f2/go.mod h1:iZQPn5E/KvnR/719BOgmTRixfvP11qKfJ1Ix+kBIceo=
+github.com/haiyiyun/webrouter v0.0.0-20211125101311-e49551c30619 h1:KMsPvvxpMcfWT/GXzCSTzVXQjCrDyXXz9CtdvanmwOI=
+github.com/haiyiyun/webrouter v0.0.0-20211125101311-e49551c30619/go.mod h1:XcDxZX/KH0I32lQJRS0F3oQJGM9KmN9J6u8rxFTS3KE=

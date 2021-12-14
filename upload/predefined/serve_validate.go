@@ -1,7 +1,9 @@
 package predefined
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type RequestServeUploadID struct {
-	ID string `form:"id" validate:"required,bson_object_id"`
+	ID primitive.ObjectID `form:"id" validate:"required"`
 }
 
 type RequestServeFileType struct {

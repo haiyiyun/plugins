@@ -78,9 +78,7 @@ func (self *Service) Route_POST_DeleteToken(rw http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	tokenID, _ := primitive.ObjectIDFromHex(requestTUP.TokenID)
-
-	if err := self.DeleteTokenByUsernameAndPassword(tokenID, requestTUP.Username, requestTUP.Password); err == nil {
+	if err := self.DeleteTokenByUsernameAndPassword(requestTUP.TokenID, requestTUP.Username, requestTUP.Password); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
@@ -102,9 +100,7 @@ func (self *Service) Route_DELETE_Token(rw http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	tokenID, _ := primitive.ObjectIDFromHex(requestT.TokenID)
-
-	if err := self.DeleteTokenByToken(tokenID, r); err == nil {
+	if err := self.DeleteTokenByToken(requestT.TokenID, r); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")

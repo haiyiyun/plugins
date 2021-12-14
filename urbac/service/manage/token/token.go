@@ -6,10 +6,11 @@ import (
 
 	"github.com/haiyiyun/plugins/urbac/database/model"
 	"github.com/haiyiyun/plugins/urbac/database/model/token"
+	"github.com/haiyiyun/plugins/urbac/predefined"
 	"github.com/haiyiyun/utils/http/pagination"
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
-	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -53,7 +54,7 @@ func (self *Service) Route_GET_Index(rw http.ResponseWriter, r *http.Request) {
 
 	items := []model.Token{}
 	if cur, err := tokenModel.Find(context.Background(), filter, opt); err == nil {
-		cur.All(context.TODO(), &items)
+		cur.All(r.Context(), &items)
 	}
 
 	rpr := response.ResponsePaginationResult{
@@ -66,27 +67,19 @@ func (self *Service) Route_GET_Index(rw http.ResponseWriter, r *http.Request) {
 
 func (self *Service) Route_DELETE_Delete(rw http.ResponseWriter, r *http.Request) {
 	vs, _ := request.ParseDeleteForm(r)
-	tokenIDHex := vs.Get("_id")
-	tokenString := vs.Get("token")
 
-	valid := &validator.Validation{}
-	valid.Required(tokenIDHex).Key("_id").Message("_id字段为空")
-	valid.Required(tokenString).Key("token").Message("token字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMTD predefined.RequestManageTokenDelete
+	if err := validator.FormStruct(&requestMTD, vs); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if tokenID, err := primitive.ObjectIDFromHex(tokenIDHex); err == nil {
-		tokenModel := token.NewModel(self.M)
-		tokenModel.DeleteOne(context.TODO(), tokenModel.FilterByID(tokenID))
-		cacheKey := "claims.valid." + tokenString
+	tokenModel := token.NewModel(self.M)
+	if dr, err := tokenModel.DeleteOne(r.Context(), tokenModel.FilterByID(requestMTD.ObjectID)); err == nil && dr.DeletedCount > 0 {
+		cacheKey := "claims.valid." + requestMTD.ObjectID.Hex()
 		self.Cache.Delete(cacheKey)
 		response.JSON(rw, 0, nil, "")
-
-		return
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
-
-	response.JSON(rw, http.StatusBadRequest, nil, "")
 }

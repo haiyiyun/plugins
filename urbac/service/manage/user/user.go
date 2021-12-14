@@ -3,17 +3,17 @@ package user
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/plugins/urbac/database/model"
 	"github.com/haiyiyun/plugins/urbac/database/model/user"
-	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/plugins/urbac/predefined"
 
 	"github.com/haiyiyun/utils/help"
 	"github.com/haiyiyun/utils/http/pagination"
 	"github.com/haiyiyun/utils/http/request"
 	"github.com/haiyiyun/utils/http/response"
+	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -86,36 +86,20 @@ func (self *Service) Route_GET_Index(rw http.ResponseWriter, r *http.Request) {
 func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	username := r.FormValue("username")
-	realName := r.FormValue("real_name")
-	email := r.FormValue("email")
-	enableStr := r.FormValue("enable")
-	password := r.FormValue("password")
-	description := r.FormValue("description")
-
-	valid := &validator.Validation{}
-	valid.Required(username).Key("username").Message("username字段为空")
-	valid.Required(realName).Key("real_name").Message("real_name字段为空")
-	valid.Required(email).Key("email").Message("email字段为空")
-	valid.Required(enableStr).Key("enable").Message("enable字段为空")
-	valid.Required(password).Key("password").Message("password字段为空")
-	valid.Required(description).Key("description").Message("description字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMUC predefined.RequestManageUserCreate
+	if err := validator.FormStruct(&requestMUC, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	enable, _ := strconv.ParseBool(enableStr)
-
 	userModel := user.NewModel(self.M)
 	if _, err := userModel.Create(context.Background(), &model.User{
-		Name:        username,
-		RealName:    realName,
-		Email:       email,
-		Password:    string(help.NewString(password).Md5()),
-		Description: description,
-		Enable:      enable,
+		Name:        requestMUC.UserName,
+		RealName:    requestMUC.RealName,
+		Email:       requestMUC.Email,
+		Password:    string(help.NewString(requestMUC.Password).Md5()),
+		Description: requestMUC.Description,
+		Enable:      requestMUC.Enable,
 	}); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
 	} else {
@@ -126,44 +110,22 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	userIDHex := r.FormValue("user_id")
-	username := r.FormValue("username")
-	realName := r.FormValue("real_name")
-	email := r.FormValue("email")
-	enableStr := r.FormValue("enable")
-	description := r.FormValue("description")
-
-	valid := &validator.Validation{}
-	valid.Required(userIDHex).Key("user_id").Message("user_id字段为空")
-	valid.Required(username).Key("username").Message("username字段为空")
-	valid.Required(realName).Key("real_name").Message("real_name字段为空")
-	valid.Required(email).Key("email").Message("email字段为空")
-	valid.Required(enableStr).Key("enable").Message("enable字段为空")
-	valid.Required(description).Key("description").Message("description字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMUU predefined.RequestManageUserUpdate
+	if err := validator.FormStruct(&requestMUU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
-
-	userID, userIDErr := primitive.ObjectIDFromHex(userIDHex)
-	if userIDErr != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
-		return
-	}
-
-	enable, _ := strconv.ParseBool(enableStr)
 
 	change := bson.D{
-		{"name", username},
-		{"real_name", realName},
-		{"email", email},
-		{"description", description},
-		{"enable", enable},
+		{"name", requestMUU.UserName},
+		{"real_name", requestMUU.RealName},
+		{"email", requestMUU.Email},
+		{"description", requestMUU.Description},
+		{"enable", requestMUU.Enable},
 	}
 
 	userModel := user.NewModel(self.M)
-	if ur, err := userModel.Set(r.Context(), userModel.FilterByID(userID), change); err == nil && ur.ModifiedCount > 0 {
+	if ur, err := userModel.Set(r.Context(), userModel.FilterByID(requestMUU.UserID), change); err == nil && ur.ModifiedCount > 0 {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		log.Debug("error:", err)
@@ -174,18 +136,9 @@ func (self *Service) Route_POST_Update(rw http.ResponseWriter, r *http.Request) 
 func (self *Service) Route_POST_ResetPassword(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	userIDHex := r.FormValue("user_id")
-
-	valid := &validator.Validation{}
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
-		return
-	}
-
-	userID, userIDErr := primitive.ObjectIDFromHex(userIDHex)
-	if userIDErr != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	var requestMUID predefined.RequestManageUserID
+	if err := validator.FormStruct(&requestMUID, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
@@ -196,7 +149,7 @@ func (self *Service) Route_POST_ResetPassword(rw http.ResponseWriter, r *http.Re
 	}
 
 	userModel := user.NewModel(self.M)
-	if ur, err := userModel.Set(r.Context(), userModel.FilterByID(userID), change); err == nil && ur.ModifiedCount > 0 {
+	if ur, err := userModel.Set(r.Context(), userModel.FilterByID(requestMUID.UserID), change); err == nil && ur.ModifiedCount > 0 {
 		response.JSON(rw, 0, password, "")
 	} else {
 		log.Debug("error:", err)
@@ -206,90 +159,64 @@ func (self *Service) Route_POST_ResetPassword(rw http.ResponseWriter, r *http.Re
 
 func (self *Service) Route_POST_Enable(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	userIDHex := r.FormValue("user_id")
-	enableStr := r.FormValue("enable")
-	valid := &validator.Validation{}
-	valid.Required(userIDHex).Key("user_id").Message("user_id字段为空")
-	valid.Required(enableStr).Key("enable").Message("enable字段为空")
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMUE predefined.RequestManageUserEnable
+	if err := validator.FormStruct(&requestMUE, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if userID, err := primitive.ObjectIDFromHex(userIDHex); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	userModel := user.NewModel(self.M)
+	filter := userModel.FilterByID(requestMUE.UserID)
+
+	change := bson.D{
+		{"enable", requestMUE.Enable},
+	}
+
+	if _, err := userModel.Set(r.Context(), filter, change); err == nil {
+		response.JSON(rw, 0, nil, "")
 	} else {
-		userModel := user.NewModel(self.M)
-		filter := userModel.FilterByID(userID)
-		enable, _ := strconv.ParseBool(enableStr)
-
-		change := bson.D{
-			{"enable", enable},
-		}
-
-		if _, err = userModel.Set(r.Context(), filter, change); err == nil {
-			response.JSON(rw, 0, nil, "")
-		} else {
-			response.JSON(rw, http.StatusBadRequest, nil, "")
-		}
+		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
 }
 
 func (self *Service) Route_POST_Delete(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	userIDHex := r.FormValue("user_id")
-	deleteStr := r.FormValue("delete")
-	valid := &validator.Validation{}
-	valid.Required(userIDHex).Key("user_id").Message("user_id字段为空")
-	valid.Required(deleteStr).Key("delete").Message("delete字段为空")
 
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMUD predefined.RequestManageUserDelete
+	if err := validator.FormStruct(&requestMUD, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if userID, err := primitive.ObjectIDFromHex(userIDHex); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	userModel := user.NewModel(self.M)
+	filter := userModel.FilterByID(requestMUD.UserID)
+
+	change := bson.D{
+		{"delete", requestMUD.Delete},
+	}
+
+	if _, err := userModel.Set(r.Context(), filter, change); err == nil {
+		response.JSON(rw, 0, nil, "")
 	} else {
-		userModel := user.NewModel(self.M)
-		filter := userModel.FilterByID(userID)
-		del, _ := strconv.ParseBool(deleteStr)
-
-		change := bson.D{
-			{"delete", del},
-		}
-
-		if _, err = userModel.Set(r.Context(), filter, change); err == nil {
-			response.JSON(rw, 0, nil, "")
-		} else {
-			response.JSON(rw, http.StatusBadRequest, nil, "")
-		}
+		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
 }
 
 func (self *Service) Route_DELETE_Delete(rw http.ResponseWriter, r *http.Request) {
 	vs, _ := request.ParseDeleteForm(r)
 
-	userIDHex := vs.Get("user_id")
-
-	valid := &validator.Validation{}
-	valid.Required(userIDHex).Key("user_id").Message("user_id字段为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestMUID predefined.RequestManageUserID
+	if err := validator.FormStruct(&requestMUID, vs); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	if userID, err := primitive.ObjectIDFromHex(userIDHex); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	userModel := user.NewModel(self.M)
+	filter := userModel.FilterByID(requestMUID.UserID)
+	if _, err := userModel.DeleteOne(r.Context(), filter); err == nil {
+		response.JSON(rw, 0, nil, "")
 	} else {
-		userModel := user.NewModel(self.M)
-		filter := userModel.FilterByID(userID)
-		if _, err = userModel.DeleteOne(r.Context(), filter); err == nil {
-			response.JSON(rw, 0, nil, "")
-		} else {
-			response.JSON(rw, http.StatusBadRequest, nil, "")
-		}
+		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
 }

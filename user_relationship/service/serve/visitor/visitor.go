@@ -5,9 +5,10 @@ import (
 
 	"github.com/haiyiyun/plugins/user_relationship/database/model"
 	"github.com/haiyiyun/plugins/user_relationship/database/model/visitor"
+	"github.com/haiyiyun/plugins/user_relationship/predefined"
 
 	"github.com/haiyiyun/utils/http/response"
-	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -20,18 +21,14 @@ func (self *Service) Route_POST_Visitor(rw http.ResponseWriter, r *http.Request)
 
 	r.ParseForm()
 
-	ownerUserIDStr := r.FormValue("owner_user_id")
-	ownerUserID, _ := primitive.ObjectIDFromHex(ownerUserIDStr)
-
-	valid := validator.Validation{}
-	valid.BsonObjectID(ownerUserIDStr).Key("owner_user_id").Message("owner_user_id必须支持的格式")
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
+	var requestV predefined.RequestServeVisitor
+	if err := validator.FormStruct(&requestV, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	v := model.Visitor{
-		OwnerUserID:   ownerUserID,
+		OwnerUserID:   requestV.OwnerUserID,
 		VisitorUserID: userID,
 	}
 

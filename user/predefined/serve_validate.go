@@ -1,5 +1,7 @@
 package predefined
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type RequestServeAuthUsername struct {
 	Username string `form:"username" validate:"required"`
 }
@@ -41,7 +43,7 @@ type RequestServeAuthGuestToUser struct {
 }
 
 type RequestServeAuthTokenID struct {
-	TokenID string `form:"token_id" validate:"required,bson_object_id"`
+	TokenID primitive.ObjectID `form:"token_id" validate:"required"`
 }
 
 type RequestServeAuthTokenByUsernameAndPassword struct {

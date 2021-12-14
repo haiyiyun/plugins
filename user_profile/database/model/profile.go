@@ -27,84 +27,84 @@ type ProfileInfo struct {
 }
 
 type ProfileInfoAddress struct {
-	Type     int    `json:"type" bson:"type" map:"type"`
-	Nation   string `json:"nation" bson:"nation" map:"nation"`
-	Province string `json:"province" bson:"province" map:"province"`
-	City     string `json:"city" bson:"city" map:"city"`
-	District string `json:"district" bson:"district" map:"district"`
-	Address  string `json:"address" bson:"address" map:"address"`
+	Type     int    `json:"type" bson:"type" map:"type" form:"type" validate:"oneof=0 1"`
+	Nation   string `json:"nation" bson:"nation" map:"nation" form:"nation" validate:"required"`
+	Province string `json:"province" bson:"province" map:"province" form:"province" validate:"required"`
+	City     string `json:"city" bson:"city" map:"city" form:"city" validate:"required"`
+	District string `json:"district" bson:"district" map:"district" form:"district" validate:"required"`
+	Address  string `json:"address" bson:"address" map:"address" form:"address" validate:"required"`
 }
 
 type ProfileInfoEducation struct {
-	HighestDegree    string `json:"highest_degree" bson:"highest_degree" map:"highest_degree"`
-	GraduatedCollege string `json:"graduated_college" bson:"graduated_college" map:"graduated_college"`
+	HighestDegree    string `json:"highest_degree" bson:"highest_degree" map:"highest_degree" form:"highest_degree" validate:"required"`
+	GraduatedCollege string `json:"graduated_college" bson:"graduated_college" map:"graduated_college" form:"graduated_college" validate:"required"`
 }
 
 type ProfileInfoProfession struct {
-	Company      string `json:"company" bson:"company" map:"company"`
-	Position     string `json:"position" bson:"position" map:"position"`
-	AnnualIncome int    `json:"annual_income" bson:"annual_income" map:"annual_income"`
+	Company      string `json:"company" bson:"company" map:"company" form:"company" validate:"required"`
+	Position     string `json:"position" bson:"position" map:"position" form:"position" validate:"required"`
+	AnnualIncome int    `json:"annual_income" bson:"annual_income" map:"annual_income" form:"annual_income" validate:"oneof=0 1 2 3 4 5"`
 }
 
 type ProfileInfoContact struct {
-	PhoneNumber string `json:"phone_number" bson:"phone_number" map:"phone_number"`
-	Email       string `json:"email" bson:"email" map:"email"`
+	PhoneNumber string `json:"phone_number" bson:"phone_number" map:"phone_number" form:"position" validate:"required,chinamobile"`
+	Email       string `json:"email" bson:"email" map:"email" form:"position" validate:"required,email"`
 }
 
 type ProfileInfoBasic struct {
-	Sex           int              `json:"sex" bson:"sex" map:"sex"`
-	Birth         ProfileInfoBirth `json:"birth" bson:"birth" map:"birth"`
-	Height        int              `json:"height" bson:"height" map:"height"`
-	Weight        int              `json:"weight" bson:"weight" map:"weight"`
-	Marriage      int              `json:"marriage" bson:"marriage" map:"marriage"`
-	Constellation int              `json:"constellation" bson:"constellation" map:"constellation"`
+	Sex           int              `json:"sex" bson:"sex" map:"sex" form:"sex" validate:"oneof=0 1 2"`
+	Birth         ProfileInfoBirth `json:"birth" bson:"birth" map:"birth" form:"birth" validate:"required,dive"`
+	Height        int              `json:"height" bson:"height" map:"height" form:"height" validate:"required,gte=140,lte=250"`
+	Weight        int              `json:"weight" bson:"weight" map:"weight" form:"weight" validate:"required,gte=50,lte=250"`
+	Marriage      int              `json:"marriage" bson:"marriage" map:"marriage" form:"marriage" validate:"oneof=0 1 2"`
+	Constellation int              `json:"constellation" bson:"constellation" map:"constellation" form:"constellation" validate:"gte=0,lte=11"`
 }
 
 type ProfileInfoBirth struct {
-	Year  int `json:"year" bson:"year" map:"year"`
-	Month int `json:"month" bson:"month" map:"month"`
-	Day   int `json:"day" bson:"day" map:"day"`
+	Year  int `json:"year" bson:"year" map:"year" form:"year" validate:"numeric"`
+	Month int `json:"month" bson:"month" map:"month" form:"month" validate:"required,gte=1,lte=12"`
+	Day   int `json:"day" bson:"day" map:"day" form:"day" validate:"required,gte=1,lte=31"`
 }
 
 type ProfileInfoIntroduction struct {
-	Type         int      `json:"type" bson:"type" map:"type"`
-	Introduction string   `json:"introduction" bson:"introduction" map:"introduction"`
-	Photos       []string `json:"photos" bson:"photos,omitempty" map:"photos,omitempty"`
+	Type         int      `json:"type" bson:"type" map:"type" form:"type" validate:"oneof=0 1 2"`
+	Introduction string   `json:"introduction" bson:"introduction" map:"introduction" form:"introduction" validate:"required"`
+	Photos       []string `json:"photos" bson:"photos,omitempty" map:"photos,omitempty" form:"photos" validate:"gt=0,dive,required"`
 }
 type ProfileProofEducation struct {
-	Type        int      `json:"type" bson:"type" map:"type"`
-	ID          string   `json:"id" bson:"id" map:"id"`
-	CollegeName string   `json:"college_name" bson:"college_name" map:"college_name"`
-	Degree      string   `json:"degree" bson:"degree" map:"degree"`
-	Place       string   `json:"place" bson:"place" map:"place"`
-	Year        string   `json:"year" bson:"year" map:"year"`
-	Images      []string `json:"images" bson:"images,omitempty" map:"images,omitempty"`
+	Type        int      `json:"type" bson:"type" map:"type" form:"type" validate:"oneof=0 1 2 3 4"`
+	ID          string   `json:"id" bson:"id" map:"id" form:"id" validate:"required"`
+	CollegeName string   `json:"college_name" bson:"college_name" map:"college_name" form:"college_name" validate:"required"`
+	Degree      string   `json:"degree" bson:"degree" map:"degree" form:"degree" validate:"required"`
+	Place       string   `json:"place" bson:"place" map:"place" form:"place" validate:"required_if=type 4"`
+	Year        string   `json:"year" bson:"year" map:"year" form:"year" validate:"required_if=type 4"`
+	Images      []string `json:"images" bson:"images,omitempty" map:"images,omitempty" form:"images" validate:"required_if=type 1,gt=0,dive,required"`
 	Verified    bool     `json:"verified" bson:"verified" map:"verified"`
 }
 
 type ProfileProofStudent struct {
-	SchoolName string   `json:"school_name" bson:"school_name" map:"school_name"`
-	Degree     string   `json:"degree" bson:"degree" map:"degree"`
-	Images     []string `json:"images" bson:"images,omitempty" map:"images,omitempty"`
+	SchoolName string   `json:"school_name" bson:"school_name" map:"school_name" form:"school_name" validate:"required"`
+	Degree     string   `json:"degree" bson:"degree" map:"degree" form:"degree" validate:"required"`
+	Images     []string `json:"images" bson:"images,omitempty" map:"images,omitempty" form:"images" validate:"gt=0,dive,required"`
 }
 
 type ProfileProofCompany struct {
-	CompanyName string   `json:"company_name" bson:"company_name" map:"company_name"`
-	ShowName    string   `json:"show_name" bson:"show_name" map:"show_name"`
-	Images      []string `json:"images" bson:"images,omitempty" map:"images,omitempty"`
+	CompanyName string   `json:"company_name" bson:"company_name" map:"company_name" form:"company_name" validate:"required"`
+	ShowName    string   `json:"show_name" bson:"show_name" map:"show_name" form:"degree" show_name:"required"`
+	Images      []string `json:"images" bson:"images,omitempty" map:"images,omitempty" form:"images" validate:"gt=0,dive,required"`
 }
 
 type ProfileProofProfession struct {
-	Type     int                 `json:"type" bson:"type" map:"type"`
-	Company  ProfileProofCompany `json:"company" bson:"company" map:"company"`
-	Student  ProfileProofStudent `json:"student" bson:"student" map:"student"`
+	Type     int                 `json:"type" bson:"type" map:"type" form:"type" validate:"oneof=0 1 2 3 4 5 6"`
+	Company  ProfileProofCompany `json:"company" bson:"company" map:"company" form:"company" validate:"required_without=student,dive"`
+	Student  ProfileProofStudent `json:"student" bson:"student" map:"student" form:"student" validate:"required_if=type 6,required_without=company,dive"`
 	Verified bool                `json:"verified" bson:"verified" map:"verified"`
 }
 
 type ProfileProofIdentityCard struct {
-	ID       string   `json:"id" bson:"id" map:"id"`
-	RealName string   `json:"real_name" bson:"real_name" map:"real_name"`
-	Images   []string `json:"images" bson:"images,omitempty" map:"images,omitempty"`
+	ID       string   `json:"id" bson:"id" map:"id" form:"id" validate:"required"`
+	RealName string   `json:"real_name" bson:"real_name" map:"real_name" form:"real_name" validate:"required"`
+	Images   []string `json:"images" bson:"images,omitempty" map:"images,omitempty" form:"images" validate:"gt=0,dive,required"`
 	Verified bool     `json:"verified" bson:"verified" map:"verified"`
 }
 
@@ -115,8 +115,8 @@ type ProfileProof struct {
 }
 
 type ProfileQuestion struct {
-	Type     int    `json:"type" bson:"type" map:"type"`
-	Question string `json:"question" bson:"question" map:"question"`
+	Type     int    `json:"type" bson:"type" map:"type" form:"type" validate:"numeric,oneof=0"`
+	Question string `json:"question" bson:"question" map:"question" form:"question" validate:"required"`
 }
 
 type Profile struct {

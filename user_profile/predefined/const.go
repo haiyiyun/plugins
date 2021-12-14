@@ -7,8 +7,9 @@ const (
 )
 
 const (
-	ProfileInfoSexFemale = iota //女
-	ProfileInfoSexMale          //男
+	ProfileInfoSexUnknown = iota //未知
+	ProfileInfoSexFemale         //女
+	ProfileInfoSexMale           //男
 )
 
 const (

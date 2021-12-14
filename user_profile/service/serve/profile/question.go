@@ -2,35 +2,19 @@ package profile
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/haiyiyun/plugins/user_profile/database/model"
 	"github.com/haiyiyun/plugins/user_profile/database/model/profile"
-	"github.com/haiyiyun/plugins/user_profile/predefined"
 
 	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/utils/http/response"
-	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (self *Service) Route_POST_CreateQuestion(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	typStr := r.FormValue("type")
-	typ, _ := strconv.Atoi(typStr)
-	question := r.FormValue("question")
-
-	valid := validator.Validation{}
-	valid.Digital(typStr).Key("type").Message("type必须为数字")
-	valid.Have(typ, predefined.ProfileQuestionTypeValues).Key("type").Message("请提供支持的type")
-
-	valid.Required(question).Key("question").Message("question不能为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
-		return
-	}
 
 	userID := self.GetUserID(r)
 	if userID == primitive.NilObjectID {
@@ -38,12 +22,15 @@ func (self *Service) Route_POST_CreateQuestion(rw http.ResponseWriter, r *http.R
 		return
 	}
 
+	var pq model.ProfileQuestion
+	if err := validator.FormStruct(&pq, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
 	profileModel := profile.NewModel(self.M)
 	if ur, err := profileModel.AddToSet(r.Context(), profileModel.FilterByID(userID), bson.D{
-		{"questions", model.ProfileQuestion{
-			Type:     typ,
-			Question: question,
-		}},
+		{"questions", pq},
 	}); err != nil || ur.ModifiedCount == 0 {
 		log.Error(err)
 		response.JSON(rw, http.StatusBadRequest, nil, "")
@@ -55,20 +42,6 @@ func (self *Service) Route_POST_CreateQuestion(rw http.ResponseWriter, r *http.R
 
 func (self *Service) Route_POST_UpdateQuestion(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	typStr := r.FormValue("type")
-	typ, _ := strconv.Atoi(typStr)
-	question := r.FormValue("question")
-
-	valid := validator.Validation{}
-	valid.Digital(typStr).Key("type").Message("type必须为数字")
-	valid.Have(typ, predefined.ProfileQuestionTypeValues).Key("type").Message("请提供支持的type")
-
-	valid.Required(question).Key("question").Message("question不能为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
-		return
-	}
 
 	userID := self.GetUserID(r)
 	if userID == primitive.NilObjectID {
@@ -76,10 +49,16 @@ func (self *Service) Route_POST_UpdateQuestion(rw http.ResponseWriter, r *http.R
 		return
 	}
 
+	var pq model.ProfileQuestion
+	if err := validator.FormStruct(&pq, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
 	profileModel := profile.NewModel(self.M)
 	filter := profileModel.FilterByID(userID)
 	filter = append(filter, bson.D{
-		{"questions.type", typ},
+		{"questions.type", pq.Type},
 	}...)
 	// opt := options.Update().SetArrayFilters(options.ArrayFilters{
 	// 	Filters: []interface{}{
@@ -91,7 +70,7 @@ func (self *Service) Route_POST_UpdateQuestion(rw http.ResponseWriter, r *http.R
 
 	if ur, err := profileModel.Set(r.Context(), filter, bson.D{
 		// {"questions.$[elem].question", question},
-		{"questions.$.question", question},
+		{"questions.$.question", pq.Question},
 	}); err != nil || ur.ModifiedCount == 0 {
 		log.Error(err)
 		response.JSON(rw, http.StatusBadRequest, nil, "")
@@ -103,20 +82,6 @@ func (self *Service) Route_POST_UpdateQuestion(rw http.ResponseWriter, r *http.R
 
 func (self *Service) Route_POST_DeleteQuestion(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	typStr := r.FormValue("type")
-	typ, _ := strconv.Atoi(typStr)
-	question := r.FormValue("question")
-
-	valid := validator.Validation{}
-	valid.Digital(typStr).Key("type").Message("type必须为数字")
-	valid.Have(typ, predefined.ProfileQuestionTypeValues).Key("type").Message("请提供支持的type")
-
-	valid.Required(question).Key("question").Message("question不能为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
-		return
-	}
 
 	userID := self.GetUserID(r)
 	if userID == primitive.NilObjectID {
@@ -124,12 +89,15 @@ func (self *Service) Route_POST_DeleteQuestion(rw http.ResponseWriter, r *http.R
 		return
 	}
 
+	var pq model.ProfileQuestion
+	if err := validator.FormStruct(&pq, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
 	profileModel := profile.NewModel(self.M)
 	if ur, err := profileModel.Pull(r.Context(), profileModel.FilterByID(userID), bson.D{
-		{"questions", model.ProfileQuestion{
-			Type:     typ,
-			Question: question,
-		}},
+		{"questions", pq},
 	}); err != nil || ur.ModifiedCount == 0 {
 		log.Error(err)
 		response.JSON(rw, http.StatusBadRequest, nil, "")

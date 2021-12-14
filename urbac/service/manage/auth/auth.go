@@ -2,29 +2,30 @@ package auth
 
 import (
 	"net/http"
-	"strconv"
 
+	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/urbac/database/model/user"
 	"github.com/haiyiyun/plugins/urbac/predefined"
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/realip"
-	"github.com/haiyiyun/validator"
+	"github.com/haiyiyun/utils/validator"
 )
 
 func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	self.Logout(r)
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	geoLongitudeStr := r.FormValue("longitude") //经度
-	geoLatitudeStr := r.FormValue("latitude")   //维度
-	geoLongitude, _ := strconv.ParseFloat(geoLongitudeStr, 64)
-	geoLatitude, _ := strconv.ParseFloat(geoLatitudeStr, 64)
-	geo := [2]float64{
-		geoLongitude, geoLatitude,
+
+	var requestLogin predefined.RequestManageLogin
+	if err := validator.FormStruct(&requestLogin, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
 	}
 
-	if m, err := self.Login(username, password, realip.RealIP(r), r.Header.Get("User-Agent"), geo); err != nil {
+	coordinates := geometry.PointCoordinates{
+		requestLogin.Longitude, requestLogin.Latitude,
+	}
+
+	if m, err := self.Login(requestLogin.Username, requestLogin.Password, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
 		if err.Error() == predefined.StatusCodeLoginLimitText {
 			response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 		} else {
@@ -39,15 +40,18 @@ func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request)
 	if u, found := self.GetUserInfo(r); found {
 		r.ParseForm()
 		self.Logout(r)
-		geoLongitudeStr := r.FormValue("longitude") //经度
-		geoLatitudeStr := r.FormValue("latitude")   //维度
-		geoLongitude, _ := strconv.ParseFloat(geoLongitudeStr, 64)
-		geoLatitude, _ := strconv.ParseFloat(geoLatitudeStr, 64)
-		geo := [2]float64{
-			geoLongitude, geoLatitude,
+
+		var requestRefresh predefined.RequestManageRefresh
+		if err := validator.FormStruct(&requestRefresh, r.Form); err != nil {
+			response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+			return
 		}
 
-		if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), geo); err != nil {
+		coordinates := geometry.PointCoordinates{
+			requestRefresh.Longitude, requestRefresh.Latitude,
+		}
+
+		if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
 			if err.Error() == predefined.StatusCodeLoginLimitText {
 				response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 			} else {
@@ -76,18 +80,15 @@ func (self *Service) Route_POST_ChangePassword(rw http.ResponseWriter, r *http.R
 	}
 
 	r.ParseForm()
-	password := r.FormValue("password")
 
-	valid := validator.Validation{}
-	valid.Required(password).Key("password").Message("password不能为空")
-
-	if valid.HasErrors() {
-		response.JSON(rw, http.StatusBadRequest, nil, valid.RandomError().String())
+	var requestChangePassword predefined.RequestManagePassword
+	if err := validator.FormStruct(&requestChangePassword, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	userModel := user.NewModel(self.M)
-	if err := userModel.ChangePassword(u.ID, password); err == nil {
+	if err := userModel.ChangePassword(u.ID, requestChangePassword.Password); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusBadRequest, nil, "")

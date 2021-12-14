@@ -23,10 +23,8 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileID, _ := primitive.ObjectIDFromHex(requestUID.ID)
-
 	uploadModel := upload.NewModel(self.M)
-	sr := uploadModel.FindOne(r.Context(), uploadModel.FilterByID(fileID))
+	sr := uploadModel.FindOne(r.Context(), uploadModel.FilterByID(requestUID.ID))
 	var uploadFile model.Upload
 	if err := sr.Decode(&uploadFile); err != nil {
 		response.JSON(rw, http.StatusNotFound, nil, "")
@@ -148,13 +146,11 @@ func (self *Service) Route_DELETE_File(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	fileID, _ := primitive.ObjectIDFromHex(requestUID.ID)
-
 	uploadModel := upload.NewModel(self.M)
-	filter := uploadModel.FilterByID(fileID)
+	filter := uploadModel.FilterByID(requestUID.ID)
 	filter = append(filter, uploadModel.FilterByUserID(userID)...)
 
-	sr := uploadModel.FindOne(r.Context(), uploadModel.FilterByID(fileID))
+	sr := uploadModel.FindOne(r.Context(), uploadModel.FilterByID(requestUID.ID))
 	var uploadFile model.Upload
 	if err := sr.Decode(&uploadFile); err != nil {
 		response.JSON(rw, http.StatusNotFound, nil, "")
