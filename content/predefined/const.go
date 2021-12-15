@@ -75,13 +75,13 @@ const (
 )
 
 const (
-	ContentTypeSystemVideoShort = iota + 999 //系统类型：短视频
-	ContentTypeSystemVideoLong               //系统类型：长视频
-	ContentTypeSystemVoiceShort              //系统类型：短语音
-	ContentTypeSystemVoiceLong               //系统类型：长语音
-	ContentTypeSystemImageText               //系统类型：图文
-	ContentTypeSystemImage                   //系统类型：纯图片
-	ContentTypeSystemText                    //系统类型：纯文本
+	ContentTypeSystemVideoShort = iota + 1000 //系统类型：短视频
+	ContentTypeSystemVideoLong                //系统类型：长视频
+	ContentTypeSystemVoiceShort               //系统类型：短语音
+	ContentTypeSystemVoiceLong                //系统类型：长语音
+	ContentTypeSystemImageText                //系统类型：图文
+	ContentTypeSystemImage                    //系统类型：纯图片
+	ContentTypeSystemText                     //系统类型：纯文本
 )
 
 const (
@@ -102,10 +102,10 @@ const (
 )
 
 const (
-	SubjectTypeSystemDynamic  = iota + 999 //系统动态类型
-	SubjectTypeSystemArticle               //系统文章
-	SubjectTypeSystemQuestion              //系统问题
-	SubjectTypeSystemAnswer                //系统答案
+	SubjectTypeSystemDynamic  = iota + 1000 //系统动态类型
+	SubjectTypeSystemArticle                //系统文章
+	SubjectTypeSystemQuestion               //系统问题
+	SubjectTypeSystemAnswer                 //系统答案
 )
 
 const (

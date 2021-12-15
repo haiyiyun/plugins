@@ -10,8 +10,8 @@ github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c h1:u0InrUVRbnyOBVxMJs
 github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c/go.mod h1:D4zcedtLbRvCdKIUQycFXSvPEECNWw4oX8GRDkJ4o7s=
 github.com/haiyiyun/template v0.0.0-20211115101226-658156e90fbb h1:qiJ6lhUs36BK7M6sMGmlv5QpC8zYNoPE/XXOVg8+izQ=
 github.com/haiyiyun/template v0.0.0-20211115101226-658156e90fbb/go.mod h1:rP3ptbqCBsJrgLrvDCM+ajI4RfIK6bvPMlPumKkASzc=
-github.com/haiyiyun/utils v0.0.0-20211214151730-69ada8839fd8 h1:nz3C2n/SPOqu64YvUONGrbRfRhQgQ901zXUHoshunT8=
-github.com/haiyiyun/utils v0.0.0-20211214151730-69ada8839fd8/go.mod h1:ucCBfV9SglpsemTEfPZFR3QtlDD+0HOh/rfpvzVc/AA=
+github.com/haiyiyun/utils v0.0.0-20211215021822-dae449a5f7b5 h1:KgntWfkmHoMpf1Eu074Wnoyu9jpyzsNX8a0wRV5nuZg=
+github.com/haiyiyun/utils v0.0.0-20211215021822-dae449a5f7b5/go.mod h1:ucCBfV9SglpsemTEfPZFR3QtlDD+0HOh/rfpvzVc/AA=
 github.com/haiyiyun/uuid v0.0.0-20211115101403-e9c2d7112f99 h1:jDxzmDIkFtV81imkLj/PIYuRwNi0vk7hUxKmpVZSW5s=
 github.com/haiyiyun/uuid v0.0.0-20211115101403-e9c2d7112f99/go.mod h1:bAjSKCq9WJQ0y2X4vAsDk4EKpGCFYOgs/NF27oBYLKs=
 github.com/haiyiyun/validator v1.1.0/go.mod h1:NguHVxzo6/5THwMeEK2hq68eoD/RTDNtanWU17Q6mZQ=
