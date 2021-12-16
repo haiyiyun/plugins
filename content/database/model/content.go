@@ -46,8 +46,8 @@ type Content struct {
 	Copy                       bool                 `json:"copy" bson:"copy" map:"copy"`                                                                               //是否复制，搬运。用于申明此内容非本人原创
 	OnlyUserIDDiscuss          []primitive.ObjectID `json:"only_user_id_discuss" bson:"only_user_id_discuss" map:"only_user_id_discuss"`                               //只有指定的user_id可以discuss
 	LimitAllDiscussNum         int                  `json:"limit_all_discuss_num" bson:"limit_all_discuss_num" map:"limit_all_discuss_num"`                            //限制所有评论次数，0为不限制，不为0时，limit_all_discuss_num 加 limit_all_discuss_num 不能大于 limit_all_discuss_num
-	LimitPublishUserDiscussNum int                  `json:"limit_publish_user_discuss_num" bson:"limit_publish_user_discuss_num" map:"limit_publish_user_discuss_num"` //限制发布者评论次数，0为不限制，受limit_all_discuss_num影响
-	LimitUserDiscussNum        int                  `json:"limit_user_discuss_num" bson:"limit_user_discuss_num" map:"limit_user_discuss_num"`                         //限制用户评论次数，0为不限制，受limit_all_discuss_num影响
+	LimitPublishUserDiscussNum int                  `json:"limit_publish_user_discuss_num" bson:"limit_publish_user_discuss_num" map:"limit_publish_user_discuss_num"` //限制发布者评论次数，0为不限制，-1为不允许发布者评论，受limit_all_discuss_num影响
+	LimitUserDiscussNum        int                  `json:"limit_user_discuss_num" bson:"limit_user_discuss_num" map:"limit_user_discuss_num"`                         //限制用户评论次数，0为不限制，-1为不允许用户评论，受limit_all_discuss_num影响
 	ForbidForward              bool                 `json:"forbid_forward" bson:"forbid_forward" map:"forbid_forward"`                                                 //禁止转发
 	ForbidDownload             bool                 `json:"forbid_download" bson:"forbid_download" map:"forbid_download"`                                              //禁止下载
 	ForbidDiscuss              bool                 `json:"forbid_discuss" bson:"forbid_discuss" map:"forbid_discuss"`                                                 //禁止评论
