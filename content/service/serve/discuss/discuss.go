@@ -49,10 +49,20 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	//TODO 发布干预
 	status := predefined.PublishStatusNormal
 
+	discussModel := discuss.NewModel(self.M)
+
+	//判断被回复的评论是否存在
+	if requestDC.ReplyDiscussID != primitive.NilObjectID {
+		filter := discussModel.FilterNormalDiscuss()
+		if cnt, err := discussModel.CountDocuments(r.Context(), filter); cnt == 0 {
+			log.Error(err)
+			response.JSON(rw, http.StatusBadRequest, nil, "400404")
+			return
+		}
+	}
+
 	contentModel := content.NewModel(self.M)
 	filterContent := contentModel.FilterNormalContent()
-
-	discussModel := discuss.NewModel(self.M)
 
 	//判断对应type的object_id是否存在,并处理相关限制
 	switch requestDC.Type {
@@ -77,12 +87,15 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	if sr := contentModel.FindOne(r.Context(), filterContent, options.FindOne().SetProjection(bson.D{
 		{"publish_user_id", 1},
 		{"forbid_discuss", 1},
+		{"only_user_id_discuss", 1},
+		{"only_publish_user_id_can_reply_discuss", 1},
+		{"only_publish_user_id_can_not_reply_discuss", 1},
 		{"limit_all_discuss_num", 1},
 		{"limit_publish_user_discuss_num", 1},
 		{"limit_user_discuss_num", 1},
 	})); sr.Err() != nil {
 		log.Error(sr.Err())
-		response.JSON(rw, http.StatusBadRequest, nil, "400404")
+		response.JSON(rw, http.StatusBadRequest, nil, "400414")
 		return
 	} else {
 		var cont model.Content
@@ -97,6 +110,47 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 				return
 			}
 
+			//判断是否限制user_id可以评论
+			if cont.OnlyUserIDDiscuss != nil && len(cont.OnlyUserIDDiscuss) > 0 {
+				onlyUserIDDiscussHexs := []string{}
+				for _, uid := range cont.OnlyUserIDDiscuss {
+					onlyUserIDDiscussHexs = append(onlyUserIDDiscussHexs, uid.Hex())
+				}
+
+				if !help.NewSlice(onlyUserIDDiscussHexs).CheckItem(userID.Hex()) {
+					response.JSON(rw, http.StatusForbidden, nil, "403020")
+					return
+				}
+			}
+
+			if requestDC.ReplyDiscussID != primitive.NilObjectID {
+				//判断是否限制user_id可以回复评论
+				if cont.OnlyUserIDCanReplyDiscuss != nil && len(cont.OnlyUserIDCanReplyDiscuss) > 0 {
+					onlyUserIDCanReplyDiscuss := []string{}
+					for _, uid := range cont.OnlyUserIDCanReplyDiscuss {
+						onlyUserIDCanReplyDiscuss = append(onlyUserIDCanReplyDiscuss, uid.Hex())
+					}
+
+					if !help.NewSlice(onlyUserIDCanReplyDiscuss).CheckItem(userID.Hex()) {
+						response.JSON(rw, http.StatusForbidden, nil, "403030")
+						return
+					}
+				}
+
+				//判断是否限制user_id不可以回复评论
+				if cont.OnlyUserIDCanNotReplyDiscuss != nil && len(cont.OnlyUserIDCanNotReplyDiscuss) > 0 {
+					onlyUserIDCanNotReplyDiscuss := []string{}
+					for _, uid := range cont.OnlyUserIDCanNotReplyDiscuss {
+						onlyUserIDCanNotReplyDiscuss = append(onlyUserIDCanNotReplyDiscuss, uid.Hex())
+					}
+
+					if help.NewSlice(onlyUserIDCanNotReplyDiscuss).CheckItem(userID.Hex()) {
+						response.JSON(rw, http.StatusForbidden, nil, "403040")
+						return
+					}
+				}
+			}
+
 			//限制所有评论数处理
 			if cont.LimitAllDiscussNum > 0 {
 				filterLAD := discussModel.FilterNormalDiscuss()
@@ -107,7 +161,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					return
 				} else {
 					if cntLAD >= int64(cont.LimitAllDiscussNum) {
-						response.JSON(rw, http.StatusForbidden, nil, "403020")
+						response.JSON(rw, http.StatusForbidden, nil, "403050")
 						return
 					}
 				}
@@ -116,7 +170,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			//限制发布者评论数量处理
 			if cont.LimitPublishUserDiscussNum == -1 {
 				if cont.PublishUserID == userID {
-					response.JSON(rw, http.StatusForbidden, nil, "403030")
+					response.JSON(rw, http.StatusForbidden, nil, "403060")
 					return
 				}
 			} else if cont.LimitPublishUserDiscussNum > 0 {
@@ -127,7 +181,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					return
 				} else {
 					if cntLPUD >= int64(cont.LimitPublishUserDiscussNum) {
-						response.JSON(rw, http.StatusForbidden, nil, "403031")
+						response.JSON(rw, http.StatusForbidden, nil, "403071")
 						return
 					}
 				}
@@ -136,7 +190,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			//限制非发布者评论数量处理
 			if cont.LimitUserDiscussNum == -1 {
 				if cont.PublishUserID != userID {
-					response.JSON(rw, http.StatusForbidden, nil, "403040")
+					response.JSON(rw, http.StatusForbidden, nil, "403080")
 					return
 				}
 			} else if cont.LimitUserDiscussNum > 0 {
@@ -151,7 +205,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					return
 				} else {
 					if cntLUD >= int64(cont.LimitUserDiscussNum) {
-						response.JSON(rw, http.StatusForbidden, nil, "403041")
+						response.JSON(rw, http.StatusForbidden, nil, "403081")
 						return
 					}
 				}

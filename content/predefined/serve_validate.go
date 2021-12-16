@@ -25,7 +25,7 @@ type RequestServeID struct {
 }
 
 type RequestServeObjectID struct {
-	ObjectID primitive.ObjectID `form:"object_id,omitempty"`
+	ObjectID primitive.ObjectID `form:"object_id" validate:"required"`
 }
 
 type RequestServeTags struct {
@@ -159,14 +159,16 @@ type RequestServeContentCreate struct {
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
 	RequestServeContentVisibility
-	Copy                       bool                 `form:"copy"`
-	OnlyUserIDDiscuss          []primitive.ObjectID `form:"only_user_id_discuss"`
-	LimitAllDiscussNum         int                  `form:"limit_all_discuss_num"`
-	LimitPublishUserDiscussNum int                  `form:"limit_publish_user_discuss_num"`
-	LimitUserDiscussNum        int                  `form:"limit_user_discuss_num"`
-	ForbidForward              bool                 `form:"forbid_forward"`
-	ForbidDownload             bool                 `form:"forbid_download"`
-	ForbidDiscuss              bool                 `form:"forbid_discuss"`
+	Copy                         bool                 `form:"copy"`
+	OnlyUserIDDiscuss            []primitive.ObjectID `form:"only_user_id_discuss"`
+	OnlyUserIDCanReplyDiscuss    []primitive.ObjectID `form:"only_publish_user_id_can_reply_discuss"`
+	OnlyUserIDCanNotReplyDiscuss []primitive.ObjectID `form:"only_publish_user_id_can_not_reply_discuss"`
+	LimitAllDiscussNum           int                  `form:"limit_all_discuss_num"`
+	LimitPublishUserDiscussNum   int                  `form:"limit_publish_user_discuss_num"`
+	LimitUserDiscussNum          int                  `form:"limit_user_discuss_num"`
+	ForbidForward                bool                 `form:"forbid_forward"`
+	ForbidDownload               bool                 `form:"forbid_download"`
+	ForbidDiscuss                bool                 `form:"forbid_discuss"`
 }
 
 type RequestServeContentList struct {
