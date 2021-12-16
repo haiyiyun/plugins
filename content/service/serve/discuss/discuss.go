@@ -16,6 +16,7 @@ import (
 	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -48,52 +49,116 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	//TODO 发布干预
 	status := predefined.PublishStatusNormal
 
-	//判断对应type的object_id是否存在
 	contentModel := content.NewModel(self.M)
+	filterContent := contentModel.FilterNormalContent()
+
+	discussModel := discuss.NewModel(self.M)
+
+	//判断对应type的object_id是否存在,并处理相关限制
 	switch requestDC.Type {
 	case predefined.DiscussTypeDynamic:
 		contentType := predefined.ContentPublishTypeDynamic
-		filter := contentModel.FilterNormalContent()
-		filter = append(filter, contentModel.FilterByID(requestDC.ObjectID)...)
-		filter = append(filter, contentModel.FilterByPublishType(contentType)...)
-		if cnt, err := contentModel.CountDocuments(r.Context(), filter); err != nil || cnt == 0 {
-			log.Error(err)
-			response.JSON(rw, http.StatusNotFound, nil, "40400")
-			return
-		}
+		filterContent = append(filterContent, contentModel.FilterByID(requestDC.ObjectID)...)
+		filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
 	case predefined.DiscussTypeArticle:
 		contentType := predefined.ContentPublishTypeArticle
-		filter := contentModel.FilterNormalContent()
-		filter = append(filter, contentModel.FilterByID(requestDC.ObjectID)...)
-		filter = append(filter, contentModel.FilterByPublishType(contentType)...)
-		if cnt, err := contentModel.CountDocuments(r.Context(), filter); err != nil || cnt == 0 {
-			log.Error(err)
-			response.JSON(rw, http.StatusNotFound, nil, "40401")
-			return
-		}
+		filterContent = append(filterContent, contentModel.FilterByID(requestDC.ObjectID)...)
+		filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
 	case predefined.DiscussTypeQuestion:
 		contentType := predefined.ContentPublishTypeQuestion
-		filter := contentModel.FilterNormalContent()
-		filter = append(filter, contentModel.FilterByID(requestDC.ObjectID)...)
-		filter = append(filter, contentModel.FilterByPublishType(contentType)...)
-		if cnt, err := contentModel.CountDocuments(r.Context(), filter); err != nil || cnt == 0 {
-			log.Error(err)
-			response.JSON(rw, http.StatusNotFound, nil, "40402")
-			return
-		}
+		filterContent = append(filterContent, contentModel.FilterByID(requestDC.ObjectID)...)
+		filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
 	case predefined.DiscussTypeAnswer:
 		contentType := predefined.ContentPublishTypeAnswer
-		filter := contentModel.FilterNormalContent()
-		filter = append(filter, contentModel.FilterByID(requestDC.ObjectID)...)
-		filter = append(filter, contentModel.FilterByPublishType(contentType)...)
-		if cnt, err := contentModel.CountDocuments(r.Context(), filter); err != nil || cnt == 0 {
+		filterContent = append(filterContent, contentModel.FilterByID(requestDC.ObjectID)...)
+		filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
+	}
+
+	if sr := contentModel.FindOne(r.Context(), filterContent, options.FindOne().SetProjection(bson.D{
+		{"publish_user_id", 1},
+		{"forbid_discuss", 1},
+		{"limit_all_discuss_num", 1},
+		{"limit_publish_user_discuss_num", 1},
+		{"limit_user_discuss_num", 1},
+	})); sr.Err() != nil {
+		log.Error(sr.Err())
+		response.JSON(rw, http.StatusBadRequest, nil, "400404")
+		return
+	} else {
+		var cont model.Content
+		if err := sr.Decode(&cont); err != nil {
 			log.Error(err)
-			response.JSON(rw, http.StatusNotFound, nil, "40403")
+			response.JSON(rw, http.StatusBadRequest, nil, "400000")
 			return
+		} else {
+			//是否禁止评论
+			if cont.ForbidDiscuss {
+				response.JSON(rw, http.StatusForbidden, nil, "403010")
+				return
+			}
+
+			//限制所有评论数处理
+			if cont.LimitAllDiscussNum > 0 {
+				filterLAD := discussModel.FilterNormalDiscuss()
+				filterLAD = append(filterLAD, discussModel.FilterByObjectID(requestDC.ObjectID)...)
+				if cntLAD, err := discussModel.CountDocuments(r.Context(), filterLAD); err != nil && err != mongo.ErrNoDocuments {
+					log.Error(err)
+					response.JSON(rw, http.StatusBadRequest, nil, "400010")
+					return
+				} else {
+					if cntLAD >= int64(cont.LimitAllDiscussNum) {
+						response.JSON(rw, http.StatusForbidden, nil, "403020")
+						return
+					}
+				}
+			}
+
+			//限制发布者评论数量处理
+			if cont.LimitPublishUserDiscussNum == -1 {
+				if cont.PublishUserID == userID {
+					response.JSON(rw, http.StatusForbidden, nil, "403030")
+					return
+				}
+			} else if cont.LimitPublishUserDiscussNum > 0 {
+				filterLPUD := discussModel.FilterByPublishUserID(cont.PublishUserID)
+				if cntLPUD, err := discussModel.CountDocuments(r.Context(), filterLPUD); err != nil && err != mongo.ErrNoDocuments {
+					log.Error(err)
+					response.JSON(rw, http.StatusBadRequest, nil, "400020")
+					return
+				} else {
+					if cntLPUD >= int64(cont.LimitPublishUserDiscussNum) {
+						response.JSON(rw, http.StatusForbidden, nil, "403031")
+						return
+					}
+				}
+			}
+
+			//限制非发布者评论数量处理
+			if cont.LimitUserDiscussNum == -1 {
+				if cont.PublishUserID != userID {
+					response.JSON(rw, http.StatusForbidden, nil, "403040")
+					return
+				}
+			} else if cont.LimitUserDiscussNum > 0 {
+				filterLUD := bson.D{
+					{"publish_user_id", bson.D{
+						{"$ne", cont.PublishUserID},
+					}},
+				}
+				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLUD); err != nil && err != mongo.ErrNoDocuments {
+					log.Error(err)
+					response.JSON(rw, http.StatusBadRequest, nil, "400030")
+					return
+				} else {
+					if cntLUD >= int64(cont.LimitUserDiscussNum) {
+						response.JSON(rw, http.StatusForbidden, nil, "403041")
+						return
+					}
+				}
+			}
 		}
 	}
 
-	discussModel := discuss.NewModel(self.M)
 	dis := &model.Discuss{
 		Type:           requestDC.Type,
 		ObjectID:       requestDC.ObjectID,

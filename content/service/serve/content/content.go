@@ -15,6 +15,7 @@ import (
 	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -58,6 +59,56 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	guise := model.ContentGuise{}
 
 	contentModel := content.NewModel(self.M)
+
+	//关联类型处理
+	if requestCC.AssociateID != primitive.NilObjectID {
+		filter := contentModel.FilterNormalContent()
+		filter = append(filter, contentModel.FilterByID(requestCC.AssociateID)...)
+		if sr := contentModel.FindOne(r.Context(), filter, options.FindOne().SetProjection(bson.D{
+			{"type", 1},
+			{"publish_type", 1},
+			{"limit_associate_type", 1},
+			{"limit_associate_num", 1},
+		})); sr.Err() != nil {
+			log.Error(sr.Err())
+			response.JSON(rw, http.StatusBadRequest, nil, "400404")
+			return
+		} else {
+			var cont model.Content
+			if err := sr.Decode(&cont); err != nil {
+				log.Error(err)
+				response.JSON(rw, http.StatusBadRequest, nil, "400000")
+				return
+			} else {
+				//判断限制关联类型
+				if cont.LimitAssociateType > 0 {
+					if cont.LimitAssociateType != requestCC.PublishType {
+						response.JSON(rw, http.StatusForbidden, nil, "403010")
+						return
+					}
+				}
+
+				//判断限制关联数量
+				if cont.LimitAssociateNum > 0 {
+					filterLimit := contentModel.FilterNormalContent()
+					filterLimit = append(filterLimit, bson.D{
+						{"associate_id", requestCC.AssociateID},
+					}...)
+					if cnt, err := contentModel.CountDocuments(r.Context(), filterLimit); err != nil && err != mongo.ErrNoDocuments {
+						log.Error(err)
+						response.JSON(rw, http.StatusBadRequest, nil, "400010")
+						return
+					} else {
+						if cnt >= int64(cont.LimitAssociateNum) {
+							response.JSON(rw, http.StatusForbidden, nil, "403020")
+							return
+						}
+					}
+				}
+			}
+		}
+	}
+
 	ctnt := &model.Content{
 		PublishUserID:  userID,
 		Type:           requestCC.Type,
