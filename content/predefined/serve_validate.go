@@ -121,6 +121,10 @@ type RequestServeContentListType struct {
 	Type int `form:"type" validate:"oneof=0 1 2 3 4 5 6 1000 1001 1002 1003 1004 1005 1006"`
 }
 
+type RequestServeContentListTypes struct {
+	Types []int `form:"types" validate:"gte=0,dive,oneof=0 1 2 3 4 5 6 1000 1001 1002 1003 1004 1005 1006"`
+}
+
 type RequestServeContentPublishType struct {
 	PublishType int `form:"publish_type" validate:"oneof=0 1 2 3"`
 }
@@ -137,13 +141,15 @@ type RequestServeContentCreate struct {
 	RequestServeContentCreateType
 	RequestServeContentPublishType
 	RequestServeContentAssociateType
-	AssociateID primitive.ObjectID `form:"associate_id" validate:"required_unless=type 0"`
-	CategoryID  primitive.ObjectID `form:"category_id"`
-	SubjectID   primitive.ObjectID `form:"subject_id"`
+	AssociateID        primitive.ObjectID `form:"associate_id" validate:"required_unless=type 0"`
+	LimitAssociateType int                `form:"limit_associate_type" validate:"oneof=0 1 2 3 4 5 6"`
+	LimitAssociateNum  int                `form:"limit_associate_num"`
+	CategoryID         primitive.ObjectID `form:"category_id"`
+	SubjectID          primitive.ObjectID `form:"subject_id"`
 	RequestServeAtUsers
 	Author      string   `form:"author"`
 	Title       string   `form:"title" validate:"required"`
-	Cover       string   `form:"cover" validate:"required"`
+	Cover       string   `form:"cover,omitempty"`
 	Description string   `form:"description,omitempty"`
 	Video       string   `form:"video" validate:"required_with=type 0 type 1"`
 	Voice       string   `form:"voice" validate:"required_with=type 2 type 3"`
@@ -153,14 +159,18 @@ type RequestServeContentCreate struct {
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
 	RequestServeContentVisibility
-	Copy           bool `form:"copy"`
-	ForbidForward  bool `form:"forbid_forward"`
-	ForbidDownload bool `form:"forbid_download"`
-	ForbidDiscuss  bool `form:"forbid_discuss"`
+	Copy                       bool                 `form:"copy"`
+	OnlyUserIDDiscuss          []primitive.ObjectID `form:"only_user_id_discuss"`
+	LimitAllDiscussNum         int                  `form:"limit_all_discuss_num"`
+	LimitPublishUserDiscussNum int                  `form:"limit_publish_user_discuss_num"`
+	LimitUserDiscussNum        int                  `form:"limit_user_discuss_num"`
+	ForbidForward              bool                 `form:"forbid_forward"`
+	ForbidDownload             bool                 `form:"forbid_download"`
+	ForbidDiscuss              bool                 `form:"forbid_discuss"`
 }
 
 type RequestServeContentList struct {
-	RequestServeContentListType
+	RequestServeContentListTypes
 	RequestServeContentPublishType
 	RequestServeContentVisibility
 	RequestServeTags

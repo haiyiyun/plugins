@@ -47,6 +47,16 @@ func (self *Model) FilterByType(typ int) bson.D {
 	return filter
 }
 
+func (self *Model) FilterByTypes(types []int) bson.D {
+	filter := bson.D{
+		{"type", bson.D{
+			{"$in", types},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByPublishType(publishType int) bson.D {
 	filter := bson.D{
 		{"publish_type", publishType},

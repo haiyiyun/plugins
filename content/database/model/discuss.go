@@ -19,6 +19,7 @@ type Discuss struct {
 	LikedUser      []primitive.ObjectID `json:"liked_user" bson:"liked_user" map:"liked_user"` //喜欢用户user_id
 	HatedUser      []primitive.ObjectID `json:"hated_user" bson:"hated_user" map:"hated_user"` //讨厌用户user_id
 	Visibility     int                  `json:"visibility" bson:"visibility" map:"visibility"` //可见度
+	Evaluation     float64              `json:"evaluation" bson:"evaluation" map:"evaluation"` //价值评估,支持小数，比如：可做打星使用
 	Status         int                  `json:"status" bson:"status" map:"status"`
 	CreateTime     time.Time            `json:"create_time" bson:"create_time" map:"create_time"`
 	UpdateTime     time.Time            `json:"update_time" bson:"update_time" map:"update_time"`
