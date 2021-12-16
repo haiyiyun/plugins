@@ -258,7 +258,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 
 	discussModel := discuss.NewModel(self.M)
 	filter := discussModel.FilterNormalDiscuss()
-	filter = append(filter, discussModel.FilterByType(requestDL.Type)...)
+	filter = append(filter, discussModel.FilterByTypes(requestDL.Types)...)
 	filter = append(filter, discussModel.FilterByObjectID(requestDL.ObjectID)...)
 
 	if requestDL.Visibility == predefined.VisibilityTypeSelf {

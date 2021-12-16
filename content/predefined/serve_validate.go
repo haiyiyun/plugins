@@ -25,6 +25,10 @@ type RequestServeID struct {
 }
 
 type RequestServeObjectID struct {
+	ObjectID primitive.ObjectID `form:"object_id,omitempty"`
+}
+
+type RequestServeObjectIDRequired struct {
 	ObjectID primitive.ObjectID `form:"object_id" validate:"required"`
 }
 
@@ -90,12 +94,16 @@ type RequestServeDiscussType struct {
 	Type int `form:"type" validate:"oneof=0 1 2 3"`
 }
 
+type RequestServeDiscussTypes struct {
+	Types []int `form:"types,omitempty" validate:"gte=0,dive,oneof=0 1 2 3"`
+}
+
 type RequestServeDiscussVisibility struct {
 	Visibility int `form:"visibility" validate:"oneof=0 1 2 3 4 5 6 7 8 9"`
 }
 
 type RequestServeDiscussCreate struct {
-	RequestServeObjectID
+	RequestServeObjectIDRequired
 	RequestServeDiscussType
 	RequestServeAtUsers
 	ReplyDiscussID primitive.ObjectID `form:"reply_discuss_id,omitempty"`
@@ -105,12 +113,12 @@ type RequestServeDiscussCreate struct {
 }
 
 type RequestServeDiscussList struct {
-	RequestServeObjectID
-	RequestServeDiscussType
+	RequestServeDiscussTypes
 	RequestServeDiscussVisibility
+	RequestServePublishUserID
+	RequestServeObjectID
 	RequestServeLongitudeLatitude
 	RequestServeDistance
-	RequestServePublishUserID
 }
 
 type RequestServeContentCreateType struct {
@@ -121,8 +129,8 @@ type RequestServeContentListType struct {
 	Type int `form:"type" validate:"oneof=0 1 2 3 4 5 6 1000 1001 1002 1003 1004 1005 1006"`
 }
 
-type RequestServeContentListTypes struct {
-	Types []int `form:"types" validate:"gte=0,dive,oneof=0 1 2 3 4 5 6 1000 1001 1002 1003 1004 1005 1006"`
+type RequestServeContentTypes struct {
+	Types []int `form:"types,omitempty" validate:"gte=0,dive,oneof=0 1 2 3 4 5 6 1000 1001 1002 1003 1004 1005 1006"`
 }
 
 type RequestServeContentPublishType struct {
@@ -172,7 +180,7 @@ type RequestServeContentCreate struct {
 }
 
 type RequestServeContentList struct {
-	RequestServeContentListTypes
+	RequestServeContentTypes
 	RequestServeContentPublishType
 	RequestServeContentVisibility
 	RequestServeTags

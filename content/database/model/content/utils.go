@@ -48,6 +48,10 @@ func (self *Model) FilterByType(typ int) bson.D {
 }
 
 func (self *Model) FilterByTypes(types []int) bson.D {
+	if len(types) == 0 {
+		return bson.D{}
+	}
+
 	filter := bson.D{
 		{"type", bson.D{
 			{"$in", types},

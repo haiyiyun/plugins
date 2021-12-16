@@ -39,6 +39,20 @@ func (self *Model) FilterByType(typ int) bson.D {
 	return filter
 }
 
+func (self *Model) FilterByTypes(types []int) bson.D {
+	if len(types) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"type", bson.D{
+			{"$in", types},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByVisibility(visibility int) bson.D {
 	filter := bson.D{
 		{"visibility", visibility},
