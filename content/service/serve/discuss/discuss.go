@@ -92,7 +92,8 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		{"only_publish_user_id_can_not_reply_discuss", 1},
 		{"limit_all_discuss_num", 1},
 		{"limit_publish_user_discuss_num", 1},
-		{"limit_user_discuss_num", 1},
+		{"limit_not_publish_user_all_user_discuss_num", 1},
+		{"limit_not_publish_user_every_user_discuss_num", 1},
 	})); sr.Err() != nil {
 		log.Error(sr.Err())
 		response.JSON(rw, http.StatusBadRequest, nil, "400414")
