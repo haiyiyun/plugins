@@ -283,7 +283,14 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 	if sr := contentModel.FindOne(r.Context(), filter); sr.Err() == nil {
 		var contentDetail model.Content
 		if err := sr.Decode(&contentDetail); err == nil {
-			response.JSON(rw, 0, contentDetail, "")
+			if !contentDetail.HideDetail ||
+				(contentDetail.HideDetail &&
+					len(contentDetail.OnlyUserIDShowDetail) > 0 &&
+					help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(userID.Hex())) {
+				response.JSON(rw, 0, contentDetail, "")
+			} else {
+				response.JSON(rw, http.StatusForbidden, nil, "")
+			}
 		} else {
 			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")

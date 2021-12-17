@@ -163,6 +163,8 @@ type RequestServeContentCreate struct {
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
 	RequestServeContentVisibility
+	HideDetail                             bool                 `form:"hide_detail"`
+	OnlyUserIDShowDetail                   []primitive.ObjectID `form:"only_user_id_show_detail"`
 	Copy                                   bool                 `form:"copy"`
 	OnlyUserIDDiscuss                      []primitive.ObjectID `form:"only_user_id_discuss"`
 	OnlyUserIDCanReplyDiscuss              []primitive.ObjectID `form:"only_publish_user_id_can_reply_discuss"`
