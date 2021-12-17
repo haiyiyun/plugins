@@ -7,7 +7,7 @@ require (
 	github.com/haiyiyun/config v0.0.0-20211115100328-3a3b03ce7d35
 	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c
 	github.com/haiyiyun/mongodb v0.0.0-20211115100838-8a708fd25a5e
-	github.com/haiyiyun/utils v0.0.0-20211215021822-dae449a5f7b5
+	github.com/haiyiyun/utils v0.0.0-20211217063659-e1cdf594e95c
 	github.com/haiyiyun/webrouter v0.0.0-20211125101311-e49551c30619
 	go.mongodb.org/mongo-driver v1.8.1
 )
@@ -16,6 +16,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/haiyiyun/plugins/user v0.0.0-20211217053838-4bd8f7390d7c // indirect
 	github.com/haiyiyun/uuid v0.0.0-20211115101403-e9c2d7112f99 // indirect
 	github.com/haiyiyun/validator v1.1.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
