@@ -159,10 +159,10 @@ type RequestServeContentCreate struct {
 	Title       string   `form:"title" validate:"required"`
 	Cover       string   `form:"cover,omitempty"`
 	Description string   `form:"description,omitempty"`
-	Video       string   `form:"video" validate:"required_if=Type 0 Type 1"`
-	Voice       string   `form:"voice" validate:"required_if=Type 2 Type 3"`
-	Images      []string `form:"images" validate:"required_if=Type 4 Type 5"`
-	Content     string   `form:"content" validate:"required_if=Type 4 Type 6"`
+	Video       string   `form:"video" validate:"required_if=Type 0,required_if=Type 1"`
+	Voice       string   `form:"voice" validate:"required_if=Type 2,required_if=Type 3"`
+	Images      []string `form:"images" validate:"required_if=Type 4,required_if=Type 5"`
+	Content     string   `form:"content" validate:"required_if=Type 4,required_if=Type 6"`
 	ContentLink string   `form:"content_link"`
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
