@@ -94,10 +94,6 @@ type RequestServeDiscussType struct {
 	Type int `form:"type" validate:"oneof=0 1 2 3"`
 }
 
-type RequestServeDiscussTypes struct {
-	Types []int `form:"types,omitempty" validate:"gte=0,dive,oneof=0 1 2 3"`
-}
-
 type RequestServeDiscussVisibility struct {
 	Visibility int `form:"visibility" validate:"oneof=0 1 2 3 4 5 6 7 8 9"`
 }
@@ -113,10 +109,10 @@ type RequestServeDiscussCreate struct {
 }
 
 type RequestServeDiscussList struct {
-	RequestServeDiscussTypes
+	Types []int `form:"types,omitempty" validate:"required_with=ObjectID,gte=0,dive,oneof=0 1 2 3"`
+	RequestServeObjectID
 	RequestServeDiscussVisibility
 	RequestServePublishUserID
-	RequestServeObjectID
 	RequestServeLongitudeLatitude
 	RequestServeDistance
 }
@@ -175,6 +171,8 @@ type RequestServeContentCreate struct {
 	LimitPublishUserDiscussNum             int                  `form:"limit_publish_user_discuss_num"`
 	LimitNotPublishUserAllUserDiscussNum   int                  `form:"limit_not_publish_user_all_user_discuss_num"`
 	LimitNotPublishUserEveryUserDiscussNum int                  `form:"limit_not_publish_user_every_user_discuss_num"`
+	HideDiscuss                            bool                 `form:"hide_discuss"`
+	OnlyUserIDShowDiscuss                  []primitive.ObjectID `form:"only_user_id_show_discuss"`
 	ForbidForward                          bool                 `form:"forbid_forward"`
 	ForbidDownload                         bool                 `form:"forbid_download"`
 	ForbidDiscuss                          bool                 `form:"forbid_discuss"`
