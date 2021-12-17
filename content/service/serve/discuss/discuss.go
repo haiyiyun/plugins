@@ -188,24 +188,38 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			}
 
 			//限制非发布者评论数量处理
-			if cont.LimitUserDiscussNum == -1 {
+			if cont.LimitNotPublishUserAllUserDiscussNum == -1 {
 				if cont.PublishUserID != userID {
 					response.JSON(rw, http.StatusForbidden, nil, "403080")
 					return
 				}
-			} else if cont.LimitUserDiscussNum > 0 {
-				filterLUD := bson.D{
+			} else if cont.LimitNotPublishUserAllUserDiscussNum > 0 {
+				filterLNPUAUDN := bson.D{
 					{"publish_user_id", bson.D{
 						{"$ne", cont.PublishUserID},
 					}},
 				}
-				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLUD); err != nil && err != mongo.ErrNoDocuments {
+				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLNPUAUDN); err != nil && err != mongo.ErrNoDocuments {
 					log.Error(err)
 					response.JSON(rw, http.StatusBadRequest, nil, "400030")
 					return
 				} else {
-					if cntLUD >= int64(cont.LimitUserDiscussNum) {
+					if cntLUD >= int64(cont.LimitNotPublishUserAllUserDiscussNum) {
 						response.JSON(rw, http.StatusForbidden, nil, "403081")
+						return
+					}
+				}
+			} else if cont.LimitNotPublishUserEveryUserDiscussNum > 0 && cont.PublishUserID != userID {
+				filterLNPUEUDN := bson.D{
+					{"publish_user_id", userID},
+				}
+				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLNPUEUDN); err != nil && err != mongo.ErrNoDocuments {
+					log.Error(err)
+					response.JSON(rw, http.StatusBadRequest, nil, "400031")
+					return
+				} else {
+					if cntLUD >= int64(cont.LimitNotPublishUserEveryUserDiscussNum) {
+						response.JSON(rw, http.StatusForbidden, nil, "403082")
 						return
 					}
 				}
