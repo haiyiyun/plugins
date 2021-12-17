@@ -149,7 +149,7 @@ type RequestServeContentCreate struct {
 	RequestServeContentCreateType
 	RequestServeContentPublishType
 	RequestServeContentAssociateType
-	AssociateID        primitive.ObjectID `form:"associate_id" validate:"required_unless=associate_type 0"`
+	AssociateID        primitive.ObjectID `form:"associate_id" validate:"required_unless=AssociateType 0"`
 	LimitAssociateType int                `form:"limit_associate_type" validate:"oneof=0 1 2 3 4 5 6"`
 	LimitAssociateNum  int                `form:"limit_associate_num"`
 	CategoryID         primitive.ObjectID `form:"category_id"`
@@ -159,10 +159,10 @@ type RequestServeContentCreate struct {
 	Title       string   `form:"title" validate:"required"`
 	Cover       string   `form:"cover,omitempty"`
 	Description string   `form:"description,omitempty"`
-	Video       string   `form:"video" validate:"required_with=type 0 type 1"`
-	Voice       string   `form:"voice" validate:"required_with=type 2 type 3"`
-	Images      []string `form:"images" validate:"required_with=type 4 type 5"`
-	Content     string   `form:"content" validate:"required_with=type 4 type 6"`
+	Video       string   `form:"video" validate:"required_with=Type 0 Type 1"`
+	Voice       string   `form:"voice" validate:"required_with=Type 2 Type 3"`
+	Images      []string `form:"images" validate:"required_with=Type 4 Type 5"`
+	Content     string   `form:"content" validate:"required_with=Type 4 Type 6"`
 	ContentLink string   `form:"content_link"`
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
