@@ -149,7 +149,7 @@ type RequestServeContentCreate struct {
 	RequestServeContentCreateType
 	RequestServeContentPublishType
 	RequestServeContentAssociateType
-	AssociateID        primitive.ObjectID `form:"associate_id" validate:"required_unless=type 0"`
+	AssociateID        primitive.ObjectID `form:"associate_id" validate:"required_unless=associate_type 0"`
 	LimitAssociateType int                `form:"limit_associate_type" validate:"oneof=0 1 2 3 4 5 6"`
 	LimitAssociateNum  int                `form:"limit_associate_num"`
 	CategoryID         primitive.ObjectID `form:"category_id"`
