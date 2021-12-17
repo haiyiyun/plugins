@@ -73,6 +73,20 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 		}
 
 		jwtID := primitive.NewObjectID()
+
+		roles := []string{}
+		for len(u.Role) > 0 {
+			for _, role := range u.Role {
+				if role.EndTime.IsZero() {
+					roles = append(roles, role.Role)
+				} else if !role.StartTime.IsZero() && !role.EndTime.IsZero() {
+					if role.EndTime.After(role.StartTime) {
+						roles = append(roles, role.Role)
+					}
+				}
+			}
+		}
+
 		claims := &predefined.JWTTokenClaims{
 			StandardClaims: &jwt.StandardClaims{
 				Id:        jwtID.Hex(),
@@ -82,6 +96,14 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 				ExpiresAt: ExpiredTime.Unix(),
 			},
 			TokenType: predefined.TokenTypeSelf,
+			JWTTokenClaimsUserInfo: &predefined.JWTTokenClaimsUserInfo{
+				UserID:      u.ID.Hex(),
+				ExtensionID: u.ExtensionID,
+				Name:        u.Name,
+				Guest:       u.Guest,
+				Level:       u.Level,
+				Role:        roles,
+			},
 		}
 
 		jwtToken := jwt.NewWithClaims(predefined.JWTSigningMethod, claims)
