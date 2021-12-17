@@ -102,7 +102,7 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 				Name:        u.Name,
 				Guest:       u.Guest,
 				Level:       u.Level,
-				Role:        roles,
+				Roles:       roles,
 			},
 		}
 

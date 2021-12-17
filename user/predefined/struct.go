@@ -10,7 +10,7 @@ type JWTTokenClaimsUserInfo struct {
 	Name        string   `json:"name"`
 	Guest       bool     `json:"guest"`
 	Level       int      `json:"level"`
-	Role        []string `json:"role"`
+	Roles       []string `json:"roles"`
 }
 
 type JWTTokenClaims struct {
