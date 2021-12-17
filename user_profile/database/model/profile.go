@@ -96,8 +96,8 @@ type ProfileProofCompany struct {
 
 type ProfileProofProfession struct {
 	Type     int                 `json:"type" bson:"type" map:"type" form:"type" validate:"oneof=0 1 2 3 4 5 6"`
-	Company  ProfileProofCompany `json:"company" bson:"company" map:"company" form:"company" validate:"required_without=student,dive"`
-	Student  ProfileProofStudent `json:"student" bson:"student" map:"student" form:"student" validate:"required_if=type 6,required_without=company,dive"`
+	Company  ProfileProofCompany `json:"company" bson:"company" map:"company" form:"company" validate:"required_without=Student,dive"`
+	Student  ProfileProofStudent `json:"student" bson:"student" map:"student" form:"student" validate:"required_if=type 6,required_without=Company,dive"`
 	Verified bool                `json:"verified" bson:"verified" map:"verified"`
 }
 
