@@ -46,9 +46,32 @@ func (self *Service) Logout(r *http.Request) {
 
 func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
 	tokenModel := token.NewModel(self.M)
+
+	if self.Config.OnlySingleLogin {
+		if _, err = tokenModel.DeleteMany(ctx, tokenModel.FilterByUserID(u.ID)); err != nil {
+			return
+		}
+	}
+
+	if len(self.Config.OnlySingleLoginUserID) > 0 {
+		if help.NewSlice(self.Config.OnlySingleLoginUserID).CheckItem(u.ID.Hex()) {
+			if _, err = tokenModel.DeleteMany(ctx, tokenModel.FilterByUserID(u.ID)); err != nil {
+				return
+			}
+		}
+	}
+
 	cnt, _ := tokenModel.CountDocuments(ctx, tokenModel.FilterByUserID(u.ID))
-	if cnt == 0 || (self.AllowMultiLogin && (self.AllowMultiLoginNum == 0 || cnt < self.AllowMultiLoginNum)) {
+
+	if cnt == 0 ||
+		(self.AllowMultiLogin &&
+			((len(self.AllowMultiLoginUserIDUnlimited) > 0 && help.NewSlice(self.AllowMultiLoginUserIDUnlimited).CheckItem(u.ID.Hex())) ||
+				(self.AllowMultiLoginNum == 0 || cnt < self.AllowMultiLoginNum))) {
 		ExpiredTime := time.Now().Add(self.Config.TokenExpireDuration.Duration)
+		if dur, found := self.Config.SpecifyUserIDTokenExpireDuration[u.ID.Hex()]; found {
+			ExpiredTime = time.Now().Add(dur.Duration)
+		}
+
 		jwtID := primitive.NewObjectID()
 		claims := &predefined.JWTTokenClaims{
 			StandardClaims: &jwt.StandardClaims{
@@ -133,7 +156,10 @@ func (self *Service) GetValidClaims(r *http.Request) (claims *predefined.JWTToke
 
 									cnt, err = tokenModel.CountDocumentsByUserIDAndType(userID, tokenType)
 									if err == nil && cnt > 0 {
-										if cnt == 1 || (self.Config.AllowMultiLogin && (self.Config.AllowMultiLoginNum == 0 || cnt <= self.Config.AllowMultiLoginNum)) {
+										if cnt == 1 ||
+											(self.Config.AllowMultiLogin &&
+												((len(self.AllowMultiLoginUserIDUnlimited) > 0 && help.NewSlice(self.AllowMultiLoginUserIDUnlimited).CheckItem(userID.Hex())) ||
+													(self.Config.AllowMultiLoginNum == 0 || cnt <= self.Config.AllowMultiLoginNum))) {
 											u, err := self.getUser(userID)
 											if err == nil {
 												uTmp = u
