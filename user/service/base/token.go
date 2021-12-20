@@ -112,7 +112,7 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 			},
 			TokenType: predefined.TokenTypeSelf,
 			JWTTokenClaimsUserInfo: &predefined.JWTTokenClaimsUserInfo{
-				UserID:      u.ID.Hex(),
+				UserID:      u.ID,
 				ExtensionID: u.ExtensionID,
 				Name:        u.Name,
 				Guest:       u.Guest,
