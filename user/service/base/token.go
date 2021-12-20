@@ -76,7 +76,7 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 
 		//过滤未开始或者已经到期的
 		roles := []model.UserRole{}
-		for len(u.Roles) > 0 {
+		if len(u.Roles) > 0 {
 			for _, role := range u.Roles {
 				if role.EndTime.IsZero() {
 					roles = append(roles, role)
@@ -90,7 +90,7 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 
 		//过滤未开始或者已经到期的
 		tags := []model.UserTag{}
-		for len(u.Roles) > 0 {
+		if len(u.Roles) > 0 {
 			for _, tag := range u.Tags {
 				if tag.EndTime.IsZero() {
 					tags = append(tags, tag)
