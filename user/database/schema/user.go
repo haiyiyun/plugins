@@ -50,9 +50,49 @@ var (
 			},
 			{
 				bson.D{
-					{"role.role", 1},
+					{"roles.role", 1},
 				},
 				options.Index(),
+			},
+			{
+				bson.D{
+					{"roles.level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"_id", 1},
+					{"roles.role", 1},
+				},
+				options.Index().SetUnique(true).SetPartialFilterExpression(bson.D{
+					{"roles.role", bson.D{
+						{"$exists", true},
+					}},
+				}),
+			},
+			{
+				bson.D{
+					{"tags.tag", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"tags.level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"_id", 1},
+					{"tags.tag", 1},
+				},
+				options.Index().SetUnique(true).SetPartialFilterExpression(bson.D{
+					{"tags.tag", bson.D{
+						{"$exists", true},
+					}},
+				}),
 			},
 			{
 				bson.D{

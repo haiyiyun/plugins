@@ -9,9 +9,19 @@ import (
 )
 
 type UserRole struct {
-	Role      string    `json:"role" bson:"role" map:"role"`
-	StartTime time.Time `json:"start_time" bson:"start_time" map:"start_time"`
-	EndTime   time.Time `json:"end_time" bson:"end_time" map:"end_time"`
+	Role       string    `json:"role" bson:"role" map:"role"`
+	Level      int       `json:"level" bson:"level" map:"level"`
+	Experience int       `json:"experience" bson:"experience" map:"experience"`
+	StartTime  time.Time `json:"start_time" bson:"start_time" map:"start_time"`
+	EndTime    time.Time `json:"end_time" bson:"end_time" map:"end_time"`
+}
+
+type UserTag struct {
+	Tag        string    `json:"tag" bson:"tag" map:"tag"`
+	Level      int       `json:"level" bson:"level" map:"level"`
+	Experience int       `json:"experience" bson:"experience" map:"experience"`
+	StartTime  time.Time `json:"start_time" bson:"start_time" map:"start_time"`
+	EndTime    time.Time `json:"end_time" bson:"end_time" map:"end_time"`
 }
 
 type UserOnline struct {
@@ -28,9 +38,11 @@ type User struct {
 	ExtensionID int                `bson:"extension_id" json:"extension_id" map:"extension_id"` //扩展ID，0值代表无需和其他库同步，同步其他数据库时的自增ID，如mysql的user表的id
 	Name        string             `bson:"name" json:"name" map:"name"`
 	Password    string             `bson:"password" json:"-" map:"password"`
-	Guest       bool               `bson:"guest" json:"guest" map:"guest"` //是否来宾
-	Level       int                `json:"level" bson:"level" map:"level"`
-	Role        []UserRole         `json:"role" bson:"role" map:"role"`
+	Guest       bool               `bson:"guest" json:"guest" map:"guest"`                //是否来宾
+	Level       int                `json:"level" bson:"level" map:"level"`                //总级别
+	Experience  int                `json:"experience" bson:"experience" map:"experience"` //总经验值
+	Roles       []UserRole         `json:"roles" bson:"roles" map:"roles"`                //用户身份角色
+	Tags        []UserTag          `json:"tags" bson:"tags" map:"tags"`                   //用户身份标签
 	Online      UserOnline         `json:"online" bson:"online" map:"online"`
 	Location    geometry.Point     `json:"location" bson:"location,omitempty" map:"location,omitempty"`
 	Enable      bool               `bson:"enable" json:"enable" map:"enable"`

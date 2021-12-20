@@ -7,7 +7,7 @@ require (
 	github.com/haiyiyun/cache v0.0.0-20210818124739-0b1b279f594d
 	github.com/haiyiyun/config v0.0.0-20211115100328-3a3b03ce7d35
 	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c
-	github.com/haiyiyun/mongodb v0.0.0-20211115100838-8a708fd25a5e
+	github.com/haiyiyun/mongodb v0.0.0-20211220034941-d47777537e3a
 	github.com/haiyiyun/utils v0.0.0-20211217063659-e1cdf594e95c
 	github.com/haiyiyun/webrouter v0.0.0-20211125101311-e49551c30619
 	go.mongodb.org/mongo-driver v1.8.1

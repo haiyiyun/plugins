@@ -74,14 +74,29 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 
 		jwtID := primitive.NewObjectID()
 
-		roles := []string{}
-		for len(u.Role) > 0 {
-			for _, role := range u.Role {
+		//过滤未开始或者已经到期的
+		roles := []model.UserRole{}
+		for len(u.Roles) > 0 {
+			for _, role := range u.Roles {
 				if role.EndTime.IsZero() {
-					roles = append(roles, role.Role)
+					roles = append(roles, role)
 				} else if !role.StartTime.IsZero() && !role.EndTime.IsZero() {
 					if role.EndTime.After(role.StartTime) {
-						roles = append(roles, role.Role)
+						roles = append(roles, role)
+					}
+				}
+			}
+		}
+
+		//过滤未开始或者已经到期的
+		tags := []model.UserTag{}
+		for len(u.Roles) > 0 {
+			for _, tag := range u.Tags {
+				if tag.EndTime.IsZero() {
+					tags = append(tags, tag)
+				} else if !tag.StartTime.IsZero() && !tag.EndTime.IsZero() {
+					if tag.EndTime.After(tag.StartTime) {
+						tags = append(tags, tag)
 					}
 				}
 			}
@@ -102,7 +117,12 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 				Name:        u.Name,
 				Guest:       u.Guest,
 				Level:       u.Level,
+				Experience:  u.Experience,
 				Roles:       roles,
+				Tags:        tags,
+				IP:          ip,
+				UserAgent:   userAgent,
+				Location:    geometry.NewPoint(coordinates),
 			},
 		}
 
