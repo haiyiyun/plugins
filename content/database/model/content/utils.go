@@ -2,6 +2,7 @@ package content
 
 import (
 	"context"
+	"time"
 
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/predefined"
@@ -143,6 +144,26 @@ func (self *Model) FilterByLteValue(value int) bson.D {
 	filter := bson.D{
 		{"value", bson.D{
 			{"$lte", value},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByGteStartTime(startTime time.Time) bson.D {
+	filter := bson.D{
+		{"start_time", bson.D{
+			{"$gte", startTime},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByLteEndTime(endTime time.Time) bson.D {
+	filter := bson.D{
+		{"end_time", bson.D{
+			{"$lte", endTime},
 		}},
 	}
 

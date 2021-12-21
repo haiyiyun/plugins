@@ -147,6 +147,18 @@ var (
 			},
 			{
 				bson.D{
+					{"start_time", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"end_time", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"status", 1},
 				},
 				options.Index(),

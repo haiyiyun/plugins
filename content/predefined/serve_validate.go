@@ -1,6 +1,9 @@
 package predefined
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/haiyiyun/utils/help"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type RequestServeLongitudeLatitude struct {
 	Longitude float64 `form:"longitude,omitempty"` //经度
@@ -181,6 +184,9 @@ type RequestServeContentCreate struct {
 	ForbidForward                          bool                 `form:"forbid_forward"`
 	ForbidDownload                         bool                 `form:"forbid_download"`
 	ForbidDiscuss                          bool                 `form:"forbid_discuss"`
+	StartTime                              help.DateTime        `form:"start_time"`
+	EndTime                                help.DateTime        `form:"end_time"`
+	ExtraData                              string               `form:"extra_data"`
 }
 
 type RequestServeContentList struct {
@@ -193,12 +199,15 @@ type RequestServeContentList struct {
 	SubjectID  primitive.ObjectID `form:"subject_id,omitempty"`
 	RequestServeLongitudeLatitude
 	RequestServeDistance
-	ValueZero        bool `form:"value_zero,omitempty"`
-	ValueGte         int  `form:"value_gte,omitempty"`
-	ValueLte         int  `form:"value_lte,omitempty"`
-	DiscussTotalZero bool `form:"discuss_total_zero,omitempty"`
-	DiscussTotalGte  int  `form:"discuss_total_gte,omitempty"`
-	DiscussTotalLte  int  `form:"discuss_total_lte,omitempty"`
+	ValueZero        bool          `form:"value_zero,omitempty"`
+	ValueGte         int           `form:"value_gte,omitempty"`
+	ValueLte         int           `form:"value_lte,omitempty"`
+	DiscussTotalZero bool          `form:"discuss_total_zero,omitempty"`
+	DiscussTotalGte  int           `form:"discuss_total_gte,omitempty"`
+	DiscussTotalLte  int           `form:"discuss_total_lte,omitempty"`
+	InTime           bool          `form:"in_time,omitempty"`
+	StartTime        help.DateTime `form:"start_time,omitempty"`
+	EndTime          help.DateTime `form:"end_time,omitempty"`
 }
 
 type RequestServeContentDetail struct {

@@ -2,6 +2,7 @@ package content
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/mongodb/geometry"
@@ -109,6 +110,30 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	if requestCC.AtUsers == nil {
+		requestCC.AtUsers = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDShowDetail == nil {
+		requestCC.OnlyUserIDShowDetail = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDDiscuss == nil {
+		requestCC.OnlyUserIDDiscuss = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDCanReplyDiscuss == nil {
+		requestCC.OnlyUserIDCanReplyDiscuss = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDCanNotReplyDiscuss == nil {
+		requestCC.OnlyUserIDCanNotReplyDiscuss = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDShowDiscuss == nil {
+		requestCC.OnlyUserIDShowDiscuss = []primitive.ObjectID{}
+	}
+
 	ctnt := &model.Content{
 		PublishUserID:                          userID,
 		Type:                                   requestCC.Type,
@@ -149,7 +174,15 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		ForbidDownload:                         requestCC.ForbidDownload,
 		ForbidDiscuss:                          requestCC.ForbidDiscuss,
 		Tags:                                   tags,
+		ReadedUser:                             []primitive.ObjectID{},
+		WantedUser:                             []primitive.ObjectID{},
+		LikedUser:                              []primitive.ObjectID{},
+		HatedUser:                              []primitive.ObjectID{},
 		Guise:                                  guise,
+		AntiGuiseUser:                          []primitive.ObjectID{},
+		StartTime:                              requestCC.StartTime.Time,
+		EndTime:                                requestCC.EndTime.Time,
+		ExtraData:                              requestCC.ExtraData,
 		Status:                                 status,
 	}
 
@@ -236,6 +269,20 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterByValue(0)...)
 	}
 
+	if !requestCL.StartTime.Time.IsZero() {
+		filter = append(filter, contentModel.FilterByGteStartTime(requestCL.StartTime.Time)...)
+	}
+
+	if !requestCL.EndTime.Time.IsZero() {
+		filter = append(filter, contentModel.FilterByGteStartTime(requestCL.EndTime.Time)...)
+	}
+
+	if requestCL.InTime {
+		now := time.Now()
+		filter = append(filter, contentModel.FilterByGteStartTime(now)...)
+		filter = append(filter, contentModel.FilterByGteStartTime(now)...)
+	}
+
 	if len(requestCL.Tags) > 0 {
 		filter = append(filter, bson.E{
 			"tags", bson.D{
@@ -272,6 +319,9 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		{"reliable", 1},
 		{"guise", 1},
 		{"anti_guise_user", 1},
+		{"start_time", 1},
+		{"end_time", 1},
+		{"extra_data", 1},
 		{"status", 1},
 		{"discuss_estimate_total", 1},
 		{"create_time", 1},
@@ -326,13 +376,28 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 	if sr := contentModel.FindOne(r.Context(), filter); sr.Err() == nil {
 		var contentDetail model.Content
 		if err := sr.Decode(&contentDetail); err == nil {
+			now := time.Now()
+			if !contentDetail.StartTime.IsZero() && !contentDetail.EndTime.IsZero() {
+				if !(contentDetail.StartTime.Before(now) && contentDetail.EndTime.After(now)) {
+					response.JSON(rw, http.StatusForbidden, nil, "403010")
+				}
+			} else if !contentDetail.StartTime.IsZero() {
+				if !contentDetail.StartTime.Before(now) {
+					response.JSON(rw, http.StatusForbidden, nil, "403011")
+				}
+			} else if !contentDetail.EndTime.IsZero() {
+				if !contentDetail.EndTime.After(now) {
+					response.JSON(rw, http.StatusForbidden, nil, "403012")
+				}
+			}
+
 			if !contentDetail.HideDetail ||
 				(contentDetail.HideDetail &&
 					len(contentDetail.OnlyUserIDShowDetail) > 0 &&
 					help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(userID.Hex())) {
 				response.JSON(rw, 0, contentDetail, "")
 			} else {
-				response.JSON(rw, http.StatusForbidden, nil, "")
+				response.JSON(rw, http.StatusForbidden, nil, "403020")
 			}
 		} else {
 			log.Error(err)
