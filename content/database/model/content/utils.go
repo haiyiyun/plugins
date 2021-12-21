@@ -1,10 +1,13 @@
 package content
 
 import (
+	"context"
+
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/predefined"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (self *Model) FilterNormalContent() bson.D {
@@ -176,4 +179,158 @@ func (self *Model) FilterByLocation(location geometry.Point, maxDistance, minDis
 	}
 
 	return filter
+}
+
+func (self *Model) AddAtUsers(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"at_users", userID},
+	})
+}
+
+func (self *Model) DeleteAtUsers(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"at_users", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDShowDetail(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_user_id_show_detail", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDShowDetail(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_user_id_show_detail", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_user_id_discuss", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_user_id_discuss", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDCanReplyDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_publish_user_id_can_reply_discuss", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDCanReplyDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_publish_user_id_can_reply_discuss", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDCanNotReplyDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_publish_user_id_can_not_reply_discuss", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDCanNotReplyDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_publish_user_id_can_not_reply_discuss", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDShowDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_user_id_show_discuss", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDShowDiscuss(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_user_id_show_discuss", userID},
+	})
+}
+
+func (self *Model) AddReadedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"readed_user", userID},
+	})
+}
+
+func (self *Model) DeleteReadedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"readed_user", userID},
+	})
+}
+
+func (self *Model) AddWantedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"wanted_user", userID},
+	})
+}
+
+func (self *Model) DeleteWantedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"wanted_user", userID},
+	})
+}
+
+func (self *Model) AddLikedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"liked_user", userID},
+	})
+}
+
+func (self *Model) DeleteLikedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"liked_user", userID},
+	})
+}
+
+func (self *Model) AddHatedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"hated_user", userID},
+	})
+}
+
+func (self *Model) DeleteHatedUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"hated_user", userID},
+	})
+}
+
+func (self *Model) AddAntiGuiseUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"anti_guise_user", userID},
+	})
+}
+
+func (self *Model) DeleteAntiGuiseUser(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"anti_guise_user", userID},
+	})
 }

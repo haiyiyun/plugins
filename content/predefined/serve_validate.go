@@ -33,15 +33,15 @@ type RequestServeObjectIDRequired struct {
 }
 
 type RequestServeTags struct {
-	Tags []string `form:"tags,omitempty"`
+	Tags []string `form:"tags"`
 }
 
 type RequestServeUserTags struct {
-	UserTags []string `form:"user_tags,omitempty"`
+	UserTags []string `form:"user_tags"`
 }
 
 type RequestServeAtUsers struct {
-	AtUsers []primitive.ObjectID `form:"at_users,omitempty"`
+	AtUsers []primitive.ObjectID `form:"at_users"`
 }
 
 type RequestServeCategorySystemType struct {

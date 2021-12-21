@@ -342,3 +342,24 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
 }
+
+func (self *Service) Route_GET_AddOnlyUseridShowDetail(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.AddOnlyUserIDShowDetail(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
