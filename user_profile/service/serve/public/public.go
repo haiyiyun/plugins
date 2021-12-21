@@ -9,7 +9,7 @@ import (
 	"github.com/haiyiyun/utils/validator"
 )
 
-func (self *Service) Route_GET_NickNameAvatar(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_GET_NicknameAvatar(rw http.ResponseWriter, r *http.Request) {
 	var requestUID predefined.RequestServeUserID
 	if err := validator.FormStruct(&requestUID, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
