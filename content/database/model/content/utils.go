@@ -118,6 +118,34 @@ func (self *Model) FilterByLteDiscussEstimateTotal(discussEstimateTotal int) bso
 	return filter
 }
 
+func (self *Model) FilterByValue(value int) bson.D {
+	filter := bson.D{
+		{"value", value},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByGteValue(value int) bson.D {
+	filter := bson.D{
+		{"value", bson.D{
+			{"$gte", value},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByLteValue(value int) bson.D {
+	filter := bson.D{
+		{"value", bson.D{
+			{"$lte", value},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByTag(tag string) bson.D {
 	filter := bson.D{
 		{"tags", tag},

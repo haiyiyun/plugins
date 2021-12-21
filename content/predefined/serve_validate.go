@@ -164,6 +164,7 @@ type RequestServeContentCreate struct {
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
 	RequestServeContentVisibility
+	Value                                  int                  `form:"value"`
 	HideDetail                             bool                 `form:"hide_detail"`
 	OnlyUserIDShowDetail                   []primitive.ObjectID `form:"only_user_id_show_detail"`
 	Copy                                   bool                 `form:"copy"`
@@ -191,6 +192,9 @@ type RequestServeContentList struct {
 	SubjectID  primitive.ObjectID `form:"subject_id,omitempty"`
 	RequestServeLongitudeLatitude
 	RequestServeDistance
+	ValueZero        bool `form:"value_zero,omitempty"`
+	ValueGte         int  `form:"value_gte,omitempty"`
+	ValueLte         int  `form:"value_lte,omitempty"`
 	DiscussTotalZero bool `form:"discuss_total_zero,omitempty"`
 	DiscussTotalGte  int  `form:"discuss_total_gte,omitempty"`
 	DiscussTotalLte  int  `form:"discuss_total_lte,omitempty"`

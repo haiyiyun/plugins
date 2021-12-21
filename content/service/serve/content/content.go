@@ -219,6 +219,18 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterByDiscussEstimateTotal(0)...)
 	}
 
+	if requestCL.ValueGte > 0 {
+		filter = append(filter, contentModel.FilterByGteValue(requestCL.ValueGte)...)
+	}
+
+	if requestCL.ValueLte > 0 {
+		filter = append(filter, contentModel.FilterByLteValue(requestCL.ValueLte)...)
+	}
+
+	if requestCL.ValueZero {
+		filter = append(filter, contentModel.FilterByValue(0)...)
+	}
+
 	if len(requestCL.Tags) > 0 {
 		filter = append(filter, bson.E{
 			"tags", bson.D{
@@ -247,6 +259,9 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		{"title", 1},
 		{"cover", 1},
 		{"description", 1},
+		{"user_tags", 1},
+		{"visibility", 1},
+		{"value", 1},
 		{"copy", 1},
 		{"bestest", 1},
 		{"reliable", 1},

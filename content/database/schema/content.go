@@ -141,6 +141,12 @@ var (
 			},
 			{
 				bson.D{
+					{"value", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"status", 1},
 				},
 				options.Index(),
