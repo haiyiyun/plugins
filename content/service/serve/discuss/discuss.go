@@ -335,7 +335,11 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			filter = append(filter, discussModel.FilterByPublishUserID(requestDL.PublishUserID)...)
 			filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
 		} else {
-			filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
+			if requestDL.Visibility != predefined.VisibilityTypeAll {
+				filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
+			} else {
+				filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
+			}
 		}
 	}
 

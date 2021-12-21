@@ -170,7 +170,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var requestCL predefined.RequestServeContentList
-	if err := validator.FormStruct(&requestCL, r.Form); err != nil {
+	if err := validator.FormStruct(&requestCL, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -191,7 +191,11 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			filter = append(filter, contentModel.FilterByPublishUserID(requestCL.PublishUserID)...)
 			filter = append(filter, contentModel.FilterByVisibility(requestCL.Visibility)...)
 		} else {
-			filter = append(filter, contentModel.FilterByVisibilityOrAll(requestCL.Visibility)...)
+			if requestCL.Visibility != predefined.VisibilityTypeAll {
+				filter = append(filter, contentModel.FilterByVisibilityOrAll(requestCL.Visibility)...)
+			} else {
+				filter = append(filter, contentModel.FilterByVisibility(requestCL.Visibility)...)
+			}
 		}
 	}
 
@@ -272,7 +276,7 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var requestCD predefined.RequestServeContentDetail
-	if err := validator.FormStruct(&requestCD, r.Form); err != nil {
+	if err := validator.FormStruct(&requestCD, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
