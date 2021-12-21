@@ -1,5 +1,7 @@
 package predefined
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type RequestServeNickname struct {
 	Nickname string `form:"nickname" validate:"required"`
 }
@@ -26,4 +28,8 @@ type RequestServeCoverVideo struct {
 
 type RequestServeCoverVoice struct {
 	Voice string `form:"voice" validate:"required"`
+}
+
+type RequestServeUserID struct {
+	UserID primitive.ObjectID `form:"user_id" validate:"required"`
 }

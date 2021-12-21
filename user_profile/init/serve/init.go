@@ -7,6 +7,7 @@ import (
 	"github.com/haiyiyun/plugins/user_profile/database/schema"
 	"github.com/haiyiyun/plugins/user_profile/service/base"
 	userProfile "github.com/haiyiyun/plugins/user_profile/service/serve/profile"
+	userPublic "github.com/haiyiyun/plugins/user_profile/service/serve/public"
 
 	"github.com/haiyiyun/cache"
 	"github.com/haiyiyun/config"
@@ -41,6 +42,7 @@ func init() {
 
 		//Init Begin
 		userProfileService := userProfile.NewService(serveService)
+		userPublicService := userPublic.NewService(serveService)
 		//Init End
 
 		//Go Begin
@@ -48,6 +50,7 @@ func init() {
 
 		//Register Begin
 		webrouter.Register(serveConf.WebRouterRootPath+"profile/", userProfileService)
+		webrouter.Register(serveConf.WebRouterRootPath+"public/", userPublicService)
 		//Register End
 	}
 }
