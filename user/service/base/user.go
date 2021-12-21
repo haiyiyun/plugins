@@ -51,6 +51,8 @@ func (self *Service) CreateUser(ctx context.Context, username, password string, 
 			ExtensionID: extensionID,
 			Name:        username,
 			Password:    help.NewString(password).Md5(),
+			Roles:       []model.UserRole{},
+			Tags:        []model.UserTag{},
 			Enable:      true,
 		}
 
