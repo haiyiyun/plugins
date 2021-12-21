@@ -123,12 +123,6 @@ var (
 			},
 			{
 				bson.D{
-					{"tags", 1},
-				},
-				options.Index(),
-			},
-			{
-				bson.D{
 					{"bestest", 1},
 				},
 				options.Index(),
@@ -136,6 +130,12 @@ var (
 			{
 				bson.D{
 					{"reliable", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"discuss_estimate_total", 1},
 				},
 				options.Index(),
 			},

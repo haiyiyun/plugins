@@ -15,6 +15,7 @@ type Category struct {
 	Tags       []string           `json:"tags" bson:"tags" map:"tags"`                //标签
 	Location   geometry.Point     `json:"location" bson:"location,omitempty" map:"location,omitempty"`
 	Visibility int                `json:"visibility" bson:"visibility" map:"visibility"` //可见度
+	ExtraData  string             `json:"extra_data" bson:"extra_data" map:"extra_data"` //额外扩展信息数据，可灵活使用，比如将相关额外信息json后存入
 	Status     int                `json:"status" bson:"status" map:"status"`
 	Enable     bool               `json:"enable" bson:"enable" map:"enable"`
 	CreateTime time.Time          `json:"create_time" bson:"create_time" map:"create_time"`

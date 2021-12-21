@@ -67,6 +67,7 @@ type Content struct {
 	HatedUser                              []primitive.ObjectID `json:"hated_user" bson:"hated_user" map:"hated_user"`                                                                                                          //讨厌用户user_id
 	Guise                                  ContentGuise         `json:"guise" bson:"guise" map:"guise"`                                                                                                                         //匿名伪装
 	AntiGuiseUser                          []primitive.ObjectID `json:"anti_guise_user" bson:"anti_guise_user" map:"anti_guise_user"`                                                                                           //反伪装的用户user_id
+	DiscussEstimateTotal                   int                  `json:"discuss_estimate_total" bson:"discuss_estimate_total" map:"discuss_estimate_total"`                                                                      //评论估计总数
 	Status                                 int                  `json:"status" bson:"status" map:"status"`
 	CreateTime                             time.Time            `json:"create_time" bson:"create_time" map:"create_time"`
 	UpdateTime                             time.Time            `json:"update_time" bson:"update_time" map:"update_time"`

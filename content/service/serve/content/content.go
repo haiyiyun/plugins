@@ -207,6 +207,18 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterBySubjectID(requestCL.SubjectID)...)
 	}
 
+	if requestCL.DiscussTotalGte > 0 {
+		filter = append(filter, contentModel.FilterByGteDiscussEstimateTotal(requestCL.DiscussTotalGte)...)
+	}
+
+	if requestCL.DiscussTotalLte > 0 {
+		filter = append(filter, contentModel.FilterByLteDiscussEstimateTotal(requestCL.DiscussTotalLte)...)
+	}
+
+	if requestCL.DiscussTotalZero {
+		filter = append(filter, contentModel.FilterByDiscussEstimateTotal(0)...)
+	}
+
 	if len(requestCL.Tags) > 0 {
 		filter = append(filter, bson.E{
 			"tags", bson.D{
@@ -230,13 +242,20 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		{"associate_type", 1},
 		{"associate_id", 1},
 		{"category_id", 1},
+		{"subject_id", 1},
 		{"author", 1},
 		{"title", 1},
 		{"cover", 1},
 		{"description", 1},
+		{"copy", 1},
+		{"bestest", 1},
+		{"reliable", 1},
 		{"guise", 1},
+		{"anti_guise_user", 1},
 		{"status", 1},
+		{"discuss_estimate_total", 1},
 		{"create_time", 1},
+		{"update_time", 1},
 	}
 
 	opt := options.Find().SetSort(bson.D{

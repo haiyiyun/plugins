@@ -90,6 +90,34 @@ func (self *Model) FilterByVisibilityOrAll(visibility int) bson.D {
 	return filter
 }
 
+func (self *Model) FilterByDiscussEstimateTotal(discussEstimateTotal int) bson.D {
+	filter := bson.D{
+		{"discuss_estimate_total", discussEstimateTotal},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByGteDiscussEstimateTotal(discussEstimateTotal int) bson.D {
+	filter := bson.D{
+		{"discuss_estimate_total", bson.D{
+			{"$gte", discussEstimateTotal},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByLteDiscussEstimateTotal(discussEstimateTotal int) bson.D {
+	filter := bson.D{
+		{"discuss_estimate_total", bson.D{
+			{"$lte", discussEstimateTotal},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByTag(tag string) bson.D {
 	filter := bson.D{
 		{"tags", tag},

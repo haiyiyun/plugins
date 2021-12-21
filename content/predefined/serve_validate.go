@@ -78,7 +78,8 @@ type RequestServeSubjectCreate struct {
 	RequestServeSubjectVisibility
 	RequestServeLongitudeLatitude
 	RequestServeUserTags
-	Subject string `form:"subject" validate:"required"`
+	ExtraData string `form:"extra_data,omitempty"`
+	Subject   string `form:"subject" validate:"required"`
 }
 
 type RequestServeSubjectList struct {
@@ -190,6 +191,9 @@ type RequestServeContentList struct {
 	SubjectID  primitive.ObjectID `form:"subject_id,omitempty"`
 	RequestServeLongitudeLatitude
 	RequestServeDistance
+	DiscussTotalZero bool `form:"discuss_total_zero,omitempty"`
+	DiscussTotalGte  int  `form:"discuss_total_gte,omitempty"`
+	DiscussTotalLte  int  `form:"discuss_total_lte,omitempty"`
 }
 
 type RequestServeContentDetail struct {

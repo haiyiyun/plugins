@@ -243,6 +243,9 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	if ior, err := discussModel.Create(r.Context(), dis); err != nil || ior.InsertedID == nil {
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
+		go contentModel.Inc(r.Context(), contentModel.FilterByID(requestDC.ObjectID), bson.D{
+			{"discuss_estimate_total", 1},
+		})
 		response.JSON(rw, 0, ior.InsertedID, "")
 	}
 }
