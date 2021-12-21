@@ -67,9 +67,9 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 		(self.AllowMultiLogin &&
 			((len(self.AllowMultiLoginUserIDUnlimited) > 0 && help.NewSlice(self.AllowMultiLoginUserIDUnlimited).CheckItem(u.ID.Hex())) ||
 				(self.AllowMultiLoginNum == 0 || cnt < self.AllowMultiLoginNum))) {
-		ExpiredTime := time.Now().Add(self.Config.TokenExpireDuration.Duration)
+		expiredTime := time.Now().Add(self.Config.TokenExpireDuration.Duration)
 		if dur, found := self.Config.SpecifyUserIDTokenExpireDuration[u.ID.Hex()]; found {
-			ExpiredTime = time.Now().Add(dur.Duration)
+			expiredTime = time.Now().Add(dur.Duration)
 		}
 
 		jwtID := primitive.NewObjectID()
@@ -108,7 +108,7 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 				Audience:  u.ID.Hex(),
 				Issuer:    u.ID.Hex(),
 				Subject:   u.Name,
-				ExpiresAt: ExpiredTime.Unix(),
+				ExpiresAt: expiredTime.Unix(),
 			},
 			TokenType: predefined.TokenTypeSelf,
 			JWTTokenClaimsUserInfo: &predefined.JWTTokenClaimsUserInfo{
@@ -139,7 +139,7 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 					UserAgent: userAgent,
 					Location:  geometry.NewPoint(coordinates),
 				},
-				ExpiredTime: ExpiredTime,
+				ExpiredTime: expiredTime,
 			}); err == nil {
 				m = map[string]interface{}{
 					"user_id": u.ID.Hex(),
