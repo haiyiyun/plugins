@@ -3,8 +3,6 @@ package auth
 import (
 	"net/http"
 
-	"github.com/haiyiyun/plugins/user/database/model"
-	"github.com/haiyiyun/plugins/user/database/model/profile"
 	"github.com/haiyiyun/plugins/user/database/model/user"
 	"github.com/haiyiyun/plugins/user/predefined"
 
@@ -15,7 +13,6 @@ import (
 	"github.com/haiyiyun/utils/realip"
 	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
@@ -206,7 +203,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	var userID primitive.ObjectID
-	userID, err := self.CreateUser(r.Context(), requestCreate.Username, requestCreate.Password, requestCreate.Longitude, requestCreate.Latitude, self.Config.EnableProfile, 0)
+	userID, err := self.CreateUser(r.Context(), primitive.NilObjectID, requestCreate.Username, requestCreate.Password, requestCreate.Longitude, requestCreate.Latitude, self.Config.EnableProfile, 0, false)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
@@ -256,53 +253,12 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coordinates := geometry.PointCoordinates{
-		requestGuest.Longitude, requestGuest.Latitude,
-	}
-
 	userID := primitive.NewObjectID()
 	username := userID.Hex()
 	usernameMd5 := help.NewString(username).Md5()
 	password := help.NewString(usernameMd5).Md5()
 
-	userModel := user.NewModel(self.M)
-	ctx := r.Context()
-	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
-		if err := sctx.StartTransaction(); err != nil {
-			return err
-		}
-
-		u := model.User{
-			ID:       userID,
-			Name:     username,
-			Password: password,
-			Guest:    true,
-			Enable:   true,
-		}
-
-		if coordinates != geometry.NilPointCoordinates {
-			u.Location = geometry.NewPoint(coordinates)
-		}
-
-		_, err := userModel.Create(r.Context(), u)
-		if err != nil {
-			sctx.AbortTransaction(sctx)
-			return err
-		}
-
-		profileModel := profile.NewModel(self.M)
-		_, err = profileModel.Create(r.Context(), model.Profile{
-			UserID: userID,
-			Enable: true,
-		})
-
-		if err != nil {
-			sctx.AbortTransaction(sctx)
-			return err
-		}
-
-		return sctx.CommitTransaction(sctx)
-	})
+	userID, err := self.CreateUser(r.Context(), userID, username, password, requestGuest.Longitude, requestGuest.Latitude, self.Config.EnableProfile, 0, false)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")

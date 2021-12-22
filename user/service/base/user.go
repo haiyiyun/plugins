@@ -35,12 +35,13 @@ func (self *Service) CheckUser(ctx context.Context, username string) (int64, err
 	return userModel.CountDocuments(ctx, userModel.FilterByName(username))
 }
 
-func (self *Service) CreateUser(ctx context.Context, username, password string, longitude, latitude float64, enableProfile bool, extensionID int) (primitive.ObjectID, error) {
+func (self *Service) CreateUser(ctx context.Context, id primitive.ObjectID, username, password string, longitude, latitude float64, enableProfile bool, extensionID int, guest bool) (primitive.ObjectID, error) {
 	coordinates := geometry.PointCoordinates{
 		longitude, latitude,
 	}
 
 	userModel := user.NewModel(self.M)
+
 	var userID primitive.ObjectID
 	err := userModel.UseSession(ctx, func(sctx mongo.SessionContext) error {
 		if err := sctx.StartTransaction(); err != nil {
@@ -53,7 +54,12 @@ func (self *Service) CreateUser(ctx context.Context, username, password string, 
 			Password:    help.NewString(password).Md5(),
 			Roles:       []model.UserRole{},
 			Tags:        []model.UserTag{},
+			Guest:       guest,
 			Enable:      true,
+		}
+
+		if id != primitive.NilObjectID {
+			u.ID = id
 		}
 
 		if coordinates != geometry.NilPointCoordinates {
