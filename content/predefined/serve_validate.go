@@ -23,6 +23,10 @@ type RequestServePublishUserID struct {
 	PublishUserID primitive.ObjectID `form:"publish_user_id,omitempty"`
 }
 
+type RequestServePublishUserIDs struct {
+	PublishUserID []primitive.ObjectID `form:"publish_user_id,omitempty" validate:"gte=0,dive,required"`
+}
+
 type RequestServeID struct {
 	ID primitive.ObjectID `form:"id" validate:"required"`
 }
@@ -200,7 +204,7 @@ type RequestServeContentList struct {
 	RequestServeContentPublishType
 	RequestServeContentVisibility
 	RequestServeTags
-	RequestServePublishUserID
+	RequestServePublishUserIDs
 	CategoryID primitive.ObjectID `form:"category_id,omitempty"`
 	SubjectID  primitive.ObjectID `form:"subject_id,omitempty"`
 	RequestServeLongitudeLatitude
