@@ -49,7 +49,7 @@ func (self *Service) generateUploadName(contentType, originalFileName string) (f
 
 		//类型过滤
 		fileType = predefined.UploadTypeFile
-		pathType := self.Config.UploadDirectory
+		pathType := self.Config.UploadFileDirectory
 		switch contentTypes[0] {
 		case predefined.UploadTypeImage:
 			fileType = predefined.UploadTypeImage
