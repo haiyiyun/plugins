@@ -255,10 +255,9 @@ func (self *Service) Route_POST_Guest(rw http.ResponseWriter, r *http.Request) {
 
 	userID := primitive.NewObjectID()
 	username := userID.Hex()
-	usernameMd5 := help.NewString(username).Md5()
-	password := help.NewString(usernameMd5).Md5()
+	password := help.NewString(username).Md5()
 
-	userID, err := self.CreateUser(r.Context(), userID, username, password, requestGuest.Longitude, requestGuest.Latitude, self.Config.EnableProfile, 0, false)
+	userID, err := self.CreateUser(r.Context(), userID, username, password, requestGuest.Longitude, requestGuest.Latitude, self.Config.EnableProfile, 0, true)
 
 	if err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, "")
