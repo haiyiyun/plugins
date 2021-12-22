@@ -7,7 +7,9 @@ import (
 	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/database/model"
+	"github.com/haiyiyun/plugins/content/database/model/category"
 	"github.com/haiyiyun/plugins/content/database/model/content"
+	"github.com/haiyiyun/plugins/content/database/model/subject"
 	"github.com/haiyiyun/plugins/content/predefined"
 	"github.com/haiyiyun/utils/help"
 	"github.com/haiyiyun/utils/http/pagination"
@@ -103,6 +105,120 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 						if cnt >= int64(cont.LimitAssociateNum) {
 							response.JSON(rw, http.StatusForbidden, nil, "403020")
 							return
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//判断Category是否存在
+	if requestCC.CategoryID != primitive.NilObjectID {
+		categoryModel := category.NewModel(self.M)
+
+		if sr := categoryModel.FindOne(r.Context(), categoryModel.FilterNormalCategory()); sr.Err() != nil {
+			log.Error(sr.Err())
+			response.JSON(rw, http.StatusBadRequest, nil, "400414")
+			return
+		} else {
+			var cate model.Category
+			if err := sr.Decode(&cate); err != nil {
+				log.Error(err)
+				response.JSON(rw, http.StatusBadRequest, nil, "400020")
+				return
+			} else {
+				//处理限制
+				if cate.LimitUserAtLeastLevel > 0 {
+					if claims.Level < cate.LimitUserAtLeastLevel {
+						if !help.NewSlice(help.NewSlice(cate.OnlyUserIDNotLimitUserLevel).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+							response.JSON(rw, http.StatusForbidden, nil, "403030")
+						}
+					}
+				}
+
+				if len(cate.LimitUserRole) > 0 {
+					foundRole := false
+					for _, role := range cate.LimitUserRole {
+						if foundRole = request.CheckUserRole(r, role); foundRole {
+							break
+						}
+					}
+
+					if !foundRole {
+						if !help.NewSlice(help.NewSlice(cate.OnlyUserIDNotLimitUserRole).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+							response.JSON(rw, http.StatusForbidden, nil, "403040")
+						}
+					}
+				}
+
+				if len(cate.LimitUserTag) > 0 {
+					foundTag := false
+					for _, tag := range cate.LimitUserTag {
+						if foundTag = request.CheckUserTag(r, tag); foundTag {
+							break
+						}
+					}
+
+					if !foundTag {
+						if !help.NewSlice(help.NewSlice(cate.OnlyUserIDNotLimitUserTag).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+							response.JSON(rw, http.StatusForbidden, nil, "403050")
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//判断Subject是否存在
+	if requestCC.SubjectID != primitive.NilObjectID {
+		subjectModel := subject.NewModel(self.M)
+
+		if sr := subjectModel.FindOne(r.Context(), subjectModel.FilterNormalSubject()); sr.Err() != nil {
+			log.Error(sr.Err())
+			response.JSON(rw, http.StatusBadRequest, nil, "400424")
+			return
+		} else {
+			var subj model.Subject
+			if err := sr.Decode(&subj); err != nil {
+				log.Error(err)
+				response.JSON(rw, http.StatusBadRequest, nil, "400030")
+				return
+			} else {
+				//处理限制
+				if subj.LimitUserAtLeastLevel > 0 {
+					if claims.Level < subj.LimitUserAtLeastLevel {
+						if !help.NewSlice(help.NewSlice(subj.OnlyUserIDNotLimitUserLevel).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+							response.JSON(rw, http.StatusForbidden, nil, "403060")
+						}
+					}
+				}
+
+				if len(subj.LimitUserRole) > 0 {
+					foundRole := false
+					for _, role := range subj.LimitUserRole {
+						if foundRole = request.CheckUserRole(r, role); foundRole {
+							break
+						}
+					}
+
+					if !foundRole {
+						if !help.NewSlice(help.NewSlice(subj.OnlyUserIDNotLimitUserRole).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+							response.JSON(rw, http.StatusForbidden, nil, "403070")
+						}
+					}
+				}
+
+				if len(subj.LimitUserTag) > 0 {
+					foundTag := false
+					for _, tag := range subj.LimitUserTag {
+						if foundTag = request.CheckUserTag(r, tag); foundTag {
+							break
+						}
+					}
+
+					if !foundTag {
+						if !help.NewSlice(help.NewSlice(subj.OnlyUserIDNotLimitUserTag).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+							response.JSON(rw, http.StatusForbidden, nil, "403080")
 						}
 					}
 				}

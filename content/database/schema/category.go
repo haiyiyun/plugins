@@ -50,6 +50,42 @@ var (
 			},
 			{
 				bson.D{
+					{"limit_user_at_least_level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_not_limit_user_level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"limit_user_role", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_not_limit_user_role", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"limit_user_tag", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_not_limit_user_tag", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"status", 1},
 				},
 				options.Index(),
