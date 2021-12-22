@@ -85,7 +85,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			} else {
 				//判断限制关联类型
 				if cont.LimitAssociateType > 0 {
-					if cont.LimitAssociateType != requestCC.PublishType {
+					if cont.LimitAssociateType != requestCC.AssociateType {
 						response.JSON(rw, http.StatusForbidden, nil, "403010")
 						return
 					}
