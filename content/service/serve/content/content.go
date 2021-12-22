@@ -373,6 +373,14 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if requestCL.AssociateType > 0 {
+		filter = append(filter, contentModel.FilterByAssociateType(requestCL.AssociateType)...)
+	}
+
+	if requestCL.AssociateID != primitive.NilObjectID {
+		filter = append(filter, contentModel.FilterByAssociateID(requestCL.AssociateID)...)
+	}
+
 	if requestCL.CategoryID != primitive.NilObjectID {
 		filter = append(filter, contentModel.FilterByCategoryID(requestCL.CategoryID)...)
 	}

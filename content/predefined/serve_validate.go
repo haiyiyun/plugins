@@ -205,8 +205,10 @@ type RequestServeContentList struct {
 	RequestServeContentVisibility
 	RequestServeTags
 	RequestServePublishUserIDs
-	CategoryID primitive.ObjectID `form:"category_id,omitempty"`
-	SubjectID  primitive.ObjectID `form:"subject_id,omitempty"`
+	CategoryID    primitive.ObjectID `form:"category_id,omitempty"`
+	SubjectID     primitive.ObjectID `form:"subject_id,omitempty"`
+	AssociateType int                `form:"associate_type,omitempty"`
+	AssociateID   primitive.ObjectID `form:"associate_id,omitempty"`
 	RequestServeLongitudeLatitude
 	RequestServeDistance
 	LimitUserAtLeastLevel int           `form:"limit_user_at_least_level,omitempty"`

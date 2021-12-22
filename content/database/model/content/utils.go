@@ -41,6 +41,22 @@ func (self *Model) FilterByPublishUserIDs(publishUserIDs []primitive.ObjectID) b
 	return filter
 }
 
+func (self *Model) FilterByAssociateType(associateType int) bson.D {
+	filter := bson.D{
+		{"associate_type", associateType},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByAssociateID(associateID primitive.ObjectID) bson.D {
+	filter := bson.D{
+		{"associate_id", associateID},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByCategoryID(categoryID primitive.ObjectID) bson.D {
 	filter := bson.D{
 		{"category_id", categoryID},
