@@ -115,8 +115,9 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	//判断Category是否存在
 	if requestCC.CategoryID != primitive.NilObjectID {
 		categoryModel := category.NewModel(self.M)
-
-		if sr := categoryModel.FindOne(r.Context(), categoryModel.FilterNormalCategory()); sr.Err() != nil {
+		categoryFilter := categoryModel.FilterByID(requestCC.CategoryID)
+		categoryFilter = append(categoryFilter, categoryModel.FilterNormalCategory()...)
+		if sr := categoryModel.FindOne(r.Context(), categoryFilter); sr.Err() != nil {
 			log.Error(sr.Err())
 			response.JSON(rw, http.StatusBadRequest, nil, "400414")
 			return
@@ -172,8 +173,9 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	//判断Subject是否存在
 	if requestCC.SubjectID != primitive.NilObjectID {
 		subjectModel := subject.NewModel(self.M)
-
-		if sr := subjectModel.FindOne(r.Context(), subjectModel.FilterNormalSubject()); sr.Err() != nil {
+		subjectFilter := subjectModel.FilterByID(requestCC.SubjectID)
+		subjectFilter = append(subjectFilter, subjectModel.FilterNormalSubject()...)
+		if sr := subjectModel.FindOne(r.Context(), subjectFilter); sr.Err() != nil {
 			log.Error(sr.Err())
 			response.JSON(rw, http.StatusBadRequest, nil, "400424")
 			return
