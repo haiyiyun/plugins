@@ -51,12 +51,14 @@ func (self *Service) generateUploadName(contentType, originalFileName string) (f
 		fileType = predefined.UploadTypeFile
 		pathType := self.Config.UploadFileDirectory
 		switch contentTypes[0] {
-		case predefined.UploadTypeImage:
+		case "image":
 			fileType = predefined.UploadTypeImage
 			pathType = self.Config.UploadImageDirectory
-		case predefined.UploadTypeMedia:
-			switch fileType {
-			case ".mp3", ".mp4", ".wav", ".wma", ".wmv", ".mid", ".avi", ".mpg", ".asf", ".rm", ".rmvb":
+		case "video", "audio":
+			switch contentTypes[1] {
+			case "x-ms-asf", "avi", "x-ivf", "x-mpeg", "mpeg4", "x-sgi-movie", "mpeg", "x-mpg", "mpg", "vnd.rn-realvideo", "x-ms-wm", "x-ms-wmv", "x-ms-wmx", "x-mei-aac",
+				"aiff", "basic", "x-liquid-file", "x-liquid-secure", "x-la-lms", "mpegurl", "mid", "x-musicnet-download", "x-musicnet-stream", "mp1", "mp2", "mp3", "rn-mpeg", "scpls",
+				"vnd.rn-realaudio", "x-pn-realaudio", "x-pn-realaudio-plugin", "wav", "x-ms-wax", "x-ms-wma":
 				fileType = predefined.UploadTypeMedia
 				pathType = self.Config.UploadMediaDirectory
 			}
