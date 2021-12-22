@@ -95,6 +95,13 @@ const (
 )
 
 const (
+	ContentLinkTypeWebview = iota //普通网址
+	ContentLinkTypeImage          //图片地址
+	ContentLinkTypeVoice          //语音地址
+	ContentLinkTypeVideo          //视频地址
+)
+
+const (
 	SubjectTypeUserDynamic  = iota //用户动态类型
 	SubjectTypeUserArticle         //用户文章类型
 	SubjectTypeUserQuestion        //用户问题类型

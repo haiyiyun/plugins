@@ -16,6 +16,7 @@ type ContentGuise struct {
 type ContentLink struct {
 	External bool   `json:"external" bson:"external" map:"external"` //是否外部link
 	Iframe   bool   `json:"iframe" bson:"iframe" map:"iframe"`       //是否内嵌，还是跳转到浏览器
+	Type     int    `json:"type" bson:"type" map:"type"`             //链接类型
 	URL      string `json:"url" bson:"url" map:"url"`                //链接地址
 }
 
