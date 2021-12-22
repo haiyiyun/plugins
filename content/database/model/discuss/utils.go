@@ -92,7 +92,9 @@ func (self *Model) FilterByLocation(location geometry.Point, maxDistance, minDis
 	}
 
 	filter := bson.D{
-		{"$near", geo},
+		{"location", bson.D{
+			{"$near", geo},
+		}},
 	}
 
 	return filter

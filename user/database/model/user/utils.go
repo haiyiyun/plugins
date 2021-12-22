@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"time"
 
+	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/user/database/model"
 	"github.com/haiyiyun/utils/help"
 
@@ -16,10 +17,207 @@ func init() {
 	gob.Register(model.User{})
 }
 
+func (self *Model) FilterByNormalUser() bson.D {
+	return bson.D{
+		{"enable", true},
+		{"delete", false},
+	}
+}
+
+func (self *Model) FilterByGuest(guest bool) bson.D {
+	return bson.D{
+		{"guest", guest},
+	}
+}
+
+func (self *Model) FilterByRole(role string) bson.D {
+	return bson.D{
+		{"roles.role", role},
+	}
+}
+
+func (self *Model) FilterByRoles(roles []string) bson.D {
+	if len(roles) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"roles.role", bson.D{
+			{"$in", roles},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByRolesWithTime(roles []string, t time.Time) bson.D {
+	if len(roles) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"roles.role", bson.D{
+			{"$in", roles},
+		}},
+		{"roles.start_time", bson.D{
+			{"$lte", t},
+		}},
+		{"roles.end_time", bson.D{
+			{"$gte", t},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByRoleWithTime(role string, t time.Time) bson.D {
+	return bson.D{
+		{"roles.role", role},
+		{"roles.start_time", bson.D{
+			{"$lte", t},
+		}},
+		{"roles.end_time", bson.D{
+			{"$gte", t},
+		}},
+	}
+}
+
+func (self *Model) FilterByTag(tag string) bson.D {
+	return bson.D{
+		{"tags.tag", tag},
+	}
+}
+
+func (self *Model) FilterByTags(tags []string) bson.D {
+	if len(tags) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"tags.tag", bson.D{
+			{"$in", tags},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByTagsWithTime(tags []string, t time.Time) bson.D {
+	if len(tags) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"tags.tag", bson.D{
+			{"$in", tags},
+		}},
+		{"roles.start_time", bson.D{
+			{"$lte", t},
+		}},
+		{"roles.end_time", bson.D{
+			{"$gte", t},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByTagWithTime(tag string, t time.Time) bson.D {
+	return bson.D{
+		{"tags.tag", tag},
+		{"tags.start_time", bson.D{
+			{"$lte", t},
+		}},
+		{"tags.end_time", bson.D{
+			{"$gte", t},
+		}},
+	}
+}
+
+func (self *Model) FilterByLevel(level int) bson.D {
+	return bson.D{
+		{"level", level},
+	}
+}
+
+func (self *Model) FilterByGteLevel(level int) bson.D {
+	return bson.D{
+		{"level", bson.D{
+			{"$gte", level},
+		}},
+	}
+}
+
+func (self *Model) FilterByLteLevel(level int) bson.D {
+	return bson.D{
+		{"level", bson.D{
+			{"$lte", level},
+		}},
+	}
+}
+
+func (self *Model) FilterByOnline(online bool) bson.D {
+	return bson.D{
+		{"online.online", online},
+	}
+}
+
 func (self *Model) FilterByName(name string) bson.D {
 	return bson.D{
 		{"name", name},
 	}
+}
+
+func (self *Model) FilterByLocation(location geometry.Point, maxDistance, minDistance float64) bson.D {
+	geo := bson.D{
+		{"$geometry", location},
+	}
+
+	if maxDistance > 0 {
+		geo = append(geo, bson.E{
+			"$maxDistance", maxDistance,
+		})
+	}
+
+	if minDistance > 0 {
+		geo = append(geo, bson.E{
+			"$minDistance", minDistance,
+		})
+	}
+
+	filter := bson.D{
+		{"location", bson.D{
+			{"$near", geo},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByOnlineLocation(location geometry.Point, maxDistance, minDistance float64) bson.D {
+	geo := bson.D{
+		{"$geometry", location},
+	}
+
+	if maxDistance > 0 {
+		geo = append(geo, bson.E{
+			"$maxDistance", maxDistance,
+		})
+	}
+
+	if minDistance > 0 {
+		geo = append(geo, bson.E{
+			"$minDistance", minDistance,
+		})
+	}
+
+	filter := bson.D{
+		{"online.location", bson.D{
+			{"$near", geo},
+		}},
+	}
+
+	return filter
 }
 
 func (self *Model) CheckNameAndPassword(name, password string) (u model.User, err error) {

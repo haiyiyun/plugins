@@ -62,6 +62,18 @@ var (
 			},
 			{
 				bson.D{
+					{"roles.start_time", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"roles.end_time", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"_id", 1},
 					{"roles.role", 1},
 				},
@@ -80,6 +92,18 @@ var (
 			{
 				bson.D{
 					{"tags.level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"tags.start_time", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"tags.end_time", 1},
 				},
 				options.Index(),
 			},

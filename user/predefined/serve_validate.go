@@ -1,6 +1,9 @@
 package predefined
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/haiyiyun/utils/help"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type RequestServeAuthUsername struct {
 	Username string `form:"username" validate:"required"`
@@ -15,27 +18,42 @@ type RequestServeAuthUsernamePassword struct {
 	RequestServeAuthPassword
 }
 
-type RequestServeAuthLongitudeLatitude struct {
+type RequestServeLongitudeLatitude struct {
 	Longitude float64 `form:"longitude,omitempty"` //经度
 	Latitude  float64 `form:"latitude,omitempty"`  //维度
 }
 
+type RequestServeDistance struct {
+	MaxDistance float64 `form:"max_distance,omitempty" validate:"numeric"`
+	MinDistance float64 `form:"min_distance,omitempty" validate:"numeric"`
+}
+
+type RequestServeOnlineLongitudeLatitude struct {
+	OnlineLongitude float64 `form:"pnline_longitude,omitempty"` //经度
+	OnlineLatitude  float64 `form:"pnline_latitude,omitempty"`  //维度
+}
+
+type RequestServeOnlineDistance struct {
+	OnlineMaxDistance float64 `form:"pnline_max_distance,omitempty" validate:"numeric"`
+	OnlineMinDistance float64 `form:"pnline_min_distance,omitempty" validate:"numeric"`
+}
+
 type RequestServeAuthLogin struct {
 	RequestServeAuthUsernamePassword
-	RequestServeAuthLongitudeLatitude
+	RequestServeLongitudeLatitude
 }
 
 type RequestServeAuthRefresh struct {
-	RequestServeAuthLongitudeLatitude
+	RequestServeLongitudeLatitude
 }
 
 type RequestServeAuthCreate struct {
 	RequestServeAuthUsernamePassword
-	RequestServeAuthLongitudeLatitude
+	RequestServeLongitudeLatitude
 }
 
 type RequestServeAuthGuest struct {
-	RequestServeAuthLongitudeLatitude
+	RequestServeLongitudeLatitude
 }
 
 type RequestServeAuthGuestToUser struct {
@@ -49,4 +67,22 @@ type RequestServeAuthTokenID struct {
 type RequestServeAuthTokenByUsernameAndPassword struct {
 	RequestServeAuthTokenID
 	RequestServeAuthUsernamePassword
+}
+
+type RequestServeUserList struct {
+	GuestQuery    bool          `form:"guest_query"`
+	Guest         bool          `form:"guest"`
+	Roles         []string      `form:"roles"`
+	RolesWithTime help.DateTime `form:"roles_with_time"`
+	Tags          []string      `form:"tags"`
+	TagsWithTime  help.DateTime `form:"tags_with_time"`
+	Level         int           `form:"level"`
+	GteLevel      int           `form:"gte_level"`
+	LteLevel      int           `form:"lte_level"`
+	OnlineQuery   bool          `form:"online_query"`
+	Online        bool          `form:"online"`
+	RequestServeLongitudeLatitude
+	RequestServeDistance
+	RequestServeOnlineLongitudeLatitude
+	RequestServeOnlineDistance
 }
