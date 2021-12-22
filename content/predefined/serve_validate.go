@@ -172,6 +172,12 @@ type RequestServeContentCreate struct {
 	HideDetail                             bool                 `form:"hide_detail"`
 	OnlyUserIDShowDetail                   []primitive.ObjectID `form:"only_user_id_show_detail"`
 	Copy                                   bool                 `form:"copy"`
+	LimitUserAtLeastLevel                  int                  `form:"limit_user_at_least_level"`
+	OnlyUserIDNotLimitUserLevel            []primitive.ObjectID `form:"only_user_id_not_limit_user_level"`
+	LimitUserRole                          []string             `form:"limit_user_role"`
+	OnlyUserIDNotLimitUserRole             []primitive.ObjectID `form:"only_user_id_not_limit_user_role"`
+	LimitUserTag                           []string             `form:"limit_user_tag"`
+	OnlyUserIDNotLimitUserTag              []primitive.ObjectID `form:"only_user_id_not_limit_user_tag"`
 	OnlyUserIDDiscuss                      []primitive.ObjectID `form:"only_user_id_discuss"`
 	OnlyUserIDCanReplyDiscuss              []primitive.ObjectID `form:"only_publish_user_id_can_reply_discuss"`
 	OnlyUserIDCanNotReplyDiscuss           []primitive.ObjectID `form:"only_publish_user_id_can_not_reply_discuss"`
@@ -199,15 +205,18 @@ type RequestServeContentList struct {
 	SubjectID  primitive.ObjectID `form:"subject_id,omitempty"`
 	RequestServeLongitudeLatitude
 	RequestServeDistance
-	ValueZero        bool          `form:"value_zero,omitempty"`
-	ValueGte         int           `form:"value_gte,omitempty"`
-	ValueLte         int           `form:"value_lte,omitempty"`
-	DiscussTotalZero bool          `form:"discuss_total_zero,omitempty"`
-	DiscussTotalGte  int           `form:"discuss_total_gte,omitempty"`
-	DiscussTotalLte  int           `form:"discuss_total_lte,omitempty"`
-	InTime           bool          `form:"in_time,omitempty"`
-	StartTime        help.DateTime `form:"start_time,omitempty"`
-	EndTime          help.DateTime `form:"end_time,omitempty"`
+	LimitUserAtLeastLevel int           `form:"limit_user_at_least_level,omitempty"`
+	LimitUserRole         []string      `form:"limit_user_role,omitempty"`
+	LimitUserTag          []string      `form:"limit_user_tag,omitempty"`
+	ValueZero             bool          `form:"value_zero,omitempty"`
+	ValueGte              int           `form:"value_gte,omitempty"`
+	ValueLte              int           `form:"value_lte,omitempty"`
+	DiscussTotalZero      bool          `form:"discuss_total_zero,omitempty"`
+	DiscussTotalGte       int           `form:"discuss_total_gte,omitempty"`
+	DiscussTotalLte       int           `form:"discuss_total_lte,omitempty"`
+	InTime                bool          `form:"in_time,omitempty"`
+	StartTime             help.DateTime `form:"start_time,omitempty"`
+	EndTime               help.DateTime `form:"end_time,omitempty"`
 }
 
 type RequestServeContentDetail struct {

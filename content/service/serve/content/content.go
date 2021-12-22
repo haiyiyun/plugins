@@ -134,6 +134,18 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		requestCC.OnlyUserIDShowDiscuss = []primitive.ObjectID{}
 	}
 
+	if requestCC.OnlyUserIDNotLimitUserLevel == nil {
+		requestCC.OnlyUserIDNotLimitUserLevel = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDNotLimitUserRole == nil {
+		requestCC.OnlyUserIDNotLimitUserRole = []primitive.ObjectID{}
+	}
+
+	if requestCC.OnlyUserIDNotLimitUserTag == nil {
+		requestCC.OnlyUserIDNotLimitUserTag = []primitive.ObjectID{}
+	}
+
 	ctnt := &model.Content{
 		PublishUserID:                          userID,
 		Type:                                   requestCC.Type,
@@ -161,6 +173,12 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		HideDetail:                             requestCC.HideDetail,
 		OnlyUserIDShowDetail:                   requestCC.OnlyUserIDShowDetail,
 		Copy:                                   requestCC.Copy,
+		LimitUserAtLeastLevel:                  requestCC.LimitUserAtLeastLevel,
+		OnlyUserIDNotLimitUserLevel:            requestCC.OnlyUserIDNotLimitUserLevel,
+		LimitUserRole:                          requestCC.LimitUserRole,
+		OnlyUserIDNotLimitUserRole:             requestCC.OnlyUserIDNotLimitUserRole,
+		LimitUserTag:                           requestCC.LimitUserTag,
+		OnlyUserIDNotLimitUserTag:              requestCC.OnlyUserIDNotLimitUserTag,
 		OnlyUserIDDiscuss:                      requestCC.OnlyUserIDDiscuss,
 		OnlyUserIDCanReplyDiscuss:              requestCC.OnlyUserIDCanReplyDiscuss,
 		OnlyUserIDCanNotReplyDiscuss:           requestCC.OnlyUserIDCanNotReplyDiscuss,
@@ -243,6 +261,18 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 
 	if requestCL.SubjectID != primitive.NilObjectID {
 		filter = append(filter, contentModel.FilterBySubjectID(requestCL.SubjectID)...)
+	}
+
+	if requestCL.LimitUserAtLeastLevel > 0 {
+		filter = append(filter, contentModel.FilterByGteLimitUserAtLeastLevel(requestCL.LimitUserAtLeastLevel)...)
+	}
+
+	if len(requestCL.LimitUserRole) > 0 {
+		filter = append(filter, contentModel.FilterByLimitUserRole(requestCL.LimitUserRole)...)
+	}
+
+	if len(requestCL.LimitUserTag) > 0 {
+		filter = append(filter, contentModel.FilterByLimitUserTag(requestCL.LimitUserTag)...)
 	}
 
 	if requestCL.DiscussTotalGte > 0 {
@@ -377,18 +407,50 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 		var contentDetail model.Content
 		if err := sr.Decode(&contentDetail); err == nil {
 			now := time.Now()
-			if !contentDetail.StartTime.IsZero() && !contentDetail.EndTime.IsZero() {
-				if !(contentDetail.StartTime.Before(now) && contentDetail.EndTime.After(now)) {
-					response.JSON(rw, http.StatusForbidden, nil, "403010")
+			if contentDetail.LimitUserAtLeastLevel > 0 {
+				if claims.Level < contentDetail.LimitUserAtLeastLevel {
+					if !help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDNotLimitUserLevel).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+						response.JSON(rw, http.StatusForbidden, nil, "403010")
+					}
 				}
-			} else if !contentDetail.StartTime.IsZero() {
-				if !contentDetail.StartTime.Before(now) {
-					response.JSON(rw, http.StatusForbidden, nil, "403011")
+			}
+
+			if len(contentDetail.LimitUserRole) > 0 {
+				foundRole := false
+				for _, role := range contentDetail.LimitUserRole {
+					if foundRole = request.CheckUserRole(r, role); foundRole {
+						break
+					}
 				}
-			} else if !contentDetail.EndTime.IsZero() {
-				if !contentDetail.EndTime.After(now) {
-					response.JSON(rw, http.StatusForbidden, nil, "403012")
+
+				if !foundRole {
+					if !help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDNotLimitUserRole).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+						response.JSON(rw, http.StatusForbidden, nil, "403020")
+					}
 				}
+			}
+
+			if len(contentDetail.LimitUserTag) > 0 {
+				foundTag := false
+				for _, tag := range contentDetail.LimitUserTag {
+					if foundTag = request.CheckUserTag(r, tag); foundTag {
+						break
+					}
+				}
+
+				if !foundTag {
+					if !help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDNotLimitUserTag).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+						response.JSON(rw, http.StatusForbidden, nil, "403030")
+					}
+				}
+			}
+
+			if !contentDetail.StartTime.IsZero() && !contentDetail.EndTime.IsZero() && !(contentDetail.StartTime.Before(now) && contentDetail.EndTime.After(now)) {
+				response.JSON(rw, http.StatusForbidden, nil, "403040")
+			} else if !contentDetail.StartTime.IsZero() && !contentDetail.StartTime.Before(now) {
+				response.JSON(rw, http.StatusForbidden, nil, "403041")
+			} else if !contentDetail.EndTime.IsZero() && !contentDetail.EndTime.After(now) {
+				response.JSON(rw, http.StatusForbidden, nil, "403042")
 			}
 
 			if !contentDetail.HideDetail ||
@@ -397,7 +459,7 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 					help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(userID.Hex())) {
 				response.JSON(rw, 0, contentDetail, "")
 			} else {
-				response.JSON(rw, http.StatusForbidden, nil, "403020")
+				response.JSON(rw, http.StatusForbidden, nil, "403050")
 			}
 		} else {
 			log.Error(err)

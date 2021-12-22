@@ -50,6 +50,12 @@ var (
 			},
 			{
 				bson.D{
+					{"limit_associate_type", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"category_id", 1},
 				},
 				options.Index(),
@@ -93,7 +99,85 @@ var (
 			},
 			{
 				bson.D{
+					{"hide_detail", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_show_detail", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"copy", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"limit_user_at_least_level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_not_limit_user_level", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"limit_user_role", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_not_limit_user_role", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"limit_user_tag", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_not_limit_user_tag", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_discuss", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_publish_user_id_can_reply_discuss", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_publish_user_id_can_not_reply_discuss", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"hide_discuss", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"only_user_id_show_discuss", 1},
 				},
 				options.Index(),
 			},
@@ -130,6 +214,30 @@ var (
 			{
 				bson.D{
 					{"reliable", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"readed_user", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"wanted_user", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"liked_user", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"hated_user", 1},
 				},
 				options.Index(),
 			},

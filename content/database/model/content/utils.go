@@ -65,6 +65,34 @@ func (self *Model) FilterByTypes(types []int) bson.D {
 	return filter
 }
 
+func (self *Model) FilterByLimitUserRole(limitUserRole []string) bson.D {
+	if len(limitUserRole) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"limit_user_role", bson.D{
+			{"$in", limitUserRole},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByLimitUserTag(limitUserTag []string) bson.D {
+	if len(limitUserTag) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"limit_user_tag", bson.D{
+			{"$in", limitUserTag},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByPublishType(publishType int) bson.D {
 	filter := bson.D{
 		{"publish_type", publishType},
@@ -144,6 +172,16 @@ func (self *Model) FilterByLteValue(value int) bson.D {
 	filter := bson.D{
 		{"value", bson.D{
 			{"$lte", value},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByGteLimitUserAtLeastLevel(limitUserAtLeastLevel int) bson.D {
+	filter := bson.D{
+		{"limit_user_at_least_level", bson.D{
+			{"$gte", limitUserAtLeastLevel},
 		}},
 	}
 
@@ -269,6 +307,48 @@ func (self *Model) DeleteOnlyUserIDCanNotReplyDiscuss(cxt context.Context, conte
 	filter := self.FilterByID(contentID)
 	return self.Pull(cxt, filter, bson.D{
 		{"only_publish_user_id_can_not_reply_discuss", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDNotLimitUserLevel(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_user_id_not_limit_user_level", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDNotLimitUserLevel(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_user_id_not_limit_user_level", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDNotLimitUserRole(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_user_id_not_limit_user_role", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDNotLimitUserRole(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_user_id_not_limit_user_role", userID},
+	})
+}
+
+func (self *Model) AddOnlyUserIDNotLimitUserTag(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"only_user_id_not_limit_user_tag", userID},
+	})
+}
+
+func (self *Model) DeleteOnlyUserIDNotLimitUserTag(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(contentID)
+	return self.Pull(cxt, filter, bson.D{
+		{"only_user_id_not_limit_user_tag", userID},
 	})
 }
 
