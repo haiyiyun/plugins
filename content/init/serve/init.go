@@ -9,6 +9,7 @@ import (
 	contentCategory "github.com/haiyiyun/plugins/content/service/serve/category"
 	contentContent "github.com/haiyiyun/plugins/content/service/serve/content"
 	contentDiscuss "github.com/haiyiyun/plugins/content/service/serve/discuss"
+	contentFollow "github.com/haiyiyun/plugins/content/service/serve/follow"
 	contentSubject "github.com/haiyiyun/plugins/content/service/serve/subject"
 
 	"github.com/haiyiyun/cache"
@@ -56,6 +57,7 @@ func init() {
 		contentSubjectService := contentSubject.NewService(serveService)
 		contentContentService := contentContent.NewService(serveService)
 		contentDiscussService := contentDiscuss.NewService(serveService)
+		contentFollowService := contentFollow.NewService(serveService)
 		//Init End
 
 		//Go Begin
@@ -66,6 +68,7 @@ func init() {
 		webrouter.Register(serveConf.WebRouterRootPath+"subject/", contentSubjectService)
 		webrouter.Register(serveConf.WebRouterRootPath+"content/", contentContentService)
 		webrouter.Register(serveConf.WebRouterRootPath+"discuss/", contentDiscussService)
+		webrouter.Register(serveConf.WebRouterRootPath+"follow/", contentFollowService)
 		//Register End
 	}
 }

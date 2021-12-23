@@ -228,3 +228,22 @@ type RequestServeContentList struct {
 type RequestServeContentDetail struct {
 	RequestServeID
 }
+
+type RequestServeFollowType struct {
+	Type int `form:"type" validate:"oneof=0 1 2 3 4 5"`
+}
+
+type RequestServeFollowRelationshipCreate struct {
+	RequestServeFollowType
+	RequestServeObjectIDRequired
+	Stealth bool `form:"stealth"`
+}
+
+type RequestServeFollowRelationshipDelete struct {
+	RequestServeFollowType
+	RequestServeObjectIDRequired
+}
+
+type RequestServeFollowRelationshipList struct {
+	RequestServeFollowType
+}
