@@ -133,6 +133,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					if claims.Level < cate.LimitUserAtLeastLevel {
 						if !help.NewSlice(help.NewSlice(cate.OnlyUserIDNotLimitUserLevel).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 							response.JSON(rw, http.StatusForbidden, nil, "403030")
+							return
 						}
 					}
 				}
@@ -148,6 +149,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					if !foundRole {
 						if !help.NewSlice(help.NewSlice(cate.OnlyUserIDNotLimitUserRole).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 							response.JSON(rw, http.StatusForbidden, nil, "403040")
+							return
 						}
 					}
 				}
@@ -191,6 +193,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					if claims.Level < subj.LimitUserAtLeastLevel {
 						if !help.NewSlice(help.NewSlice(subj.OnlyUserIDNotLimitUserLevel).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 							response.JSON(rw, http.StatusForbidden, nil, "403060")
+							return
 						}
 					}
 				}
@@ -206,6 +209,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					if !foundRole {
 						if !help.NewSlice(help.NewSlice(subj.OnlyUserIDNotLimitUserRole).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 							response.JSON(rw, http.StatusForbidden, nil, "403070")
+							return
 						}
 					}
 				}
@@ -221,6 +225,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					if !foundTag {
 						if !help.NewSlice(help.NewSlice(subj.OnlyUserIDNotLimitUserTag).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 							response.JSON(rw, http.StatusForbidden, nil, "403080")
+							return
 						}
 					}
 				}
@@ -376,6 +381,34 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if requestCL.AssociateID != primitive.NilObjectID {
+		//判断关联是否有限制
+		filterAssociateContent := contentModel.FilterNormalContent()
+		filterAssociateContent = append(filterAssociateContent, contentModel.FilterByID(requestCL.AssociateID)...)
+		associateContentSR := contentModel.FindOne(r.Context(), filterAssociateContent, options.FindOne().SetProjection(bson.D{
+			{"hide_discuss", 1},
+			{"only_user_id_show_discuss", 1},
+		}))
+
+		if associateContentSR.Err() != nil {
+			log.Error(associateContentSR.Err())
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "503000")
+			return
+		}
+
+		var associateContent model.Content
+		if err := associateContentSR.Decode(&associateContent); err != nil {
+			log.Error(err)
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "503001")
+			return
+		} else {
+			if associateContent.HideDetail {
+				if len(associateContent.OnlyUserIDShowDetail) == 0 || (len(associateContent.OnlyUserIDShowDetail) > 0 && !help.NewSlice(help.NewSlice(associateContent.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(userID.Hex())) {
+					response.JSON(rw, http.StatusForbidden, nil, "403000")
+					return
+				}
+			}
+		}
+
 		filter = append(filter, contentModel.FilterByAssociateID(requestCL.AssociateID)...)
 	}
 
@@ -535,6 +568,7 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 				if claims.Level < contentDetail.LimitUserAtLeastLevel {
 					if !help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDNotLimitUserLevel).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 						response.JSON(rw, http.StatusForbidden, nil, "403010")
+						return
 					}
 				}
 			}
@@ -550,6 +584,7 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 				if !foundRole {
 					if !help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDNotLimitUserRole).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 						response.JSON(rw, http.StatusForbidden, nil, "403020")
+						return
 					}
 				}
 			}
@@ -565,16 +600,20 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 				if !foundTag {
 					if !help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDNotLimitUserTag).ObjectIDToStrings()).CheckItem(userID.Hex()) {
 						response.JSON(rw, http.StatusForbidden, nil, "403030")
+						return
 					}
 				}
 			}
 
 			if !contentDetail.StartTime.IsZero() && !contentDetail.EndTime.IsZero() && !(contentDetail.StartTime.Before(now) && contentDetail.EndTime.After(now)) {
 				response.JSON(rw, http.StatusForbidden, nil, "403040")
+				return
 			} else if !contentDetail.StartTime.IsZero() && !contentDetail.StartTime.Before(now) {
 				response.JSON(rw, http.StatusForbidden, nil, "403041")
+				return
 			} else if !contentDetail.EndTime.IsZero() && !contentDetail.EndTime.After(now) {
 				response.JSON(rw, http.StatusForbidden, nil, "403042")
+				return
 			}
 
 			if !contentDetail.HideDetail ||

@@ -100,7 +100,7 @@ func (self *Service) Route_GET_Relationships(rw http.ResponseWriter, r *http.Req
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByUserWithType(claims.UserID, requestSFRL.Type)
+	filter := relModel.FilterByUserWithType(requestSFRL.UserID, requestSFRL.Type)
 
 	cnt, _ := relModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
@@ -193,14 +193,14 @@ func (self *Service) Route_GET_RelationshipTotal(rw http.ResponseWriter, r *http
 		return
 	}
 
-	var requestSFT predefined.RequestServeFollowType
-	if err := validator.FormStruct(&requestSFT, r.URL.Query()); err != nil {
+	var requestSFRT predefined.RequestServeFollowRelationshipTotal
+	if err := validator.FormStruct(&requestSFRT, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByUserWithType(claims.UserID, requestSFT.Type)
+	filter := relModel.FilterByUserWithType(requestSFRT.UserID, requestSFRT.Type)
 
 	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
 		log.Error(err)

@@ -250,11 +250,17 @@ type RequestServeFollowRelationshipDelete struct {
 
 type RequestServeFollowRelationshipList struct {
 	RequestServeFollowType
+	RequestServeUserID
 }
 
 type RequestServeFollowBeRelationshipList struct {
 	RequestServeFollowType
 	RequestServeObjectIDRequired
+}
+
+type RequestServeFollowRelationshipTotal struct {
+	RequestServeFollowType
+	RequestServeUserID
 }
 
 type RequestServeFollowBeRelationshipTotal struct {
