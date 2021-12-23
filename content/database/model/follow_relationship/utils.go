@@ -92,6 +92,10 @@ func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, obje
 
 func (self *Model) DeleteRelationship(ctx context.Context, typ int, userID, objectID primitive.ObjectID) error {
 	err := self.UseSession(ctx, func(sctx mongo.SessionContext) error {
+		if err := sctx.StartTransaction(); err != nil {
+			return err
+		}
+
 		if typ == predefined.FollowTypeUser {
 			if sr := self.FindOne(sctx, self.FilterByRelationship(typ, objectID, userID), options.FindOne().SetProjection(bson.D{
 				{"_id", 1},
