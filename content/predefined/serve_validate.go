@@ -94,7 +94,7 @@ type RequestServeSubjectCreate struct {
 }
 
 type RequestServeSubjectList struct {
-	RequestServePublishUserID
+	RequestServePublishUserIDs
 	RequestServeSubjectListType
 	RequestServeSubjectVisibility
 	RequestServeLongitudeLatitude
@@ -125,7 +125,7 @@ type RequestServeDiscussList struct {
 	Types []int `form:"types,omitempty" validate:"required_with=ObjectID,gte=0,dive,oneof=0 1 2 3"`
 	RequestServeObjectID
 	RequestServeDiscussVisibility
-	RequestServePublishUserID
+	RequestServePublishUserIDs
 	RequestServeLongitudeLatitude
 	RequestServeDistance
 }

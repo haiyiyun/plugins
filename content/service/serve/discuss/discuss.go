@@ -334,17 +334,15 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 
 	if requestDL.Visibility == predefined.VisibilityTypeSelf {
 		filter = append(filter, discussModel.FilterByPublishUserID(userID)...)
-		filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
 	} else {
-		if requestDL.PublishUserID != primitive.NilObjectID {
-			filter = append(filter, discussModel.FilterByPublishUserID(requestDL.PublishUserID)...)
-			filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
+		if len(requestDL.PublishUserID) > 0 {
+			filter = append(filter, discussModel.FilterByPublishUserIDs(requestDL.PublishUserID)...)
+		}
+
+		if requestDL.Visibility != predefined.VisibilityTypeAll {
+			filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
 		} else {
-			if requestDL.Visibility != predefined.VisibilityTypeAll {
-				filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
-			} else {
-				filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
-			}
+			filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
 		}
 	}
 
@@ -375,6 +373,45 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			}
 
 			response.JSON(rw, 0, rpr, "")
+		}
+	}
+}
+
+func (self *Service) Route_GET_AvgEvaluation(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	discussModel := discuss.NewModel(self.M)
+	match := discussModel.FilterNormalDiscuss()
+	match = append(match, discussModel.FilterByObjectID(requestOIDR.ObjectID)...)
+
+	if cur, err := discussModel.Aggregate(r.Context(), bson.D{
+		{"$match", match},
+		{"$group", bson.D{
+			{"_id", `$_id`},
+			{"avg_evaluation", bson.D{
+				{"$avg", `$evaluation`},
+			}},
+		}},
+	}); err != nil {
+		log.Error(err)
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		var dissAvgs []help.M
+		if err := cur.All(r.Context(), &dissAvgs); err != nil {
+			log.Error(err)
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+		} else {
+			response.JSON(rw, 0, dissAvgs, "")
 		}
 	}
 }

@@ -31,6 +31,20 @@ func (self *Model) FilterByPublishUserID(publishUserID primitive.ObjectID) bson.
 	return filter
 }
 
+func (self *Model) FilterByPublishUserIDs(publishUserIDs []primitive.ObjectID) bson.D {
+	if len(publishUserIDs) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"publish_user_id", bson.D{
+			{"$in", publishUserIDs},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByType(typ int) bson.D {
 	filter := bson.D{
 		{"type", typ},
