@@ -121,6 +121,10 @@ type RequestServeDiscussCreate struct {
 	Text       string  `form:"text" validate:"required"`
 }
 
+type RequestServeDiscussDelete struct {
+	RequestServeID
+}
+
 type RequestServeDiscussList struct {
 	Types []int `form:"types,omitempty" validate:"required_with=ObjectID,gte=0,dive,oneof=0 1 2 3"`
 	RequestServeObjectID
@@ -227,6 +231,10 @@ type RequestServeContentList struct {
 	InTime                bool          `form:"in_time,omitempty"`
 	StartTime             help.DateTime `form:"start_time,omitempty"`
 	EndTime               help.DateTime `form:"end_time,omitempty"`
+}
+
+type RequestServeContentDelete struct {
+	RequestServeID
 }
 
 type RequestServeContentIntroduction struct {

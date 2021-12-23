@@ -334,6 +334,32 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func (self *Service) Route_DELETE_Content(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestSCD predefined.RequestServeContentDelete
+	if err := validator.FormStruct(&requestSCD, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCD.ID)...)
+
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"status", predefined.PublishStatusDelete},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
 func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {

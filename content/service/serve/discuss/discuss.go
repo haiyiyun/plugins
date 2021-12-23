@@ -252,6 +252,32 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func (self *Service) Route_DELETE_Discuss(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestSDD predefined.RequestServeDiscussDelete
+	if err := validator.FormStruct(&requestSDD, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	discussModel := discuss.NewModel(self.M)
+	filter := discussModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, discussModel.FilterByID(requestSDD.ID)...)
+
+	if ur, err := discussModel.Set(r.Context(), filter, bson.D{
+		{"status", predefined.PublishStatusDelete},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
 func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
