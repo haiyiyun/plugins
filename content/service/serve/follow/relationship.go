@@ -40,7 +40,7 @@ func (self *Service) Route_POST_Relationship(rw http.ResponseWriter, r *http.Req
 	}
 }
 
-func (self *Service) Route_Delete_Relationship(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_DELETE_Relationship(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
@@ -63,7 +63,7 @@ func (self *Service) Route_Delete_Relationship(rw http.ResponseWriter, r *http.R
 	}
 }
 
-func (self *Service) Route_Delete_RelationshipById(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_DELETE_RelationshipById(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
