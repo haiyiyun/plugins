@@ -94,13 +94,63 @@ func (self *Service) Route_GET_Relationships(rw http.ResponseWriter, r *http.Req
 	}
 
 	var requestSFRL predefined.RequestServeFollowRelationshipList
-	if err := validator.FormStruct(&requestSFRL, r.Form); err != nil {
+	if err := validator.FormStruct(&requestSFRL, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
 	filter := relModel.FilterByUserWithType(claims.UserID, requestSFRL.Type)
+
+	cnt, _ := relModel.CountDocuments(r.Context(), filter)
+	pg := pagination.Parse(r, cnt)
+
+	projection := bson.D{
+		{"_id", 1},
+		{"type", 1},
+		{"user_id", 1},
+		{"object_id", 1},
+		{"mutual", 1},
+		{"create_time", 1},
+	}
+
+	opt := options.Find().SetSort(bson.D{
+		{"create_time", -1},
+	}).SetProjection(projection).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
+
+	if cur, err := relModel.Find(r.Context(), filter, opt); err != nil {
+		response.JSON(rw, http.StatusNotFound, nil, "")
+	} else {
+		items := []help.M{}
+		if err := cur.All(r.Context(), &items); err != nil {
+			log.Error(err)
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+		} else {
+			rpr := response.ResponsePaginationResult{
+				Total: cnt,
+				Items: items,
+			}
+
+			response.JSON(rw, 0, rpr, "")
+		}
+	}
+}
+
+func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestSFRL predefined.RequestServeFollowRelationshipList
+	if err := validator.FormStruct(&requestSFRL, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	relModel := follow_relationship.NewModel(self.M)
+	filter := relModel.FilterByObjectIDWithType(claims.UserID, requestSFRL.Type)
 
 	cnt, _ := relModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
@@ -144,7 +194,7 @@ func (self *Service) Route_GET_RelationshipTotal(rw http.ResponseWriter, r *http
 	}
 
 	var requestSFT predefined.RequestServeFollowType
-	if err := validator.FormStruct(&requestSFT, r.Form); err != nil {
+	if err := validator.FormStruct(&requestSFT, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -168,7 +218,7 @@ func (self *Service) Route_GET_BeRelationshipTotal(rw http.ResponseWriter, r *ht
 	}
 
 	var requestSFRT predefined.RequestServeFollowBeRelationshipTotal
-	if err := validator.FormStruct(&requestSFRT, r.Form); err != nil {
+	if err := validator.FormStruct(&requestSFRT, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
