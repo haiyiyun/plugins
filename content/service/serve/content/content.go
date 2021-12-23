@@ -723,15 +723,17 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) Route_GET_AddOnlyUseridShowDetail(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_AddOnlyUseridShowDetail(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
 		return
 	}
 
+	r.ParseForm()
+
 	var requestOIDR predefined.RequestServeObjectIDRequired
-	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}

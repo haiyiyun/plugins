@@ -288,6 +288,7 @@ func (self *Model) DeleteAtUsers(cxt context.Context, contentID, userID primitiv
 
 func (self *Model) AddOnlyUserIDShowDetail(cxt context.Context, contentID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
 	filter := self.FilterByID(contentID)
+	filter = append(filter, self.FilterNormalContent()...)
 	return self.AddToSet(cxt, filter, bson.D{
 		{"only_user_id_show_detail", userID},
 	})
