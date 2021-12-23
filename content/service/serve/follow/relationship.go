@@ -32,7 +32,7 @@ func (self *Service) Route_POST_Relationship(rw http.ResponseWriter, r *http.Req
 
 	relModel := follow_relationship.NewModel(self.M)
 
-	if _, err := relModel.CreateRelationship(r.Context(), requestSFRC.Type, claims.UserID, requestSFRC.ObjectID, requestSFRC.Stealth); err != nil {
+	if _, err := relModel.CreateRelationship(r.Context(), requestSFRC.Type, claims.UserID, requestSFRC.ObjectID, requestSFRC.Stealth, requestSFRC.ExtensionID); err != nil {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {

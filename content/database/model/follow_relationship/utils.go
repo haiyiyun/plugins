@@ -33,7 +33,7 @@ func (self *Model) FilterByObjectIDWithType(objectID primitive.ObjectID, typ int
 	}
 }
 
-func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, objectID primitive.ObjectID, stealth bool) (primitive.ObjectID, error) {
+func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, objectID primitive.ObjectID, stealth bool, extensionID primitive.ObjectID) (primitive.ObjectID, error) {
 	var id primitive.ObjectID
 	err := self.UseSession(ctx, func(sctx mongo.SessionContext) error {
 		if err := sctx.StartTransaction(); err != nil {
@@ -74,6 +74,10 @@ func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, obje
 			ObjectID: objectID,
 			Mutual:   mutual,
 			Stealth:  stealth,
+		}
+
+		if extensionID != primitive.NilObjectID {
+			rel.ExtensionID = extensionID
 		}
 
 		ior, err := self.Create(sctx, rel)

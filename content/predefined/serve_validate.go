@@ -252,7 +252,8 @@ type RequestServeFollowType struct {
 type RequestServeFollowRelationshipCreate struct {
 	RequestServeFollowType
 	RequestServeObjectIDRequired
-	Stealth bool `form:"stealth"`
+	Stealth     bool               `form:"stealth"`
+	ExtensionID primitive.ObjectID `form:"extension_id"`
 }
 
 type RequestServeFollowRelationshipDelete struct {
