@@ -30,6 +30,22 @@ func (self *Service) Route_GET_NicknameAvatar(rw http.ResponseWriter, r *http.Re
 	response.JSON(rw, http.StatusNotFound, nil, "")
 }
 
+func (self *Service) Route_GET_Info(rw http.ResponseWriter, r *http.Request) {
+	var requestUID predefined.RequestServeUserID
+	if err := validator.FormStruct(&requestUID, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	profileModel := profile.NewModel(self.M)
+	if pf, err := profileModel.GetPublicInfo(requestUID.UserID); err == nil {
+		response.JSON(rw, 0, pf, "")
+		return
+	}
+
+	response.JSON(rw, http.StatusNotFound, nil, "")
+}
+
 func (self *Service) Route_GET_NicknameList(rw http.ResponseWriter, r *http.Request) {
 	var requestSN predefined.RequestServeNickname
 	if err := validator.FormStruct(&requestSN, r.URL.Query()); err != nil {
@@ -47,6 +63,7 @@ func (self *Service) Route_GET_NicknameList(rw http.ResponseWriter, r *http.Requ
 	projection := bson.D{
 		{"_id", 1},
 		{"info.nickname", 1},
+		{"info.avatar", 1},
 	}
 
 	opt := options.Find().SetSort(bson.D{
@@ -91,6 +108,7 @@ func (self *Service) Route_GET_SearchNickname(rw http.ResponseWriter, r *http.Re
 	projection := bson.D{
 		{"_id", 1},
 		{"info.nickname", 1},
+		{"info.avatar", 1},
 	}
 
 	opt := options.Find().SetSort(bson.D{
