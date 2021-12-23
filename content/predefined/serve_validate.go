@@ -229,6 +229,10 @@ type RequestServeContentList struct {
 	EndTime               help.DateTime `form:"end_time,omitempty"`
 }
 
+type RequestServeContentIntroduction struct {
+	RequestServeID
+}
+
 type RequestServeContentDetail struct {
 	RequestServeID
 }

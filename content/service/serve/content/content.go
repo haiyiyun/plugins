@@ -537,6 +537,70 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (self *Service) Route_GET_Introduction(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(claims.Audience)
+
+	if userID == primitive.NilObjectID {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestCI predefined.RequestServeContentIntroduction
+	if err := validator.FormStruct(&requestCI, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByID(requestCI.ID)
+	filter = append(filter, contentModel.FilterNormalContent()...)
+	if sr := contentModel.FindOne(r.Context(), filter, options.FindOne().SetProjection(bson.D{
+		{"_id", 1},
+		{"publish_user_id", 1},
+		{"type", 1},
+		{"publish_type", 1},
+		{"associate_type", 1},
+		{"associate_id", 1},
+		{"category_id", 1},
+		{"subject_id", 1},
+		{"author", 1},
+		{"title", 1},
+		{"cover", 1},
+		{"description", 1},
+		{"user_tags", 1},
+		{"visibility", 1},
+		{"value", 1},
+		{"copy", 1},
+		{"bestest", 1},
+		{"reliable", 1},
+		{"guise", 1},
+		{"anti_guise_user", 1},
+		{"start_time", 1},
+		{"end_time", 1},
+		{"extra_data", 1},
+		{"status", 1},
+		{"discuss_estimate_total", 1},
+		{"create_time", 1},
+		{"update_time", 1},
+	})); sr.Err() == nil {
+		var contentDetail model.Content
+		if err := sr.Decode(&contentDetail); err == nil {
+			response.JSON(rw, 0, contentDetail, "")
+		} else {
+			log.Error(err)
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+		}
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
+	}
+}
+
 func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
