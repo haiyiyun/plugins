@@ -48,7 +48,7 @@ func (self *Service) Route_DELETE_Relationship(rw http.ResponseWriter, r *http.R
 	}
 
 	var requestSFRD predefined.RequestServeFollowRelationshipDelete
-	if err := validator.FormStruct(&requestSFRD, r.Form); err != nil {
+	if err := validator.FormStruct(&requestSFRD, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
@@ -71,7 +71,7 @@ func (self *Service) Route_DELETE_RelationshipById(rw http.ResponseWriter, r *ht
 	}
 
 	var requestSID predefined.RequestServeID
-	if err := validator.FormStruct(&requestSID, r.Form); err != nil {
+	if err := validator.FormStruct(&requestSID, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
