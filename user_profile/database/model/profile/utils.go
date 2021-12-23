@@ -39,3 +39,33 @@ func (self *Model) GetNickNameAndAvatar(userID primitive.ObjectID) (pf help.M, e
 
 	return
 }
+
+func (self *Model) FilterByNormalProfile() bson.D {
+	return bson.D{
+		{"enable", true},
+	}
+}
+
+func (self *Model) FilterByNickname(nickname string) bson.D {
+	return bson.D{
+		{"info.nickname", nickname},
+	}
+}
+
+func (self *Model) FilterByNicknameWithRegex(nickname string) bson.D {
+	return bson.D{
+		{"info.nickname", bson.D{
+			{"$regex", nickname},
+			{"$options", `i`},
+		}},
+	}
+}
+
+func (self *Model) FilterByNicknameStartWithRegex(nickname string) bson.D {
+	return bson.D{
+		{"info.nickname", bson.D{
+			{"$regex", `^` + nickname},
+			{"$options", `im`},
+		}},
+	}
+}

@@ -33,3 +33,8 @@ type RequestServeCoverVoice struct {
 type RequestServeUserID struct {
 	UserID primitive.ObjectID `form:"user_id" validate:"required"`
 }
+
+type RequestServeSearchNickname struct {
+	RequestServeNickname
+	Limit int `form:"limit" validate:"max=30"`
+}
