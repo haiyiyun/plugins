@@ -19,6 +19,12 @@ func (self *Model) FilterByRelationship(typ int, userID, objectID primitive.Obje
 	}
 }
 
+func (self *Model) FilterByExtensionID(extensionID primitive.ObjectID) bson.D {
+	return bson.D{
+		{"extension_id", extensionID},
+	}
+}
+
 func (self *Model) FilterByUserWithType(userID primitive.ObjectID, typ int) bson.D {
 	return bson.D{
 		{"user_id", userID},

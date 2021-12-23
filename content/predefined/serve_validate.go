@@ -274,9 +274,11 @@ type RequestServeFollowBeRelationshipList struct {
 type RequestServeFollowRelationshipTotal struct {
 	RequestServeFollowType
 	RequestServeUserID
+	ExtensionID primitive.ObjectID `form:"extension_id"`
 }
 
 type RequestServeFollowBeRelationshipTotal struct {
 	RequestServeFollowType
 	RequestServeObjectIDRequired
+	ExtensionID primitive.ObjectID `form:"extension_id"`
 }

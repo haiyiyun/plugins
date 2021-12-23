@@ -12,6 +12,7 @@ import (
 	"github.com/haiyiyun/utils/http/response"
 	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -110,6 +111,7 @@ func (self *Service) Route_GET_Relationships(rw http.ResponseWriter, r *http.Req
 		{"type", 1},
 		{"user_id", 1},
 		{"object_id", 1},
+		{"extension_id", 1},
 		{"mutual", 1},
 		{"create_time", 1},
 	}
@@ -160,6 +162,7 @@ func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.R
 		{"type", 1},
 		{"user_id", 1},
 		{"object_id", 1},
+		{"extension_id", 1},
 		{"mutual", 1},
 		{"create_time", 1},
 	}
@@ -202,6 +205,10 @@ func (self *Service) Route_GET_RelationshipTotal(rw http.ResponseWriter, r *http
 	relModel := follow_relationship.NewModel(self.M)
 	filter := relModel.FilterByUserWithType(requestSFRT.UserID, requestSFRT.Type)
 
+	if requestSFRT.ExtensionID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByExtensionID(requestSFRT.ExtensionID)...)
+	}
+
 	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
@@ -217,14 +224,18 @@ func (self *Service) Route_GET_BeRelationshipTotal(rw http.ResponseWriter, r *ht
 		return
 	}
 
-	var requestSFRT predefined.RequestServeFollowBeRelationshipTotal
-	if err := validator.FormStruct(&requestSFRT, r.URL.Query()); err != nil {
+	var requestSFBRT predefined.RequestServeFollowBeRelationshipTotal
+	if err := validator.FormStruct(&requestSFBRT, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByObjectIDWithType(requestSFRT.ObjectID, requestSFRT.Type)
+	filter := relModel.FilterByObjectIDWithType(requestSFBRT.ObjectID, requestSFBRT.Type)
+
+	if requestSFBRT.ExtensionID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByExtensionID(requestSFBRT.ExtensionID)...)
+	}
 
 	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
 		log.Error(err)

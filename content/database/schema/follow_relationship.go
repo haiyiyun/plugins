@@ -28,6 +28,12 @@ var (
 			},
 			{
 				bson.D{
+					{"extension_id", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"type", 1},
 				},
 				options.Index(),
