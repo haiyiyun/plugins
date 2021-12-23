@@ -15,6 +15,9 @@ type CacheCfg struct {
 }
 
 type BaseCfg struct {
+	DefaultRole                      string                     `json:"default_role"`
+	DefaultTag                       string                     `json:"default_tag"`
+	DefaultLevel                     int                        `json:"default_level"`
 	CheckLogin                       bool                       `json:"check_login"`
 	TokenByUrlQuery                  bool                       `json:"token_by_url_query"`
 	TokenByUrlQueryName              string                     `json:"token_by_url_query_name"`

@@ -48,12 +48,35 @@ func (self *Service) CreateUser(ctx context.Context, id primitive.ObjectID, user
 			return err
 		}
 
+		roles := []model.UserRole{}
+		tags := []model.UserTag{}
+		level := 0
+
+		if !guest {
+			if self.Config.DefaultRole != "" {
+				roles = append(roles, model.UserRole{
+					Role: self.Config.DefaultRole,
+				})
+			}
+
+			if self.Config.DefaultTag != "" {
+				tags = append(tags, model.UserTag{
+					Tag: self.Config.DefaultTag,
+				})
+			}
+
+			if self.Config.DefaultLevel > 0 {
+				level = self.Config.DefaultLevel
+			}
+		}
+
 		u := model.User{
 			ExtensionID: extensionID,
 			Name:        username,
 			Password:    help.NewString(password).Md5(),
-			Roles:       []model.UserRole{},
-			Tags:        []model.UserTag{},
+			Roles:       roles,
+			Tags:        tags,
+			Level:       level,
 			Guest:       guest,
 			Enable:      true,
 		}
