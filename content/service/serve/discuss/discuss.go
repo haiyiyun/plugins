@@ -397,7 +397,7 @@ func (self *Service) Route_GET_AvgEvaluation(rw http.ResponseWriter, r *http.Req
 	if cur, err := discussModel.Aggregate(r.Context(), mongo.Pipeline{
 		{{"$match", match}},
 		{{"$group", bson.D{
-			{"_id", `$_id`},
+			{"_id", `$object_id`},
 			{"avg_evaluation", bson.D{
 				{"$avg", `$evaluation`},
 			}},
