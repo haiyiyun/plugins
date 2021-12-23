@@ -252,7 +252,12 @@ type RequestServeFollowRelationshipList struct {
 	RequestServeFollowType
 }
 
+type RequestServeFollowBeRelationshipList struct {
+	RequestServeFollowType
+	RequestServeObjectIDRequired
+}
+
 type RequestServeFollowBeRelationshipTotal struct {
 	RequestServeFollowType
-	RequestServeUserID
+	RequestServeObjectIDRequired
 }

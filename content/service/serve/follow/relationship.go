@@ -143,14 +143,14 @@ func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.R
 		return
 	}
 
-	var requestSFRL predefined.RequestServeFollowRelationshipList
+	var requestSFRL predefined.RequestServeFollowBeRelationshipList
 	if err := validator.FormStruct(&requestSFRL, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByObjectIDWithType(claims.UserID, requestSFRL.Type)
+	filter := relModel.FilterByObjectIDWithType(requestSFRL.ObjectID, requestSFRL.Type)
 
 	cnt, _ := relModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
@@ -224,7 +224,7 @@ func (self *Service) Route_GET_BeRelationshipTotal(rw http.ResponseWriter, r *ht
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByObjectIDWithType(requestSFRT.UserID, requestSFRT.Type)
+	filter := relModel.FilterByObjectIDWithType(requestSFRT.ObjectID, requestSFRT.Type)
 
 	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
 		log.Error(err)
