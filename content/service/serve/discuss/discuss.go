@@ -394,14 +394,14 @@ func (self *Service) Route_GET_AvgEvaluation(rw http.ResponseWriter, r *http.Req
 	match := discussModel.FilterNormalDiscuss()
 	match = append(match, discussModel.FilterByObjectID(requestOIDR.ObjectID)...)
 
-	if cur, err := discussModel.Aggregate(r.Context(), bson.D{
-		{"$match", match},
-		{"$group", bson.D{
+	if cur, err := discussModel.Aggregate(r.Context(), mongo.Pipeline{
+		{{"$match", match}},
+		{{"$group", bson.D{
 			{"_id", `$_id`},
 			{"avg_evaluation", bson.D{
 				{"$avg", `$evaluation`},
 			}},
-		}},
+		}}},
 	}); err != nil {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
