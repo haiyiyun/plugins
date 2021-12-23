@@ -26,6 +26,13 @@ func (self *Model) FilterByUserWithType(userID primitive.ObjectID, typ int) bson
 	}
 }
 
+func (self *Model) FilterByObjectIDWithType(objectID primitive.ObjectID, typ int) bson.D {
+	return bson.D{
+		{"object_id", objectID},
+		{"type", typ},
+	}
+}
+
 func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, objectID primitive.ObjectID, stealth bool) (primitive.ObjectID, error) {
 	var id primitive.ObjectID
 	err := self.UseSession(ctx, func(sctx mongo.SessionContext) error {

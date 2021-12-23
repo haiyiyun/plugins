@@ -135,3 +135,51 @@ func (self *Service) Route_GET_Relationships(rw http.ResponseWriter, r *http.Req
 		}
 	}
 }
+
+func (self *Service) Route_GET_RelationshipTotal(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestSFT predefined.RequestServeFollowType
+	if err := validator.FormStruct(&requestSFT, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	relModel := follow_relationship.NewModel(self.M)
+	filter := relModel.FilterByUserWithType(claims.UserID, requestSFT.Type)
+
+	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
+		log.Error(err)
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, cnt, "")
+	}
+}
+
+func (self *Service) Route_GET_BeRelationshipTotal(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	var requestSFRT predefined.RequestServeFollowBeRelationshipTotal
+	if err := validator.FormStruct(&requestSFRT, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	relModel := follow_relationship.NewModel(self.M)
+	filter := relModel.FilterByObjectIDWithType(requestSFRT.UserID, requestSFRT.Type)
+
+	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
+		log.Error(err)
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, cnt, "")
+	}
+}

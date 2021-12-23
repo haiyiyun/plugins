@@ -31,6 +31,10 @@ type RequestServeID struct {
 	ID primitive.ObjectID `form:"id" validate:"required"`
 }
 
+type RequestServeUserID struct {
+	UserID primitive.ObjectID `form:"user_id" validate:"required"`
+}
+
 type RequestServeObjectID struct {
 	ObjectID primitive.ObjectID `form:"object_id,omitempty"`
 }
@@ -246,4 +250,9 @@ type RequestServeFollowRelationshipDelete struct {
 
 type RequestServeFollowRelationshipList struct {
 	RequestServeFollowType
+}
+
+type RequestServeFollowBeRelationshipTotal struct {
+	RequestServeFollowType
+	RequestServeUserID
 }
