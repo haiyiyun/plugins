@@ -134,7 +134,7 @@ type RequestServeDiscussList struct {
 	RequestServeDistance
 }
 
-type RequestServeContentCreateType struct {
+type RequestServeContentType struct {
 	Type int `form:"type" validate:"oneof=0 1 2 3 4 5 6"`
 }
 
@@ -159,7 +159,7 @@ type RequestServeContentVisibility struct {
 }
 
 type RequestServeContentCreate struct {
-	RequestServeContentCreateType
+	RequestServeContentType
 	RequestServeContentPublishType
 	RequestServeContentAssociateType
 	AssociateID        primitive.ObjectID `form:"associate_id" validate:"required_unless=AssociateType 0"`
@@ -237,7 +237,47 @@ type RequestServeContentDelete struct {
 	RequestServeID
 }
 
-type RequestServeContentIntroduction struct {
+type RequestServeContentUpdateDescription struct {
+	RequestServeObjectIDRequired
+	Description string `form:"description" validate:"required"`
+}
+
+type RequestServeContentUpdateVisibility struct {
+	RequestServeObjectIDRequired
+	RequestServeContentVisibility
+}
+
+type RequestServeContentUpdateForbidForward struct {
+	RequestServeObjectIDRequired
+	ForbidForward bool `form:"forbid_forward"`
+}
+
+type RequestServeContentUpdateForbidDownload struct {
+	RequestServeObjectIDRequired
+	ForbidDownload bool `form:"forbid_download"`
+}
+
+type RequestServeContentUpdateForbidDiscuss struct {
+	RequestServeObjectIDRequired
+	ForbidDiscuss bool `form:"forbid_discuss"`
+}
+
+type RequestServeContentUpdateStartTime struct {
+	RequestServeObjectIDRequired
+	StartTime help.DateTime `form:"start_time" validate:"required"`
+}
+
+type RequestServeContentUpdateEndTime struct {
+	RequestServeObjectIDRequired
+	EndTime help.DateTime `form:"end_time" validate:"required"`
+}
+
+type RequestServeContentUpdateExtraData struct {
+	RequestServeObjectIDRequired
+	ExtraData string `form:"extra_data" validate:"required"`
+}
+
+type RequestServeContentPublic struct {
 	RequestServeID
 }
 

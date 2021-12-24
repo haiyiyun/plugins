@@ -563,7 +563,7 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) Route_GET_Introduction(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
@@ -577,7 +577,7 @@ func (self *Service) Route_GET_Introduction(rw http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var requestCI predefined.RequestServeContentIntroduction
+	var requestCI predefined.RequestServeContentPublic
 	if err := validator.FormStruct(&requestCI, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
@@ -740,6 +740,222 @@ func (self *Service) Route_POST_AddOnlyUseridShowDetail(rw http.ResponseWriter, 
 
 	contentModel := content.NewModel(self.M)
 	if ur, err := contentModel.AddOnlyUserIDShowDetail(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_Description(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateDescription
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"description", requestSCU.Description},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_Visibility(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateVisibility
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"visibility", requestSCU.Visibility},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_ForbidForward(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateForbidForward
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"forbid_forward", requestSCU.ForbidForward},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_ForbidDownload(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateForbidDownload
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"forbid_download", requestSCU.ForbidDownload},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_ForbidDiscuss(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateForbidDiscuss
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"forbid_discuss", requestSCU.ForbidDiscuss},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_StartTime(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateStartTime
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"start_time", requestSCU.StartTime.Time},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_EndTime(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateEndTime
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"end_time", requestSCU.EndTime.Time},
+	}); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_ExtraData(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSCU predefined.RequestServeContentUpdateExtraData
+	if err := validator.FormStruct(&requestSCU, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	filter := contentModel.FilterByPublishUserID(claims.UserID)
+	filter = append(filter, contentModel.FilterByID(requestSCU.ObjectID)...)
+	if ur, err := contentModel.Set(r.Context(), filter, bson.D{
+		{"extra_data", requestSCU.ExtraData},
+	}); err != nil || ur.ModifiedCount == 0 {
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
 		response.JSON(rw, 0, nil, "")
