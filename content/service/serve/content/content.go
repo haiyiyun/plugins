@@ -511,42 +511,56 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	cnt, _ := contentModel.CountDocuments(r.Context(), filter)
 	pg := pagination.Parse(r, cnt)
 
-	projection := bson.D{
-		{"_id", 1},
-		{"publish_user_id", 1},
-		{"type", 1},
-		{"publish_type", 1},
-		{"associate_type", 1},
-		{"associate_id", 1},
-		{"category_id", 1},
-		{"subject_id", 1},
-		{"author", 1},
-		{"title", 1},
-		{"cover", 1},
-		{"description", 1},
-		{"user_tags", 1},
-		{"visibility", 1},
-		{"value", 1},
-		{"copy", 1},
-		{"bestest", 1},
-		{"reliable", 1},
-		{"guise", 1},
-		{"anti_guise_user", 1},
-		{"start_time", 1},
-		{"end_time", 1},
-		{"extra_data", 1},
-		{"status", 1},
-		{"discuss_estimate_total", 1},
-		{"create_time", 1},
-		{"update_time", 1},
-	}
-
-	opt := options.Find().SetSort(bson.D{
-		{"create_time", -1},
-	}).SetProjection(projection).SetSkip(pg.SkipNum).SetLimit(pg.PageSize)
-
-	if cur, err := contentModel.Find(r.Context(), filter, opt); err != nil {
-		response.JSON(rw, http.StatusNotFound, nil, "")
+	if cur, err := contentModel.Aggregate(r.Context(), mongo.Pipeline{
+		{{"$match", filter}},
+		{{"$project", bson.D{
+			{"publish_user_id", 1},
+			{"type", 1},
+			{"publish_type", 1},
+			{"associate_type", 1},
+			{"associate_id", 1},
+			{"category_id", 1},
+			{"subject_id", 1},
+			{"author", 1},
+			{"title", 1},
+			{"cover", 1},
+			{"description", 1},
+			{"user_tags", 1},
+			{"visibility", 1},
+			{"value", 1},
+			{"copy", 1},
+			{"bestest", 1},
+			{"reliable", 1},
+			{"readed_user_total", bson.D{
+				{"$size", `$readed_user`},
+			}},
+			{"wanted_user_total", bson.D{
+				{"$size", `$wanted_user`},
+			}},
+			{"liked_user_total", bson.D{
+				{"$size", `$liked_user`},
+			}},
+			{"hated_user_total", bson.D{
+				{"$size", `$hated_user`},
+			}},
+			{"guise", 1},
+			{"anti_guise_user", 1},
+			{"start_time", 1},
+			{"end_time", 1},
+			{"extra_data", 1},
+			{"status", 1},
+			{"discuss_estimate_total", 1},
+			{"create_time", 1},
+			{"update_time", 1},
+		}}},
+		{{"$sort", bson.D{
+			{"create_time", -1},
+		}}},
+		{{"$skip", pg.SkipNum}},
+		{{"$limit", pg.PageSize}},
+	}); err != nil {
+		log.Error(err)
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
 		items := []help.M{}
 		if err := cur.All(r.Context(), &items); err != nil {
@@ -584,46 +598,62 @@ func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	contentModel := content.NewModel(self.M)
-	filter := contentModel.FilterByID(requestCI.ID)
-	filter = append(filter, contentModel.FilterNormalContent()...)
-	if sr := contentModel.FindOne(r.Context(), filter, options.FindOne().SetProjection(bson.D{
-		{"_id", 1},
-		{"publish_user_id", 1},
-		{"type", 1},
-		{"publish_type", 1},
-		{"associate_type", 1},
-		{"associate_id", 1},
-		{"category_id", 1},
-		{"subject_id", 1},
-		{"author", 1},
-		{"title", 1},
-		{"cover", 1},
-		{"description", 1},
-		{"user_tags", 1},
-		{"visibility", 1},
-		{"value", 1},
-		{"copy", 1},
-		{"bestest", 1},
-		{"reliable", 1},
-		{"guise", 1},
-		{"anti_guise_user", 1},
-		{"start_time", 1},
-		{"end_time", 1},
-		{"extra_data", 1},
-		{"status", 1},
-		{"discuss_estimate_total", 1},
-		{"create_time", 1},
-		{"update_time", 1},
-	})); sr.Err() == nil {
-		var contentDetail model.Content
-		if err := sr.Decode(&contentDetail); err == nil {
-			response.JSON(rw, 0, contentDetail, "")
-		} else {
+	match := contentModel.FilterByID(requestCI.ID)
+	match = append(match, contentModel.FilterNormalContent()...)
+	if cur, err := contentModel.Aggregate(r.Context(), mongo.Pipeline{
+		{{"$match", match}},
+		{{"$project", bson.D{
+			{"publish_user_id", 1},
+			{"type", 1},
+			{"publish_type", 1},
+			{"associate_type", 1},
+			{"associate_id", 1},
+			{"category_id", 1},
+			{"subject_id", 1},
+			{"author", 1},
+			{"title", 1},
+			{"cover", 1},
+			{"description", 1},
+			{"user_tags", 1},
+			{"visibility", 1},
+			{"value", 1},
+			{"copy", 1},
+			{"bestest", 1},
+			{"reliable", 1},
+			{"readed_user_total", bson.D{
+				{"$size", `$readed_user`},
+			}},
+			{"wanted_user_total", bson.D{
+				{"$size", `$wanted_user`},
+			}},
+			{"liked_user_total", bson.D{
+				{"$size", `$liked_user`},
+			}},
+			{"hated_user_total", bson.D{
+				{"$size", `$hated_user`},
+			}},
+			{"guise", 1},
+			{"anti_guise_user", 1},
+			{"start_time", 1},
+			{"end_time", 1},
+			{"extra_data", 1},
+			{"status", 1},
+			{"discuss_estimate_total", 1},
+			{"create_time", 1},
+			{"update_time", 1},
+		}}},
+		{{"$limit", 1}},
+	}); err != nil {
+		log.Error(err)
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		var contentDetail help.M
+		if err := cur.All(r.Context(), &contentDetail); err != nil {
 			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+		} else {
+			response.JSON(rw, 0, contentDetail, "")
 		}
-	} else {
-		response.JSON(rw, http.StatusBadRequest, nil, "")
 	}
 }
 
@@ -723,7 +753,191 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Service) Route_POST_AddOnlyUseridShowDetail(rw http.ResponseWriter, r *http.Request) {
+func (self *Service) Route_POST_ReadedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.AddReadedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_ReadedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.DeleteReadedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_WantedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.AddWantedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_WantedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.DeleteWantedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_LikedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.AddLikedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_LikedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.DeleteLikedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_HatedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.AddHatedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_HatedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	contentModel := content.NewModel(self.M)
+	if ur, err := contentModel.DeleteHatedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_OnlyUseridShowDetail(rw http.ResponseWriter, r *http.Request) {
 	claims := request.GetClaims(r)
 	if claims == nil {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
