@@ -645,12 +645,17 @@ func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
 		{{"$limit", 1}},
 	}); err != nil {
 		log.Error(err)
-		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "503000")
 	} else {
 		var contentDetail help.M
+		if !cur.Next(r.Context()) {
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "503001")
+			return
+		}
+
 		if err := cur.Decode(&contentDetail); err != nil {
 			log.Error(err)
-			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "503002")
 		} else {
 			cur.Close(r.Context())
 			response.JSON(rw, 0, contentDetail, "")
