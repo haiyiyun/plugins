@@ -1,4 +1,4 @@
-package manage
+package serve
 
 import (
 	"context"
@@ -7,8 +7,7 @@ import (
 
 	"github.com/haiyiyun/plugins/log/database/schema"
 	"github.com/haiyiyun/plugins/log/service/base"
-	"github.com/haiyiyun/plugins/log/service/manage"
-	manageLog "github.com/haiyiyun/plugins/log/service/manage/log"
+	"github.com/haiyiyun/plugins/log/service/serve"
 
 	"github.com/haiyiyun/cache"
 	"github.com/haiyiyun/config"
@@ -19,7 +18,7 @@ import (
 )
 
 func init() {
-	baseConfFile := flag.String("config.plugins.log.manage.base", "../config/plugins/log/base.conf", "base config file")
+	baseConfFile := flag.String("config.plugins.log.serve.base", "../config/plugins/log/base.conf", "base config file")
 	var baseConf base.Config
 	config.Files(*baseConfFile).Load(&baseConf)
 
@@ -31,11 +30,11 @@ func init() {
 
 	baseService := base.NewService(&baseConf, baseCache, baseDB)
 
-	manageConfFile := flag.String("config.plugins.log.manage", "../config/plugins/log/manage.conf", "manage config file")
-	var manageConf manage.Config
-	config.Files(*manageConfFile).Load(&manageConf)
+	serveConfFile := flag.String("config.plugins.log.serve", "../config/plugins/log/serve.conf", "serve config file")
+	var serveConf serve.Config
+	config.Files(*serveConfFile).Load(&serveConf)
 
-	if manageConf.Log {
+	if serveConf.Log {
 		webrouter.Injector("loglogin", "", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 			if logID := baseService.LogRequestLogin(r); logID != primitive.NilObjectID {
 				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
@@ -79,25 +78,23 @@ func init() {
 			return
 		})
 
-		webrouter.Releasor("logoperate", "urbac", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+		webrouter.Releasor("logoperate", "user", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 			baseService.LogResponseOperate(rw, r)
 			return
 		})
 	}
 
-	if manageConf.WebRouter {
-		manageConf.Config = baseConf
-		manageService := manage.NewService(&manageConf, baseService)
+	if serveConf.WebRouter {
+		serveConf.Config = baseConf
+		// serveService := serve.NewService(&serveConf, baseService)
 
 		//Init Begin
-		manageLogService := manageLog.NewService(manageService)
 		//Init End
 
 		//Go Begin
 		//Go End
 
 		//Register Begin
-		webrouter.Register(manageConf.WebRouterRootPath+"log/", manageLogService)
 		//Register End
 	}
 }
