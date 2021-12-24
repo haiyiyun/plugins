@@ -647,12 +647,12 @@ func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
-		var contentDetail []help.M
-		if err := cur.All(r.Context(), &contentDetail); err != nil {
+		var contentDetail help.M
+		if err := cur.Decode(&contentDetail); err != nil {
 			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 		} else {
-			response.JSON(rw, 0, contentDetail[0], "")
+			response.JSON(rw, 0, contentDetail, "")
 		}
 	}
 }
