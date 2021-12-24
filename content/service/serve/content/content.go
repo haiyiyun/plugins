@@ -652,6 +652,7 @@ func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
 			log.Error(err)
 			response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 		} else {
+			cur.Close(r.Context())
 			response.JSON(rw, 0, contentDetail, "")
 		}
 	}
