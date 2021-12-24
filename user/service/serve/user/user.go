@@ -16,6 +16,7 @@ import (
 	"github.com/haiyiyun/utils/realip"
 	"github.com/haiyiyun/utils/validator"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -121,6 +122,14 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	userModel := user.NewModel(self.M)
 	filter := userModel.FilterByNormalUser()
 
+	if requestSUL.ExtensionID > 0 {
+		filter = append(filter, userModel.FilterByExtensionID(requestSUL.ExtensionID)...)
+	}
+
+	if requestSUL.UserID != primitive.NilObjectID {
+		filter = append(filter, userModel.FilterByID(requestSUL.UserID)...)
+	}
+
 	if requestSUL.GuestQuery {
 		filter = append(filter, userModel.FilterByGuest(requestSUL.Guest)...)
 	}
@@ -179,6 +188,11 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	projection := bson.D{
 		{"_id", 1},
 		{"extension_id", 1},
+		{"guest", 1},
+		{"level", 1},
+		{"experience", 1},
+		{"roles", 1},
+		{"tags", 1},
 	}
 
 	opt := options.Find().SetSort(bson.D{

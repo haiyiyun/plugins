@@ -1,10 +1,13 @@
 package discuss
 
 import (
+	"context"
+
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/predefined"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (self *Model) FilterNormalDiscuss() bson.D {
@@ -112,4 +115,32 @@ func (self *Model) FilterByLocation(location geometry.Point, maxDistance, minDis
 	}
 
 	return filter
+}
+
+func (self *Model) AddLikedUser(cxt context.Context, discussID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(discussID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"liked_user", userID},
+	})
+}
+
+func (self *Model) DeleteLikedUser(cxt context.Context, discussID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(discussID)
+	return self.Pull(cxt, filter, bson.D{
+		{"liked_user", userID},
+	})
+}
+
+func (self *Model) AddHatedUser(cxt context.Context, discussID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(discussID)
+	return self.AddToSet(cxt, filter, bson.D{
+		{"hated_user", userID},
+	})
+}
+
+func (self *Model) DeleteHatedUser(cxt context.Context, discussID, userID primitive.ObjectID) (*mongo.UpdateResult, error) {
+	filter := self.FilterByID(discussID)
+	return self.Pull(cxt, filter, bson.D{
+		{"hated_user", userID},
+	})
 }

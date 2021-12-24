@@ -70,17 +70,19 @@ type RequestServeAuthTokenByUsernameAndPassword struct {
 }
 
 type RequestServeUserList struct {
-	GuestQuery    bool          `form:"guest_query"`
-	Guest         bool          `form:"guest"`
-	Roles         []string      `form:"roles"`
-	RolesWithTime help.DateTime `form:"roles_with_time"`
-	Tags          []string      `form:"tags"`
-	TagsWithTime  help.DateTime `form:"tags_with_time"`
-	Level         int           `form:"level"`
-	GteLevel      int           `form:"gte_level"`
-	LteLevel      int           `form:"lte_level"`
-	OnlineQuery   bool          `form:"online_query"`
-	Online        bool          `form:"online"`
+	UserID        primitive.ObjectID `form:"user_id"`
+	ExtensionID   int                `form:"extension_id"`
+	GuestQuery    bool               `form:"guest_query"`
+	Guest         bool               `form:"guest"`
+	Roles         []string           `form:"roles"`
+	RolesWithTime help.DateTime      `form:"roles_with_time"`
+	Tags          []string           `form:"tags"`
+	TagsWithTime  help.DateTime      `form:"tags_with_time"`
+	Level         int                `form:"level"`
+	GteLevel      int                `form:"gte_level"`
+	LteLevel      int                `form:"lte_level"`
+	OnlineQuery   bool               `form:"online_query"`
+	Online        bool               `form:"online"`
 	RequestServeLongitudeLatitude
 	RequestServeDistance
 	RequestServeOnlineLongitudeLatitude

@@ -441,3 +441,95 @@ func (self *Service) Route_GET_AvgEvaluation(rw http.ResponseWriter, r *http.Req
 		}
 	}
 }
+
+func (self *Service) Route_POST_LikedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	discussModel := discuss.NewModel(self.M)
+	if ur, err := discussModel.AddLikedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_LikedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	discussModel := discuss.NewModel(self.M)
+	if ur, err := discussModel.DeleteLikedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_HatedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	discussModel := discuss.NewModel(self.M)
+	if ur, err := discussModel.AddHatedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}
+
+func (self *Service) Route_DELETE_HatedUser(rw http.ResponseWriter, r *http.Request) {
+	claims := request.GetClaims(r)
+	if claims == nil {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestOIDR predefined.RequestServeObjectIDRequired
+	if err := validator.FormStruct(&requestOIDR, r.URL.Query()); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	discussModel := discuss.NewModel(self.M)
+	if ur, err := discussModel.DeleteHatedUser(r.Context(), requestOIDR.ObjectID, claims.UserID); err != nil || ur.ModifiedCount == 0 {
+		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+	} else {
+		response.JSON(rw, 0, nil, "")
+	}
+}

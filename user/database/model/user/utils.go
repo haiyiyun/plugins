@@ -24,6 +24,12 @@ func (self *Model) FilterByNormalUser() bson.D {
 	}
 }
 
+func (self *Model) FilterByExtensionID(extensionID int) bson.D {
+	return bson.D{
+		{"extension_id", extensionID},
+	}
+}
+
 func (self *Model) FilterByGuest(guest bool) bson.D {
 	return bson.D{
 		{"guest", guest},
