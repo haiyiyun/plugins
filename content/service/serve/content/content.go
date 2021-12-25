@@ -531,14 +531,26 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			{"copy", 1},
 			{"bestest", 1},
 			{"reliable", 1},
+			{"in_readed_user", bson.D{
+				{"$in", bson.A{userID, `$readed_user`}},
+			}},
 			{"readed_user_total", bson.D{
 				{"$size", `$readed_user`},
+			}},
+			{"in_wanted_user", bson.D{
+				{"$in", bson.A{userID, `$wanted_user`}},
 			}},
 			{"wanted_user_total", bson.D{
 				{"$size", `$wanted_user`},
 			}},
+			{"in_liked_user", bson.D{
+				{"$in", bson.A{userID, `$liked_user`}},
+			}},
 			{"liked_user_total", bson.D{
 				{"$size", `$liked_user`},
+			}},
+			{"in_hated_user", bson.D{
+				{"$in", bson.A{userID, `$hated_user`}},
 			}},
 			{"hated_user_total", bson.D{
 				{"$size", `$hated_user`},
@@ -620,14 +632,26 @@ func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
 			{"copy", 1},
 			{"bestest", 1},
 			{"reliable", 1},
+			{"in_readed_user", bson.D{
+				{"$in", bson.A{userID, `$readed_user`}},
+			}},
 			{"readed_user_total", bson.D{
 				{"$size", `$readed_user`},
+			}},
+			{"in_wanted_user", bson.D{
+				{"$in", bson.A{userID, `$wanted_user`}},
 			}},
 			{"wanted_user_total", bson.D{
 				{"$size", `$wanted_user`},
 			}},
+			{"in_liked_user", bson.D{
+				{"$in", bson.A{userID, `$liked_user`}},
+			}},
 			{"liked_user_total", bson.D{
 				{"$size", `$liked_user`},
+			}},
+			{"in_hated_user", bson.D{
+				{"$in", bson.A{userID, `$hated_user`}},
 			}},
 			{"hated_user_total", bson.D{
 				{"$size", `$hated_user`},

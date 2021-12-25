@@ -27,8 +27,12 @@ type RequestServePublishUserIDs struct {
 	PublishUserID []primitive.ObjectID `form:"publish_user_id,omitempty" validate:"gte=0,dive,required"`
 }
 
-type RequestServeID struct {
+type RequestServeIDRequired struct {
 	ID primitive.ObjectID `form:"id" validate:"required"`
+}
+
+type RequestServeID struct {
+	ID primitive.ObjectID `form:"id,omitempty"`
 }
 
 type RequestServeUserID struct {
@@ -122,12 +126,13 @@ type RequestServeDiscussCreate struct {
 }
 
 type RequestServeDiscussDelete struct {
-	RequestServeID
+	RequestServeIDRequired
 }
 
 type RequestServeDiscussList struct {
 	Types []int `form:"types,omitempty" validate:"required_with=ObjectID,gte=0,dive,oneof=0 1 2 3"`
 	RequestServeObjectID
+	RequestServeID
 	RequestServeDiscussVisibility
 	RequestServePublishUserIDs
 	RequestServeLongitudeLatitude
@@ -234,7 +239,7 @@ type RequestServeContentList struct {
 }
 
 type RequestServeContentDelete struct {
-	RequestServeID
+	RequestServeIDRequired
 }
 
 type RequestServeContentUpdateDescription struct {
@@ -278,11 +283,11 @@ type RequestServeContentUpdateExtraData struct {
 }
 
 type RequestServeContentPublic struct {
-	RequestServeID
+	RequestServeIDRequired
 }
 
 type RequestServeContentDetail struct {
-	RequestServeID
+	RequestServeIDRequired
 }
 
 type RequestServeFollowType struct {

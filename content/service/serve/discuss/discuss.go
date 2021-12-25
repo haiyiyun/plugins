@@ -55,6 +55,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	//判断被回复的评论是否存在
 	if requestDC.ReplyDiscussID != primitive.NilObjectID {
 		filter := discussModel.FilterNormalDiscuss()
+		filter = append(filter, discussModel.FilterByID(requestDC.ReplyDiscussID)...)
 		if cnt, err := discussModel.CountDocuments(r.Context(), filter); cnt == 0 {
 			log.Error(err)
 			response.JSON(rw, http.StatusBadRequest, nil, "400404")
@@ -248,6 +249,13 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		go contentModel.Inc(context.Background(), contentModel.FilterByID(requestDC.ObjectID), bson.D{
 			{"discuss_estimate_total", 1},
 		})
+
+		if requestDC.ReplyDiscussID != primitive.NilObjectID {
+			go discussModel.Inc(context.Background(), discussModel.FilterByID(requestDC.ReplyDiscussID), bson.D{
+				{"reply_estimate_total", 1},
+			})
+		}
+
 		response.JSON(rw, 0, ior.InsertedID, "")
 	}
 }
@@ -298,82 +306,90 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coordinates := geometry.PointCoordinates{
-		requestDL.Longitude, requestDL.Latitude,
-	}
+	discussModel := discuss.NewModel(self.M)
+	filter := discussModel.FilterNormalDiscuss()
+	filter = append(filter, bson.D{
+		{"reply_discuss_id", primitive.NilObjectID},
+	}...)
 
-	if requestDL.ObjectID != primitive.NilObjectID && len(requestDL.Types) > 0 {
-		contentModel := content.NewModel(self.M)
-		filterContent := contentModel.FilterNormalContent()
-		typ := requestDL.Types[0]
+	if requestDL.ID != primitive.NilObjectID {
+		filter = append(filter, discussModel.FilterByID(requestDL.ID)...)
+	} else {
+		if requestDL.ObjectID != primitive.NilObjectID && len(requestDL.Types) > 0 {
+			contentModel := content.NewModel(self.M)
+			filterContent := contentModel.FilterNormalContent()
+			typ := requestDL.Types[0]
 
-		//判断对应type的object_id是否存在,并处理相关限制
-		switch typ {
-		case predefined.DiscussTypeDynamic:
-			contentType := predefined.ContentPublishTypeDynamic
-			filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
-			filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
-		case predefined.DiscussTypeArticle:
-			contentType := predefined.ContentPublishTypeArticle
-			filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
-			filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
-		case predefined.DiscussTypeQuestion:
-			contentType := predefined.ContentPublishTypeQuestion
-			filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
-			filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
-		case predefined.DiscussTypeAnswer:
-			contentType := predefined.ContentPublishTypeAnswer
-			filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
-			filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
-		}
+			//判断对应type的object_id是否存在,并处理相关限制
+			switch typ {
+			case predefined.DiscussTypeDynamic:
+				contentType := predefined.ContentPublishTypeDynamic
+				filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
+				filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
+			case predefined.DiscussTypeArticle:
+				contentType := predefined.ContentPublishTypeArticle
+				filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
+				filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
+			case predefined.DiscussTypeQuestion:
+				contentType := predefined.ContentPublishTypeQuestion
+				filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
+				filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
+			case predefined.DiscussTypeAnswer:
+				contentType := predefined.ContentPublishTypeAnswer
+				filterContent = append(filterContent, contentModel.FilterByID(requestDL.ObjectID)...)
+				filterContent = append(filterContent, contentModel.FilterByPublishType(contentType)...)
+			}
 
-		if sr := contentModel.FindOne(r.Context(), filterContent, options.FindOne().SetProjection(bson.D{
-			{"hide_discuss", 1},
-			{"only_user_id_show_discuss", 1},
-		})); sr.Err() != nil {
-			log.Error(sr.Err())
-			response.JSON(rw, http.StatusBadRequest, nil, "400404")
-			return
-		} else {
-			var cont model.Content
-			if err := sr.Decode(&cont); err != nil {
-				log.Error(err)
-				response.JSON(rw, http.StatusBadRequest, nil, "400000")
+			if sr := contentModel.FindOne(r.Context(), filterContent, options.FindOne().SetProjection(bson.D{
+				{"hide_discuss", 1},
+				{"only_user_id_show_discuss", 1},
+			})); sr.Err() != nil {
+				log.Error(sr.Err())
+				response.JSON(rw, http.StatusBadRequest, nil, "400404")
 				return
 			} else {
-				//是否隐藏评论
-				if cont.HideDiscuss {
-					//是否有允许查看评论的
-					if !(len(cont.OnlyUserIDShowDiscuss) > 0 && help.NewSlice(help.NewSlice(cont.OnlyUserIDShowDiscuss).ObjectIDToStrings()).CheckItem(userID.Hex())) {
-						response.JSON(rw, http.StatusForbidden, nil, "403010")
-						return
+				var cont model.Content
+				if err := sr.Decode(&cont); err != nil {
+					log.Error(err)
+					response.JSON(rw, http.StatusBadRequest, nil, "400000")
+					return
+				} else {
+					//是否隐藏评论
+					if cont.HideDiscuss {
+						//是否有允许查看评论的
+						if !(len(cont.OnlyUserIDShowDiscuss) > 0 && help.NewSlice(help.NewSlice(cont.OnlyUserIDShowDiscuss).ObjectIDToStrings()).CheckItem(userID.Hex())) {
+							response.JSON(rw, http.StatusForbidden, nil, "403010")
+							return
+						}
 					}
 				}
 			}
-		}
-	}
 
-	discussModel := discuss.NewModel(self.M)
-	filter := discussModel.FilterNormalDiscuss()
-	filter = append(filter, discussModel.FilterByTypes(requestDL.Types)...)
-	filter = append(filter, discussModel.FilterByObjectID(requestDL.ObjectID)...)
-
-	if requestDL.Visibility == predefined.VisibilityTypeSelf {
-		filter = append(filter, discussModel.FilterByPublishUserID(userID)...)
-	} else {
-		if len(requestDL.PublishUserID) > 0 {
-			filter = append(filter, discussModel.FilterByPublishUserIDs(requestDL.PublishUserID)...)
+			filter = append(filter, discussModel.FilterByTypes(requestDL.Types)...)
+			filter = append(filter, discussModel.FilterByObjectID(requestDL.ObjectID)...)
 		}
 
-		if requestDL.Visibility != predefined.VisibilityTypeAll {
-			filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
+		if requestDL.Visibility == predefined.VisibilityTypeSelf {
+			filter = append(filter, discussModel.FilterByPublishUserID(userID)...)
 		} else {
-			filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
-		}
-	}
+			if len(requestDL.PublishUserID) > 0 {
+				filter = append(filter, discussModel.FilterByPublishUserIDs(requestDL.PublishUserID)...)
+			}
 
-	if coordinates != geometry.NilPointCoordinates {
-		filter = append(filter, discussModel.FilterByLocation(geometry.NewPoint(coordinates), requestDL.MaxDistance, requestDL.MinDistance)...)
+			if requestDL.Visibility != predefined.VisibilityTypeAll {
+				filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
+			} else {
+				filter = append(filter, discussModel.FilterByVisibility(requestDL.Visibility)...)
+			}
+		}
+
+		coordinates := geometry.PointCoordinates{
+			requestDL.Longitude, requestDL.Latitude,
+		}
+
+		if coordinates != geometry.NilPointCoordinates {
+			filter = append(filter, discussModel.FilterByLocation(geometry.NewPoint(coordinates), requestDL.MaxDistance, requestDL.MinDistance)...)
+		}
 	}
 
 	cnt, _ := discussModel.CountDocuments(r.Context(), filter)

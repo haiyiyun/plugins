@@ -71,7 +71,7 @@ func (self *Service) Route_DELETE_RelationshipById(rw http.ResponseWriter, r *ht
 		return
 	}
 
-	var requestSID predefined.RequestServeID
+	var requestSID predefined.RequestServeIDRequired
 	if err := validator.FormStruct(&requestSID, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
