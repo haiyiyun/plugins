@@ -32,6 +32,17 @@ func (self *Service) Login(username, password, ip, userAgent string, coordinates
 	return
 }
 
+func (self *Service) LoginByUserID(userID primitive.ObjectID, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
+	userModel := user.NewModel(self.M)
+
+	var u model.User
+	if u, err = userModel.GetUserByID(userID); err == nil {
+		m, err = self.CreateToken(context.TODO(), u, ip, userAgent, coordinates)
+	}
+
+	return
+}
+
 func (self *Service) Logout(r *http.Request) {
 	if claims, _ := self.GetValidClaims(r); claims != nil {
 		tokenString, _ := self.BearerAuth(r)
