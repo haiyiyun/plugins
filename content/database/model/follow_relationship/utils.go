@@ -130,7 +130,7 @@ func (self *Model) DeleteRelationship(ctx context.Context, typ int, userID, obje
 			}
 		}
 
-		_, err := self.DeleteOne(ctx, self.FilterByRelationship(typ, userID, objectID))
+		_, err := self.DeleteOne(sctx, self.FilterByRelationship(typ, userID, objectID))
 		if err != nil {
 			sctx.AbortTransaction(sctx)
 			return err
