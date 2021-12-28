@@ -45,7 +45,7 @@ func (self *Service) generateUploadName(contentType, originalFileName string) (f
 			fileExt = filepath.Ext(originalFileName)
 		}
 
-		//TODU 后缀名过滤
+		//TODO 后缀名过滤
 
 		//类型过滤
 		fileType = predefined.UploadTypeFile
