@@ -49,12 +49,12 @@ const (
 )
 
 const (
-	FollowTypeUser     = iota //关注用户
-	FollowTypeSubject         //关注主题
-	FollowTypeDynamic         //关注动态
-	FollowTypeArticle         //关注文章
-	FollowTypeQuestion        //关注问题
-	FollowTypeAnswer          //关注答案
+	FollowTypeUser     = iota //关注用户，此用户下的所有信息的变化
+	FollowTypeSubject         //关注主题，此主题下的所有信息的变化
+	FollowTypeDynamic         //关注动态，此动态下的所有信息的变化，比如，被评论等
+	FollowTypeArticle         //关注文章，此文章下的所有信息的变化，比如，被评论等
+	FollowTypeQuestion        //关注问题，此问题下的所有信息的变化，比如，有发表答案，问题被评论等
+	FollowTypeAnswer          //关注答案，此答案下的所有信息的变化，比如，有被评论，设为最佳答案等
 )
 
 const (

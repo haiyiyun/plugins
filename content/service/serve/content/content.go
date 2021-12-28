@@ -1,14 +1,18 @@
 package content
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/haiyiyun/log"
+	"github.com/haiyiyun/mongodb"
 	"github.com/haiyiyun/mongodb/geometry"
 	"github.com/haiyiyun/plugins/content/database/model"
 	"github.com/haiyiyun/plugins/content/database/model/category"
 	"github.com/haiyiyun/plugins/content/database/model/content"
+	"github.com/haiyiyun/plugins/content/database/model/follow_content"
+	"github.com/haiyiyun/plugins/content/database/model/follow_relationship"
 	"github.com/haiyiyun/plugins/content/database/model/subject"
 	"github.com/haiyiyun/plugins/content/predefined"
 	"github.com/haiyiyun/utils/help"
@@ -330,6 +334,51 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	if ior, err := contentModel.Create(r.Context(), ctnt); err != nil || ior.InsertedID == nil {
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
+		//关注人处理
+		go func(mgo mongodb.Mongoer, userID, contentID primitive.ObjectID) {
+			frModel := follow_relationship.NewModel(mgo)
+			filter := frModel.FilterByObjectIDWithType(userID, predefined.FollowTypeUser)
+			ctx := context.Background()
+			if cur, err := frModel.Find(ctx, filter, options.Find().SetProjection(bson.D{
+				{"_id", 1},
+				{"extension_id", 1},
+				{"type", 1},
+				{"user_id", 1},
+			})); err != nil {
+				log.Error(err)
+			} else {
+				var frls []model.FollowRelationship
+				if err := cur.All(ctx, &frls); err != nil {
+					log.Error(err)
+				} else {
+					for _, fr := range frls {
+						go func(mgo mongodb.Mongoer, fr model.FollowRelationship, contentID primitive.ObjectID) {
+							fcModel := follow_content.NewModel(mgo)
+							//判断是否已经创建
+							filter := fcModel.FilterByFollowRelationshipID(fr.ID)
+							filter = append(filter, fcModel.FilterByUserID(fr.UserID)...)
+							filter = append(filter, fcModel.FilterByContentID(contentID)...)
+							if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil && err != mongo.ErrNoDocuments {
+								log.Error(err)
+							} else {
+								if cnt == 0 {
+									if _, err := fcModel.Create(context.Background(), &model.FollowContent{
+										FollowRelationshipID: fr.ID,
+										ExtensionID:          fr.ExtensionID,
+										Type:                 fr.Type,
+										UserID:               fr.UserID,
+										ContentID:            contentID,
+									}); err != nil {
+										log.Error(err)
+									}
+								}
+							}
+						}(mgo, fr, contentID)
+					}
+				}
+			}
+		}(self.M, userID, ior.InsertedID.(primitive.ObjectID))
+
 		response.JSON(rw, 0, ior.InsertedID, "")
 	}
 }
