@@ -13,6 +13,10 @@ type RequestServeAuthPassword struct {
 	Password string `form:"password" validate:"required"`
 }
 
+type RequestServeAuthSecurePassword struct {
+	SecurePassword string `form:"secure_password" validate:"required"`
+}
+
 type RequestServeAuthUsernamePassword struct {
 	RequestServeAuthUsername
 	RequestServeAuthPassword

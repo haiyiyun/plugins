@@ -242,6 +242,37 @@ func (self *Model) CheckNameAndPassword(name, password string) (u model.User, er
 	return
 }
 
+func (self *Model) CheckSecurePasswordSet(ctx context.Context, userID primitive.ObjectID) (int64, error) {
+	filter := self.FilterByID(userID)
+	filter = append(filter, bson.D{
+		{"secure_password", bson.D{
+			{"$ne", ""},
+		}},
+	}...)
+	return self.CountDocuments(ctx, filter)
+}
+
+func (self *Model) CheckSecurePassword(ctx context.Context, userID primitive.ObjectID, securePassword string) (int64, error) {
+	securePasswordMd5 := help.Strings(securePassword).Md5()
+
+	filter := bson.D{
+		{"_id", userID},
+		{"secure_password", securePasswordMd5},
+		{"enable", true},
+		{"delete", false},
+	}
+
+	return self.CountDocuments(ctx, filter)
+}
+
+func (self *Model) ChangeSecurePassword(ctx context.Context, userID primitive.ObjectID, securePassword string) error {
+	_, err := self.Set(ctx, self.FilterByID(userID), bson.D{
+		{"secure_password", help.NewString(securePassword).Md5()},
+	})
+
+	return err
+}
+
 func (self *Model) GetUserByID(userID primitive.ObjectID) (u model.User, err error) {
 	filter := self.FilterByID(userID)
 	filter = append(filter, bson.D{

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/haiyiyun/plugins/user/database/model/user"
 	"github.com/haiyiyun/plugins/user/predefined"
@@ -29,7 +30,7 @@ func (self *Service) Route_POST_Login(rw http.ResponseWriter, r *http.Request) {
 		requestLogin.Longitude, requestLogin.Latitude,
 	}
 
-	if m, err := self.Login(requestLogin.Username, requestLogin.Password, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
+	if m, err := self.Login(r.Context(), requestLogin.Username, requestLogin.Password, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates, time.Time{}); err != nil {
 		if err.Error() == predefined.StatusCodeLoginLimitText {
 			response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 		} else {
@@ -54,7 +55,7 @@ func (self *Service) Route_POST_GetTokens(rw http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if ts, err := self.GetTokensByUsernameAndPassword(requestUP.Username, requestUP.Password); err == nil {
+	if ts, err := self.GetTokensByUsernameAndPassword(r.Context(), requestUP.Username, requestUP.Password); err == nil {
 		response.JSON(rw, 0, ts, "")
 	} else {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
@@ -75,7 +76,7 @@ func (self *Service) Route_POST_DeleteToken(rw http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := self.DeleteTokenByUsernameAndPassword(requestTUP.TokenID, requestTUP.Username, requestTUP.Password); err == nil {
+	if err := self.DeleteTokenByUsernameAndPassword(r.Context(), requestTUP.TokenID, requestTUP.Username, requestTUP.Password); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusUnauthorized, nil, "")
@@ -125,7 +126,7 @@ func (self *Service) Route_POST_Refresh(rw http.ResponseWriter, r *http.Request)
 		requestRefresh.Longitude, requestRefresh.Latitude,
 	}
 
-	if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates); err != nil {
+	if m, err := self.CreateToken(r.Context(), u, realip.RealIP(r), r.Header.Get("User-Agent"), coordinates, time.Time{}); err != nil {
 		if err.Error() == predefined.StatusCodeLoginLimitText {
 			response.JSON(rw, predefined.StatusCodeLoginLimit, nil, predefined.StatusCodeLoginLimitText)
 		} else {
@@ -290,6 +291,83 @@ func (self *Service) Route_POST_GuestToUser(rw http.ResponseWriter, r *http.Requ
 
 	userModel := user.NewModel(self.M)
 	if err := userModel.GuestToUser(u.ID, requestGuestToUser.Username, requestGuestToUser.Password); err == nil {
+		response.JSON(rw, 0, nil, "")
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_CheckSecurePasswordSet(rw http.ResponseWriter, r *http.Request) {
+	u, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	userModel := user.NewModel(self.M)
+	if cnt, err := userModel.CheckSecurePasswordSet(r.Context(), u.ID); err == nil {
+		if cnt == 0 {
+			response.JSON(rw, 0, help.M{
+				"set": false,
+			}, "")
+		} else {
+			response.JSON(rw, 0, help.M{
+				"set": true,
+			}, "")
+		}
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_CheckSecurePassword(rw http.ResponseWriter, r *http.Request) {
+	u, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSASP predefined.RequestServeAuthSecurePassword
+	if err := validator.FormStruct(&requestSASP, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	userModel := user.NewModel(self.M)
+	if cnt, err := userModel.CheckSecurePassword(r.Context(), u.ID, requestSASP.SecurePassword); err == nil {
+		if cnt == 0 {
+			response.JSON(rw, 0, help.M{
+				"check": false,
+			}, "")
+		} else {
+			response.JSON(rw, 0, help.M{
+				"check": true,
+			}, "")
+		}
+	} else {
+		response.JSON(rw, http.StatusBadRequest, nil, "")
+	}
+}
+
+func (self *Service) Route_POST_SecurePassword(rw http.ResponseWriter, r *http.Request) {
+	u, found := self.GetUserInfo(r)
+	if !found {
+		response.JSON(rw, http.StatusUnauthorized, nil, "")
+		return
+	}
+
+	r.ParseForm()
+
+	var requestSASP predefined.RequestServeAuthSecurePassword
+	if err := validator.FormStruct(&requestSASP, r.Form); err != nil {
+		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	userModel := user.NewModel(self.M)
+	if err := userModel.ChangeSecurePassword(r.Context(), u.ID, requestSASP.SecurePassword); err == nil {
 		response.JSON(rw, 0, nil, "")
 	} else {
 		response.JSON(rw, http.StatusBadRequest, nil, "")

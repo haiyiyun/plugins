@@ -21,23 +21,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (self *Service) Login(username, password, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
+func (self *Service) Login(ctx context.Context, username, password, ip, userAgent string, coordinates geometry.PointCoordinates, expiredTime time.Time) (m help.M, err error) {
 	userModel := user.NewModel(self.M)
 
 	var u model.User
 	if u, err = userModel.CheckNameAndPassword(username, password); err == nil {
-		m, err = self.CreateToken(context.TODO(), u, ip, userAgent, coordinates)
+		m, err = self.CreateToken(ctx, u, ip, userAgent, coordinates, expiredTime)
 	}
 
 	return
 }
 
-func (self *Service) LoginByUserID(userID primitive.ObjectID, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
+func (self *Service) LoginByUserID(ctx context.Context, userID primitive.ObjectID, ip, userAgent string, coordinates geometry.PointCoordinates, expiredTime time.Time) (m help.M, err error) {
 	userModel := user.NewModel(self.M)
 
 	var u model.User
 	if u, err = userModel.GetUserByID(userID); err == nil {
-		m, err = self.CreateToken(context.TODO(), u, ip, userAgent, coordinates)
+		m, err = self.CreateToken(ctx, u, ip, userAgent, coordinates, expiredTime)
 	}
 
 	return
@@ -48,14 +48,14 @@ func (self *Service) Logout(r *http.Request) {
 		tokenString, _ := self.BearerAuth(r)
 		if tokenID, err := primitive.ObjectIDFromHex(claims.Id); err == nil {
 			tokenModel := token.NewModel(self.M)
-			tokenModel.DeleteOne(context.TODO(), tokenModel.FilterByID(tokenID))
+			tokenModel.DeleteOne(r.Context(), tokenModel.FilterByID(tokenID))
 			cacheClaimsKey := "claims.valid." + tokenString
 			self.Cache.Delete(cacheClaimsKey)
 		}
 	}
 }
 
-func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgent string, coordinates geometry.PointCoordinates) (m help.M, err error) {
+func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgent string, coordinates geometry.PointCoordinates, expiredTime time.Time) (m help.M, err error) {
 	tokenModel := token.NewModel(self.M)
 
 	if self.Config.OnlySingleLogin {
@@ -78,9 +78,12 @@ func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgen
 		(self.AllowMultiLogin &&
 			((len(self.AllowMultiLoginUserIDUnlimited) > 0 && help.NewSlice(self.AllowMultiLoginUserIDUnlimited).CheckItem(u.ID.Hex())) ||
 				(self.AllowMultiLoginNum == 0 || cnt < self.AllowMultiLoginNum))) {
-		expiredTime := time.Now().Add(self.Config.TokenExpireDuration.Duration)
-		if dur, found := self.Config.SpecifyUserIDTokenExpireDuration[u.ID.Hex()]; found {
-			expiredTime = time.Now().Add(dur.Duration)
+
+		if expiredTime.IsZero() {
+			expiredTime = time.Now().Add(self.Config.TokenExpireDuration.Duration)
+			if dur, found := self.Config.SpecifyUserIDTokenExpireDuration[u.ID.Hex()]; found {
+				expiredTime = time.Now().Add(dur.Duration)
+			}
 		}
 
 		jwtID := primitive.NewObjectID()
@@ -264,24 +267,24 @@ func (self *Service) BearerAuth(r *http.Request) (string, bool) {
 	return token, token != ""
 }
 
-func (self *Service) GetTokensByUsernameAndPassword(username, password string) (ts []help.M, err error) {
+func (self *Service) GetTokensByUsernameAndPassword(ctx context.Context, username, password string) (ts []help.M, err error) {
 	userModel := user.NewModel(self.M)
 
 	var u model.User
 	if u, err = userModel.CheckNameAndPassword(username, password); err == nil {
 		tokenModel := token.NewModel(self.M)
 		var cur *mongo.Cursor
-		if cur, err = tokenModel.Find(context.TODO(), tokenModel.FilterByUserID(u.ID), options.Find().SetProjection(bson.D{
+		if cur, err = tokenModel.Find(ctx, tokenModel.FilterByUserID(u.ID), options.Find().SetProjection(bson.D{
 			{"token", 0},
 		})); err == nil {
-			err = cur.All(context.TODO(), &ts)
+			err = cur.All(ctx, &ts)
 		}
 	}
 
 	return
 }
 
-func (self *Service) DeleteTokenByUsernameAndPassword(tokenID primitive.ObjectID, username, password string) error {
+func (self *Service) DeleteTokenByUsernameAndPassword(ctx context.Context, tokenID primitive.ObjectID, username, password string) error {
 	userModel := user.NewModel(self.M)
 
 	u, err := userModel.CheckNameAndPassword(username, password)
@@ -292,7 +295,7 @@ func (self *Service) DeleteTokenByUsernameAndPassword(tokenID primitive.ObjectID
 		filter = append(filter, tokenModel.FilterByID(tokenID)...)
 
 		var dr *mongo.DeleteResult
-		if dr, err = tokenModel.DeleteOne(context.TODO(), filter); err == nil {
+		if dr, err = tokenModel.DeleteOne(ctx, filter); err == nil {
 			if dr.DeletedCount == 0 {
 				err = mongo.ErrNoDocuments
 			}
@@ -315,10 +318,10 @@ func (self *Service) GetTokensByToken(r *http.Request) (ts []help.M, err error) 
 		}...)
 
 		var cur *mongo.Cursor
-		if cur, err = tokenModel.Find(context.TODO(), filter, options.Find().SetProjection(bson.D{
+		if cur, err = tokenModel.Find(r.Context(), filter, options.Find().SetProjection(bson.D{
 			{"token", 0},
 		})); err == nil {
-			err = cur.All(context.TODO(), &ts)
+			err = cur.All(r.Context(), &ts)
 		}
 	} else {
 		err = errors.New("Invalid Claims")
@@ -336,7 +339,7 @@ func (self *Service) DeleteTokenByToken(tokenID primitive.ObjectID, r *http.Requ
 		filter = append(filter, tokenModel.FilterByID(tokenID)...)
 
 		var dr *mongo.DeleteResult
-		if dr, err = tokenModel.DeleteOne(context.TODO(), filter); err == nil {
+		if dr, err = tokenModel.DeleteOne(r.Context(), filter); err == nil {
 			if dr.DeletedCount == 0 {
 				err = mongo.ErrNoDocuments
 			}

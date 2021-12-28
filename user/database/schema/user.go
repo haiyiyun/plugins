@@ -32,6 +32,20 @@ var (
 			},
 			{
 				bson.D{
+					{"name", 1},
+					{"password", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"_id", 1},
+					{"secure_password", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"extension_id", 1},
 				},
 				options.Index(),
