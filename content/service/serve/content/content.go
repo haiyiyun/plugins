@@ -101,7 +101,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					filterLimit = append(filterLimit, bson.D{
 						{"associate_id", requestCC.AssociateID},
 					}...)
-					if cnt, err := contentModel.CountDocuments(r.Context(), filterLimit); err != nil && err != mongo.ErrNoDocuments {
+					if cnt, err := contentModel.CountDocuments(r.Context(), filterLimit); err != nil {
 						log.Error(err)
 						response.JSON(rw, http.StatusBadRequest, nil, "400010")
 						return
@@ -359,7 +359,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 							filter := fcModel.FilterByFollowRelationshipID(fr.ID)
 							filter = append(filter, fcModel.FilterByUserID(fr.UserID)...)
 							filter = append(filter, fcModel.FilterByContentID(contentID)...)
-							if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil && err != mongo.ErrNoDocuments {
+							if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil {
 								log.Error(err)
 							} else {
 								if cnt == 0 {
@@ -401,7 +401,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 								filter := fcModel.FilterByFollowRelationshipID(fr.ID)
 								filter = append(filter, fcModel.FilterByUserID(fr.UserID)...)
 								filter = append(filter, fcModel.FilterByContentID(contentID)...)
-								if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil && err != mongo.ErrNoDocuments {
+								if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil {
 									log.Error(err)
 								} else {
 									if cnt == 0 {

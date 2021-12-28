@@ -57,7 +57,10 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		filter := discussModel.FilterNormalDiscuss()
 		filter = append(filter, discussModel.FilterByID(requestDC.ReplyDiscussID)...)
 		if cnt, err := discussModel.CountDocuments(r.Context(), filter); cnt == 0 {
-			log.Error(err)
+			if err != nil {
+				log.Error(err)
+			}
+
 			response.JSON(rw, http.StatusBadRequest, nil, "400404")
 			return
 		}
@@ -158,7 +161,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			if cont.LimitAllDiscussNum > 0 {
 				filterLAD := discussModel.FilterNormalDiscuss()
 				filterLAD = append(filterLAD, discussModel.FilterByObjectID(requestDC.ObjectID)...)
-				if cntLAD, err := discussModel.CountDocuments(r.Context(), filterLAD); err != nil && err != mongo.ErrNoDocuments {
+				if cntLAD, err := discussModel.CountDocuments(r.Context(), filterLAD); err != nil {
 					log.Error(err)
 					response.JSON(rw, http.StatusBadRequest, nil, "400010")
 					return
@@ -178,7 +181,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 				}
 			} else if cont.LimitPublishUserDiscussNum > 0 {
 				filterLPUD := discussModel.FilterByPublishUserID(cont.PublishUserID)
-				if cntLPUD, err := discussModel.CountDocuments(r.Context(), filterLPUD); err != nil && err != mongo.ErrNoDocuments {
+				if cntLPUD, err := discussModel.CountDocuments(r.Context(), filterLPUD); err != nil {
 					log.Error(err)
 					response.JSON(rw, http.StatusBadRequest, nil, "400020")
 					return
@@ -202,7 +205,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 						{"$ne", cont.PublishUserID},
 					}},
 				}
-				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLNPUAUDN); err != nil && err != mongo.ErrNoDocuments {
+				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLNPUAUDN); err != nil {
 					log.Error(err)
 					response.JSON(rw, http.StatusBadRequest, nil, "400030")
 					return
@@ -216,7 +219,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 				filterLNPUEUDN := bson.D{
 					{"publish_user_id", userID},
 				}
-				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLNPUEUDN); err != nil && err != mongo.ErrNoDocuments {
+				if cntLUD, err := discussModel.CountDocuments(r.Context(), filterLNPUEUDN); err != nil {
 					log.Error(err)
 					response.JSON(rw, http.StatusBadRequest, nil, "400031")
 					return
