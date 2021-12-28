@@ -334,15 +334,16 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 	if ior, err := contentModel.Create(r.Context(), ctnt); err != nil || ior.InsertedID == nil {
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
-		//关注人处理
-		go func(mgo mongodb.Mongoer, userID, contentID primitive.ObjectID) {
+		//关注处理
+		go func(mgo mongodb.Mongoer, userID, subjectID, contentID primitive.ObjectID, publishType int) {
 			frModel := follow_relationship.NewModel(mgo)
+
+			//关注人处理
 			filter := frModel.FilterByObjectIDWithType(userID, predefined.FollowTypeUser)
 			ctx := context.Background()
 			if cur, err := frModel.Find(ctx, filter, options.Find().SetProjection(bson.D{
 				{"_id", 1},
 				{"extension_id", 1},
-				{"type", 1},
 				{"user_id", 1},
 			})); err != nil {
 				log.Error(err)
@@ -352,7 +353,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					log.Error(err)
 				} else {
 					for _, fr := range frls {
-						go func(mgo mongodb.Mongoer, fr model.FollowRelationship, contentID primitive.ObjectID) {
+						go func(mgo mongodb.Mongoer, fr model.FollowRelationship, contentID primitive.ObjectID, typ int) {
 							fcModel := follow_content.NewModel(mgo)
 							//判断是否已经创建
 							filter := fcModel.FilterByFollowRelationshipID(fr.ID)
@@ -364,20 +365,63 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 								if cnt == 0 {
 									if _, err := fcModel.Create(context.Background(), &model.FollowContent{
 										FollowRelationshipID: fr.ID,
-										ExtensionID:          fr.ExtensionID,
-										Type:                 fr.Type,
+										Type:                 typ,
 										UserID:               fr.UserID,
 										ContentID:            contentID,
+										ExtensionID:          fr.ExtensionID,
 									}); err != nil {
 										log.Error(err)
 									}
 								}
 							}
-						}(mgo, fr, contentID)
+						}(mgo, fr, contentID, publishType)
 					}
 				}
 			}
-		}(self.M, userID, ior.InsertedID.(primitive.ObjectID))
+
+			//关注主题处理
+			if subjectID != primitive.NilObjectID {
+				filterSID := frModel.FilterByObjectIDWithType(subjectID, predefined.FollowTypeSubject)
+				ctxSID := context.Background()
+				if cur, err := frModel.Find(ctxSID, filterSID, options.Find().SetProjection(bson.D{
+					{"_id", 1},
+					{"extension_id", 1},
+					{"user_id", 1},
+				})); err != nil {
+					log.Error(err)
+				} else {
+					var frls []model.FollowRelationship
+					if err := cur.All(ctxSID, &frls); err != nil {
+						log.Error(err)
+					} else {
+						for _, fr := range frls {
+							go func(mgo mongodb.Mongoer, fr model.FollowRelationship, contentID primitive.ObjectID, typ int) {
+								fcModel := follow_content.NewModel(mgo)
+								//判断是否已经创建
+								filter := fcModel.FilterByFollowRelationshipID(fr.ID)
+								filter = append(filter, fcModel.FilterByUserID(fr.UserID)...)
+								filter = append(filter, fcModel.FilterByContentID(contentID)...)
+								if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil && err != mongo.ErrNoDocuments {
+									log.Error(err)
+								} else {
+									if cnt == 0 {
+										if _, err := fcModel.Create(context.Background(), &model.FollowContent{
+											FollowRelationshipID: fr.ID,
+											Type:                 typ,
+											UserID:               fr.UserID,
+											ContentID:            contentID,
+											ExtensionID:          fr.ExtensionID,
+										}); err != nil {
+											log.Error(err)
+										}
+									}
+								}
+							}(mgo, fr, contentID, publishType)
+						}
+					}
+				}
+			}
+		}(self.M, userID, ctnt.SubjectID, ior.InsertedID.(primitive.ObjectID), ctnt.PublishType)
 
 		response.JSON(rw, 0, ior.InsertedID, "")
 	}
@@ -743,19 +787,13 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, _ := primitive.ObjectIDFromHex(claims.Audience)
-
-	if userID == primitive.NilObjectID {
-		response.JSON(rw, http.StatusUnauthorized, nil, "")
-		return
-	}
-
 	var requestCD predefined.RequestServeContentDetail
 	if err := validator.FormStruct(&requestCD, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
+	userID := claims.UserID
 	contentModel := content.NewModel(self.M)
 	filter := contentModel.FilterByID(requestCD.ID)
 	filter = append(filter, contentModel.FilterNormalContent()...)
@@ -820,6 +858,17 @@ func (self *Service) Route_GET_Detail(rw http.ResponseWriter, r *http.Request) {
 					len(contentDetail.OnlyUserIDShowDetail) > 0 &&
 					help.NewSlice(help.NewSlice(contentDetail.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(userID.Hex())) {
 				response.JSON(rw, 0, contentDetail, "")
+
+				//判断是否已经添加过已读
+				if !help.NewSlice(help.NewSlice(contentDetail.ReadedUser).ObjectIDToStrings()).CheckItem(userID.Hex()) {
+					//添加已读user_id
+					go contentModel.AddReadedUser(context.Background(), requestCD.ID, userID)
+					//批量更新所有关注内容的已读时间
+					go func(mgo mongodb.Mongoer, userID, contentID primitive.ObjectID) {
+						fcModel := follow_content.NewModel(mgo)
+						fcModel.SetAllReadedTimeByUserIDAndContentID(context.Background(), userID, contentID, time.Now())
+					}(self.M, userID, requestCD.ID)
+				}
 			} else {
 				response.JSON(rw, http.StatusForbidden, nil, "403050")
 			}

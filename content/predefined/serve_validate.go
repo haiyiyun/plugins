@@ -327,3 +327,15 @@ type RequestServeFollowBeRelationshipTotal struct {
 	RequestServeObjectIDRequired
 	ExtensionID primitive.ObjectID `form:"extension_id"`
 }
+
+type RequestServeFollowContentTypes struct {
+	Types []int `form:"types" validate:"gte=0,dive,oneof=0 1 2 3"`
+}
+
+type RequestServeMyFollowContentList struct {
+	RequestServeFollowContentTypes
+	OnlyUnreaded  bool          `form:"only_unreaded"` //与其他readed_time的相关参数互斥
+	OnlyReaded    bool          `form:"only_readed"`   //与其他readed_time的相关参数互斥
+	GteReadedTime help.DateTime `form:"gte_readed_time"`
+	LteReadedTime help.DateTime `form:"lte_readed_time"`
+}

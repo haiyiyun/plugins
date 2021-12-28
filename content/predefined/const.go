@@ -58,6 +58,13 @@ const (
 )
 
 const (
+	FollowContentTypeDynamic  = iota //关注内容类型为动态的内容
+	FollowContentTypeArticle         //关注内容类型为文章的内容
+	FollowContentTypeQuestion        //关注内容类型为问题的内容
+	FollowContentTypeAnswer          //关注内容类型为答案的内容
+)
+
+const (
 	ContentPublishTypeDynamic  = iota //内容发布类型：动态
 	ContentPublishTypeArticle         //内容发布类型：文章
 	ContentPublishTypeQuestion        //内容发布类型：问题

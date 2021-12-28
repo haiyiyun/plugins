@@ -28,6 +28,13 @@ var (
 			},
 			{
 				bson.D{
+					{"user_id", 1},
+					{"content_id", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"follow_relationship_id", 1},
 				},
 				options.Index(),
@@ -62,6 +69,12 @@ var (
 				},
 				options.Index(),
 			},
+			// {
+			// 	bson.D{
+			// 		{"readed_time", 1},
+			// 	},
+			// 	options.Index().SetExpireAfterSeconds(60 * 60 * 24 * 30),
+			// },
 		},
 	}
 )
