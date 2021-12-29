@@ -60,7 +60,7 @@ type RequestServeAtUsers struct {
 }
 
 type RequestServeCategorySystemType struct {
-	Type int `form:"type" validate:"oneof=0 1 2 3 4"`
+	Type int `form:"type" validate:"oneof=1001 1002 1003 1004"`
 }
 
 type RequestServeCategoryVisibility struct {
@@ -77,11 +77,11 @@ type RequestServeCategoryList struct {
 }
 
 type RequestServeSubjectCreateType struct {
-	Type int `form:"type" validate:"oneof=0 1"`
+	Type int `form:"type" validate:"oneof=1 2 3 4"`
 }
 
 type RequestServeSubjectListType struct {
-	Type int `form:"type" validate:"oneof=0 1 1000 1001"`
+	Type int `form:"type" validate:"oneof=1 2 3 4 1001 1002 1003 1004"`
 }
 
 type RequestServeSubjectVisibility struct {
@@ -107,7 +107,7 @@ type RequestServeSubjectList struct {
 }
 
 type RequestServeDiscussType struct {
-	Type int `form:"type" validate:"oneof=0 1 2 3"`
+	Type int `form:"type" validate:"oneof=1 2 3 4"`
 }
 
 type RequestServeDiscussVisibility struct {
@@ -152,7 +152,7 @@ type RequestServeContentTypes struct {
 }
 
 type RequestServeContentPublishType struct {
-	PublishType int `form:"publish_type" validate:"oneof=0 1 2 3"`
+	PublishType int `form:"publish_type" validate:"oneof=1 2 3 4"`
 }
 
 type RequestServeContentAssociateType struct {
@@ -291,7 +291,7 @@ type RequestServeContentDetail struct {
 }
 
 type RequestServeFollowType struct {
-	Type int `form:"type" validate:"oneof=0 1 2 3 4 5"`
+	Type int `form:"type" validate:"oneof=1 2 3 4 100 101"`
 }
 
 type RequestServeFollowRelationshipCreate struct {

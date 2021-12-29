@@ -335,7 +335,7 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
 		//关注处理
-		go func(mgo mongodb.Mongoer, userID, subjectID, contentID primitive.ObjectID, publishType int) {
+		go func(mgo mongodb.Mongoer, userID, subjectID, contentID primitive.ObjectID, publishType, associateType int, associateID primitive.ObjectID) {
 			frModel := follow_relationship.NewModel(mgo)
 
 			//关注人处理
@@ -421,7 +421,53 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 					}
 				}
 			}
-		}(self.M, userID, ctnt.SubjectID, ior.InsertedID.(primitive.ObjectID), ctnt.PublishType)
+
+			//关注关联处理
+			if associateID != primitive.NilObjectID {
+				//关联类型过滤
+				if associateType != predefined.ContentAssociateTypeSelf && associateType != predefined.ContentAssociateTypeForward {
+					filterAID := frModel.FilterByObjectIDWithType(associateID, publishType)
+					ctxAID := context.Background()
+					if cur, err := frModel.Find(ctxAID, filterAID, options.Find().SetProjection(bson.D{
+						{"_id", 1},
+						{"extension_id", 1},
+						{"user_id", 1},
+					})); err != nil {
+						log.Error(err)
+					} else {
+						var frls []model.FollowRelationship
+						if err := cur.All(ctxAID, &frls); err != nil {
+							log.Error(err)
+						} else {
+							for _, fr := range frls {
+								go func(mgo mongodb.Mongoer, fr model.FollowRelationship, contentID primitive.ObjectID, typ int) {
+									fcModel := follow_content.NewModel(mgo)
+									//判断是否已经创建
+									filter := fcModel.FilterByFollowRelationshipID(fr.ID)
+									filter = append(filter, fcModel.FilterByUserID(fr.UserID)...)
+									filter = append(filter, fcModel.FilterByContentID(contentID)...)
+									if cnt, err := fcModel.CountDocuments(context.Background(), filter); err != nil {
+										log.Error(err)
+									} else {
+										if cnt == 0 {
+											if _, err := fcModel.Create(context.Background(), &model.FollowContent{
+												FollowRelationshipID: fr.ID,
+												Type:                 typ,
+												UserID:               fr.UserID,
+												ContentID:            contentID,
+												ExtensionID:          fr.ExtensionID,
+											}); err != nil {
+												log.Error(err)
+											}
+										}
+									}
+								}(mgo, fr, contentID, publishType)
+							}
+						}
+					}
+				}
+			}
+		}(self.M, userID, ctnt.SubjectID, ior.InsertedID.(primitive.ObjectID), ctnt.PublishType, ctnt.AssociateType, ctnt.AssociateID)
 
 		response.JSON(rw, 0, ior.InsertedID, "")
 	}
