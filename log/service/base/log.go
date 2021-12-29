@@ -106,12 +106,16 @@ func (self *Service) GetRequestAllIP(r *http.Request) (ip string) {
 }
 
 func (self *Service) GetRequestPayload(r *http.Request) (payload string) {
-	if r.MultipartForm != nil && r.MultipartForm.File != nil {
-		payload = "FILE: ,"
-		for _, fhs := range r.MultipartForm.File {
-			if len(fhs) > 0 {
-				for _, fh := range fhs {
-					payload += fh.Filename + "(" + strconv.FormatInt(fh.Size, 10) + "),"
+	if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data; boundary=") {
+		payload = "FILE: "
+		r.ParseMultipartForm(self.MaxUploadFileSize)
+		if r.MultipartForm != nil && r.MultipartForm.File != nil {
+			payload += ","
+			for _, fhs := range r.MultipartForm.File {
+				if len(fhs) > 0 {
+					for _, fh := range fhs {
+						payload += fh.Filename + "(" + strconv.FormatInt(fh.Size, 10) + "),"
+					}
 				}
 			}
 		}

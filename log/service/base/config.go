@@ -15,6 +15,7 @@ type CacheConfig struct {
 }
 
 type BaseConfig struct {
+	MaxUploadFileSize            int64           `json:"max_file_size"`
 	DefaultDeleteDuration        config.Duration `json:"default_delete_duration"`
 	DefaultLoginDeleteDuration   config.Duration `json:"default_login_delete_duration"`
 	DefaultAuthDeleteDuration    config.Duration `json:"default_auth_delete_duration"`
