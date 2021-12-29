@@ -53,8 +53,8 @@ type RequestManagePassword struct {
 }
 
 type RequestManageLongitudeLatitude struct {
-	Longitude float64 `form:"longitude,omitempty"` //经度
-	Latitude  float64 `form:"latitude,omitempty"`  //维度
+	Longitude float64 `form:"longitude,omitempty" validate:"numeric"` //经度
+	Latitude  float64 `form:"latitude,omitempty" validate:"numeric"`  //维度
 }
 
 type RequestManageLogin struct {

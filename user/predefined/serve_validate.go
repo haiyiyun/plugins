@@ -23,8 +23,8 @@ type RequestServeAuthUsernamePassword struct {
 }
 
 type RequestServeLongitudeLatitude struct {
-	Longitude float64 `form:"longitude,omitempty"` //经度
-	Latitude  float64 `form:"latitude,omitempty"`  //维度
+	Longitude float64 `form:"longitude,omitempty" validate:"numeric"` //经度
+	Latitude  float64 `form:"latitude,omitempty" validate:"numeric"`  //维度
 }
 
 type RequestServeDistance struct {
@@ -33,8 +33,8 @@ type RequestServeDistance struct {
 }
 
 type RequestServeOnlineLongitudeLatitude struct {
-	OnlineLongitude float64 `form:"pnline_longitude,omitempty"` //经度
-	OnlineLatitude  float64 `form:"pnline_latitude,omitempty"`  //维度
+	OnlineLongitude float64 `form:"pnline_longitude,omitempty" validate:"numeric"` //经度
+	OnlineLatitude  float64 `form:"pnline_latitude,omitempty" validate:"numeric"`  //维度
 }
 
 type RequestServeOnlineDistance struct {

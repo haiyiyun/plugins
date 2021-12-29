@@ -6,8 +6,8 @@ import (
 )
 
 type RequestServeLongitudeLatitude struct {
-	Longitude float64 `form:"longitude,omitempty"` //经度
-	Latitude  float64 `form:"latitude,omitempty"`  //维度
+	Longitude float64 `form:"longitude,omitempty" validate:"numeric"` //经度
+	Latitude  float64 `form:"latitude,omitempty" validate:"numeric"`  //维度
 }
 
 type RequestServeDistance struct {
@@ -121,7 +121,7 @@ type RequestServeDiscussCreate struct {
 	ReplyDiscussID primitive.ObjectID `form:"reply_discuss_id,omitempty"`
 	RequestServeDiscussVisibility
 	RequestServeLongitudeLatitude
-	Evaluation float64 `form:"evaluation validate:numeric"`
+	Evaluation float64 `form:"evaluation" validate:"numeric"`
 	Text       string  `form:"text" validate:"required"`
 }
 
