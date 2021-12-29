@@ -577,12 +577,20 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterByAssociateID(requestCL.AssociateID)...)
 	}
 
-	if requestCL.CategoryID != primitive.NilObjectID {
-		filter = append(filter, contentModel.FilterByCategoryID(requestCL.CategoryID)...)
+	if requestCL.EmptyCategoryID {
+		filter = append(filter, contentModel.FilterByCategoryID(primitive.NilObjectID)...)
+	} else {
+		if requestCL.CategoryID != primitive.NilObjectID {
+			filter = append(filter, contentModel.FilterByCategoryID(requestCL.CategoryID)...)
+		}
 	}
 
-	if requestCL.SubjectID != primitive.NilObjectID {
-		filter = append(filter, contentModel.FilterBySubjectID(requestCL.SubjectID)...)
+	if requestCL.EmptySubjectID {
+		filter = append(filter, contentModel.FilterBySubjectID(primitive.NilObjectID)...)
+	} else {
+		if requestCL.SubjectID != primitive.NilObjectID {
+			filter = append(filter, contentModel.FilterBySubjectID(requestCL.SubjectID)...)
+		}
 	}
 
 	if requestCL.LimitUserAtLeastLevel > 0 {
