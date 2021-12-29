@@ -22,6 +22,7 @@ type BaseConfig struct {
 	DefaultOperateDeleteDuration config.Duration `json:"default_operate_delete_duration"`
 	LogLoginPath                 []string        `json:"log_login_path"`
 	LogAuthPath                  []string        `json:"log_auth_path"`
+	LogFilePath                  []string        `json:"log_file_path"`
 	LogOperateExcludePath        []string        `json:"log_operate_exclude_path"`
 }
 

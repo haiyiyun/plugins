@@ -87,7 +87,12 @@ func (self *Service) LogResponse(rw http.ResponseWriter, r *http.Request) {
 		if logIDI, found := lrw.GetData("log_id"); found {
 			if logID, ok := logIDI.(primitive.ObjectID); ok {
 				header := rw.Header()
-				data := lrw.GetResData()
+				var data []byte
+				if self.logFilePath(r.URL.Path) && r.Method == "GET" {
+					data = []byte("FILE")
+				} else {
+					data = lrw.GetResData()
+				}
 				lrw.SetGetResData(false)
 				go self.logResponse(logID, header, string(data))
 			}
@@ -106,15 +111,19 @@ func (self *Service) GetRequestAllIP(r *http.Request) (ip string) {
 }
 
 func (self *Service) GetRequestPayload(r *http.Request) (payload string) {
-	if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data; boundary=") {
-		payload = "FILE: "
-		r.ParseMultipartForm(self.MaxUploadFileSize)
-		if r.MultipartForm != nil && r.MultipartForm.File != nil {
-			payload += ","
-			for _, fhs := range r.MultipartForm.File {
-				if len(fhs) > 0 {
-					for _, fh := range fhs {
-						payload += fh.Filename + "(" + strconv.FormatInt(fh.Size, 10) + "),"
+	if self.logFilePath(r.URL.Path) {
+		if r.Method == "POST" {
+			if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data; boundary=") {
+				payload = "FILE: "
+				r.ParseMultipartForm(self.MaxUploadFileSize)
+				if r.MultipartForm != nil && r.MultipartForm.File != nil {
+					payload += ","
+					for _, fhs := range r.MultipartForm.File {
+						if len(fhs) > 0 {
+							for _, fh := range fhs {
+								payload += fh.Filename + "(" + strconv.FormatInt(fh.Size, 10) + "),"
+							}
+						}
 					}
 				}
 			}
@@ -143,6 +152,17 @@ func (self *Service) logAuthPath(reqPath string) bool {
 	requestLogAuthPath := self.Config.LogAuthPath
 	for _, aPath := range requestLogAuthPath {
 		if strings.HasPrefix(reqPath, aPath) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (self *Service) logFilePath(reqPath string) bool {
+	requestLogFilePath := self.Config.LogFilePath
+	for _, lPath := range requestLogFilePath {
+		if strings.HasPrefix(reqPath, lPath) {
 			return true
 		}
 	}
