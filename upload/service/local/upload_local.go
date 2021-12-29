@@ -56,7 +56,7 @@ func (self *Service) generateUploadName(contentType, originalFileName string) (f
 			pathType = self.Config.UploadImageDirectory
 		case "video", "audio":
 			switch contentTypes[1] {
-			case "x-ms-asf", "avi", "x-ivf", "x-mpeg", "mpeg4", "x-sgi-movie", "mpeg", "x-mpg", "mpg", "vnd.rn-realvideo", "x-ms-wm", "x-ms-wmv", "x-ms-wmx", "x-mei-aac",
+			case "x-ms-asf", "avi", "x-ivf", "x-mpeg", "mp4", "mpeg4", "x-sgi-movie", "mpeg", "x-mpg", "mpg", "vnd.rn-realvideo", "x-ms-wm", "x-ms-wmv", "x-ms-wmx", "x-mei-aac",
 				"aiff", "basic", "x-liquid-file", "x-liquid-secure", "x-la-lms", "mpegurl", "mid", "x-musicnet-download", "x-musicnet-stream", "mp1", "mp2", "mp3", "rn-mpeg", "scpls",
 				"vnd.rn-realaudio", "x-pn-realaudio", "x-pn-realaudio-plugin", "wav", "x-ms-wax", "x-ms-wma":
 				fileType = predefined.UploadTypeMedia
@@ -97,6 +97,8 @@ func (self *Service) generateUploadName(contentType, originalFileName string) (f
 
 		random := rand.New(rand.NewSource(now.UnixNano()))
 		fileName = fmt.Sprintf("%v", random.Uint64())
+	} else {
+		err = errors.New("parse Content-Type failed")
 	}
 
 	return
