@@ -525,7 +525,10 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 
 	contentModel := content.NewModel(self.M)
 	filter := contentModel.FilterNormalContent()
-	filter = append(filter, contentModel.FilterByTypes(requestCL.Types)...)
+
+	if len(requestCL.Types) > 0 {
+		filter = append(filter, contentModel.FilterByTypes(requestCL.Types)...)
+	}
 
 	if requestCL.Visibility == predefined.VisibilityTypeSelf {
 		filter = append(filter, contentModel.FilterByPublishUserID(userID)...)
