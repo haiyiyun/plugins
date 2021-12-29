@@ -121,7 +121,7 @@ type RequestServeDiscussCreate struct {
 	ReplyDiscussID primitive.ObjectID `form:"reply_discuss_id,omitempty"`
 	RequestServeDiscussVisibility
 	RequestServeLongitudeLatitude
-	Evaluation float64 `form:"evaluation"`
+	Evaluation float64 `form:"evaluation validate:numeric"`
 	Text       string  `form:"text" validate:"required"`
 }
 
