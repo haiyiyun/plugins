@@ -393,6 +393,18 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		if coordinates != geometry.NilPointCoordinates {
 			filter = append(filter, discussModel.FilterByLocation(geometry.NewPoint(coordinates), requestDL.MaxDistance, requestDL.MinDistance)...)
 		}
+
+		if requestDL.EvaluationGte > 0 {
+			filter = append(filter, discussModel.FilterByGteEvaluation(requestDL.EvaluationGte)...)
+		}
+
+		if requestDL.EvaluationLte > 0 {
+			filter = append(filter, discussModel.FilterByLteEvaluation(requestDL.EvaluationLte)...)
+		}
+
+		if requestDL.EvaluationZero {
+			filter = append(filter, discussModel.FilterByEvaluation(0)...)
+		}
 	}
 
 	cnt, _ := discussModel.CountDocuments(r.Context(), filter)

@@ -137,6 +137,9 @@ type RequestServeDiscussList struct {
 	RequestServePublishUserIDs
 	RequestServeLongitudeLatitude
 	RequestServeDistance
+	EvaluationZero bool `form:"evaluation_zero,omitempty"`
+	EvaluationGte  int  `form:"evaluation_gte,omitempty"`
+	EvaluationLte  int  `form:"evaluation_lte,omitempty"`
 }
 
 type RequestServeContentType struct {
