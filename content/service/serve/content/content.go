@@ -530,6 +530,10 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		filter = append(filter, contentModel.FilterByTypes(requestCL.Types)...)
 	}
 
+	if requestCL.PublishType > 0 {
+		filter = append(filter, contentModel.FilterByPublishType(requestCL.PublishType)...)
+	}
+
 	if requestCL.Visibility == predefined.VisibilityTypeSelf {
 		filter = append(filter, contentModel.FilterByPublishUserID(userID)...)
 	} else {
