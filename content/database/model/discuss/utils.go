@@ -145,7 +145,7 @@ func (self *Model) DeleteHatedUser(cxt context.Context, discussID, userID primit
 	})
 }
 
-func (self *Model) FilterByEvaluation(evaluation int) bson.D {
+func (self *Model) FilterByEvaluation(evaluation float64) bson.D {
 	filter := bson.D{
 		{"evaluation", evaluation},
 	}
@@ -153,7 +153,7 @@ func (self *Model) FilterByEvaluation(evaluation int) bson.D {
 	return filter
 }
 
-func (self *Model) FilterByGteEvaluation(evaluation int) bson.D {
+func (self *Model) FilterByGteEvaluation(evaluation float64) bson.D {
 	filter := bson.D{
 		{"evaluation", bson.D{
 			{"$gte", evaluation},
@@ -163,7 +163,7 @@ func (self *Model) FilterByGteEvaluation(evaluation int) bson.D {
 	return filter
 }
 
-func (self *Model) FilterByLteEvaluation(evaluation int) bson.D {
+func (self *Model) FilterByLteEvaluation(evaluation float64) bson.D {
 	filter := bson.D{
 		{"evaluation", bson.D{
 			{"$lte", evaluation},
