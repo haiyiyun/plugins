@@ -546,3 +546,13 @@ func (self *Model) IncExperience(userID primitive.ObjectID, incExperience int) e
 
 	return err
 }
+
+func (self *Model) UpdateExtraData(cxt context.Context, userID primitive.ObjectID, extraData string) error {
+	filter := self.FilterByID(userID)
+
+	_, err := self.Set(cxt, filter, bson.D{
+		{"extra_data", extraData},
+	})
+
+	return err
+}

@@ -46,6 +46,7 @@ type User struct {
 	Tags           []UserTag          `json:"tags" bson:"tags" map:"tags"`                    //用户身份标签
 	Online         UserOnline         `json:"online" bson:"online" map:"online"`
 	Location       geometry.Point     `json:"location" bson:"location,omitempty" map:"location,omitempty"`
+	ExtraData      string             `json:"extra_data" bson:"extra_data" map:"extra_data"` //在用不到profile那么复杂的集合时，可额外扩展信息数据，可灵活使用，比如将相关额外信息json后存入
 	Enable         bool               `bson:"enable" json:"enable" map:"enable"`
 	Delete         bool               `bson:"delete" json:"delete" map:"delete"`
 	CreateTime     time.Time          `bson:"create_time" json:"create_time" map:"create_time"` //创建时间
