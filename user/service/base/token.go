@@ -58,16 +58,18 @@ func (self *Service) Logout(r *http.Request) {
 func (self *Service) CreateToken(ctx context.Context, u model.User, ip, userAgent string, coordinates geometry.PointCoordinates, expiredTime time.Time) (m help.M, err error) {
 	tokenModel := token.NewModel(self.M)
 
-	if self.Config.OnlySingleLogin {
-		if _, err = tokenModel.DeleteMany(ctx, tokenModel.FilterByUserID(u.ID)); err != nil {
-			return
-		}
-	}
-
-	if len(self.Config.OnlySingleLoginUserID) > 0 {
-		if help.NewSlice(self.Config.OnlySingleLoginUserID).CheckItem(u.ID.Hex()) {
+	if !help.NewSlice(self.Config.OnlySingleLoginUserIDUnlimited).CheckItem(u.ID.Hex()) {
+		if self.Config.OnlySingleLogin {
 			if _, err = tokenModel.DeleteMany(ctx, tokenModel.FilterByUserID(u.ID)); err != nil {
 				return
+			}
+		}
+
+		if len(self.Config.OnlySingleLoginUserID) > 0 {
+			if help.NewSlice(self.Config.OnlySingleLoginUserID).CheckItem(u.ID.Hex()) {
+				if _, err = tokenModel.DeleteMany(ctx, tokenModel.FilterByUserID(u.ID)); err != nil {
+					return
+				}
 			}
 		}
 	}
