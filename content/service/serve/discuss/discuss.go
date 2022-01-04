@@ -253,6 +253,12 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			{"discuss_estimate_total", 1},
 		})
 
+		if dis.Evaluation > 0 {
+			go contentModel.Inc(context.Background(), contentModel.FilterByID(requestDC.ObjectID), bson.D{
+				{"discuss_estimate_evaluation_total", 1},
+			})
+		}
+
 		if requestDC.ReplyDiscussID != primitive.NilObjectID {
 			go discussModel.Inc(context.Background(), discussModel.FilterByID(requestDC.ReplyDiscussID), bson.D{
 				{"reply_estimate_total", 1},

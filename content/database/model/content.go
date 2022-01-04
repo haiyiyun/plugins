@@ -76,6 +76,7 @@ type Content struct {
 	Guise                                  ContentGuise         `json:"guise" bson:"guise" map:"guise"`                                                                                                                         //匿名伪装
 	AntiGuiseUser                          []primitive.ObjectID `json:"anti_guise_user" bson:"anti_guise_user" map:"anti_guise_user"`                                                                                           //反伪装的用户user_id
 	DiscussEstimateTotal                   int                  `json:"discuss_estimate_total" bson:"discuss_estimate_total" map:"discuss_estimate_total"`                                                                      //评论估计总数
+	DiscussEstimateEvaluationTotal         int                  `json:"discuss_estimate_evaluation_total" bson:"discuss_estimate_evaluation_total" map:"discuss_estimate_evaluation_total"`                                     //有价值的评论估计总数                                                    //评论估计总数
 	StartTime                              time.Time            `json:"start_time" bson:"start_time" map:"start_time"`
 	EndTime                                time.Time            `json:"end_time" bson:"end_time" map:"end_time"`
 	ExtraData                              string               `json:"extra_data" bson:"extra_data" map:"extra_data"` //额外扩展信息数据，可灵活使用，比如将相关额外信息json后存入
