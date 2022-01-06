@@ -41,6 +41,20 @@ func (self *Model) FilterByPublishUserIDs(publishUserIDs []primitive.ObjectID) b
 	return filter
 }
 
+func (self *Model) FilterByExcludePublishUserIDs(publishUserIDs []primitive.ObjectID) bson.D {
+	if len(publishUserIDs) == 0 {
+		return bson.D{}
+	}
+
+	filter := bson.D{
+		{"publish_user_id", bson.D{
+			{"$nin", publishUserIDs},
+		}},
+	}
+
+	return filter
+}
+
 func (self *Model) FilterByAssociateType(associateType int) bson.D {
 	filter := bson.D{
 		{"associate_type", associateType},

@@ -385,6 +385,10 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 				filter = append(filter, discussModel.FilterByPublishUserIDs(requestDL.PublishUserID)...)
 			}
 
+			if len(requestDL.ExcludePublishUserID) > 0 {
+				filter = append(filter, discussModel.FilterByExcludePublishUserIDs(requestDL.ExcludePublishUserID)...)
+			}
+
 			if requestDL.Visibility != predefined.VisibilityTypeAll {
 				filter = append(filter, discussModel.FilterByVisibilityOrAll(requestDL.Visibility)...)
 			} else {

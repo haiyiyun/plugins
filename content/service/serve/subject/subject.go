@@ -103,6 +103,10 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			filter = append(filter, subjectModel.FilterByPublishUserIDs(requestSL.PublishUserID)...)
 		}
 
+		if len(requestSL.ExcludePublishUserID) > 0 {
+			filter = append(filter, subjectModel.FilterByExcludePublishUserIDs(requestSL.ExcludePublishUserID)...)
+		}
+
 		if requestSL.Visibility != predefined.VisibilityTypeAll {
 			filter = append(filter, subjectModel.FilterByVisibilityOrAll(requestSL.Visibility)...)
 		} else {

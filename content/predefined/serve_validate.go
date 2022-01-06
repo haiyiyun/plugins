@@ -27,6 +27,10 @@ type RequestServePublishUserIDs struct {
 	PublishUserID []primitive.ObjectID `form:"publish_user_id,omitempty" validate:"gte=0,dive,required"`
 }
 
+type RequestServeExcludePublishUserIDs struct {
+	ExcludePublishUserID []primitive.ObjectID `form:"exclude_publish_user_id,omitempty" validate:"gte=0,dive,required"`
+}
+
 type RequestServeIDRequired struct {
 	ID primitive.ObjectID `form:"id" validate:"required"`
 }
@@ -99,6 +103,7 @@ type RequestServeSubjectCreate struct {
 
 type RequestServeSubjectList struct {
 	RequestServePublishUserIDs
+	RequestServeExcludePublishUserIDs
 	RequestServeSubjectListType
 	RequestServeSubjectVisibility
 	RequestServeLongitudeLatitude
@@ -135,6 +140,7 @@ type RequestServeDiscussList struct {
 	RequestServeID
 	RequestServeDiscussVisibility
 	RequestServePublishUserIDs
+	RequestServeExcludePublishUserIDs
 	RequestServeLongitudeLatitude
 	RequestServeDistance
 	EvaluationZero bool    `form:"evaluation_zero,omitempty"`
@@ -216,11 +222,13 @@ type RequestServeContentCreate struct {
 }
 
 type RequestServeContentList struct {
+	RequestServeID
 	RequestServeContentTypes
 	RequestServeContentPublishType
 	RequestServeContentVisibility
 	RequestServeTags
 	RequestServePublishUserIDs
+	RequestServeExcludePublishUserIDs
 	EmptyCategoryID bool               `form:"empty_category_id,omitempty"`
 	CategoryID      primitive.ObjectID `form:"category_id,omitempty"`
 	EmptySubjectID  bool               `form:"empty_subject_id,omitempty"`
@@ -285,10 +293,6 @@ type RequestServeContentUpdateEndTime struct {
 type RequestServeContentUpdateExtraData struct {
 	RequestServeObjectIDRequired
 	ExtraData string `form:"extra_data" validate:"required"`
-}
-
-type RequestServeContentPublic struct {
-	RequestServeIDRequired
 }
 
 type RequestServeContentDetail struct {

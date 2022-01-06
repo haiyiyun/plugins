@@ -506,167 +506,16 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, _ := primitive.ObjectIDFromHex(claims.Audience)
-
-	if userID == primitive.NilObjectID {
-		response.JSON(rw, http.StatusUnauthorized, nil, "")
-		return
-	}
-
 	var requestCL predefined.RequestServeContentList
 	if err := validator.FormStruct(&requestCL, r.URL.Query()); err != nil {
 		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
 		return
 	}
 
-	coordinates := geometry.PointCoordinates{
-		requestCL.Longitude, requestCL.Latitude,
-	}
-
 	contentModel := content.NewModel(self.M)
 	filter := contentModel.FilterNormalContent()
 
-	if len(requestCL.Types) > 0 {
-		filter = append(filter, contentModel.FilterByTypes(requestCL.Types)...)
-	}
-
-	if requestCL.PublishType > 0 {
-		filter = append(filter, contentModel.FilterByPublishType(requestCL.PublishType)...)
-	}
-
-	if requestCL.Visibility == predefined.VisibilityTypeSelf {
-		filter = append(filter, contentModel.FilterByPublishUserID(userID)...)
-	} else {
-		if len(requestCL.PublishUserID) > 0 {
-			filter = append(filter, contentModel.FilterByPublishUserIDs(requestCL.PublishUserID)...)
-		}
-
-		if requestCL.Visibility != predefined.VisibilityTypeAll {
-			filter = append(filter, contentModel.FilterByVisibilityOrAll(requestCL.Visibility)...)
-		} else {
-			filter = append(filter, contentModel.FilterByVisibility(requestCL.Visibility)...)
-		}
-	}
-
-	if requestCL.AssociateType > 0 {
-		filter = append(filter, contentModel.FilterByAssociateType(requestCL.AssociateType)...)
-	}
-
-	if requestCL.AssociateID != primitive.NilObjectID {
-		//判断关联是否有限制
-		filterAssociateContent := contentModel.FilterNormalContent()
-		filterAssociateContent = append(filterAssociateContent, contentModel.FilterByID(requestCL.AssociateID)...)
-		associateContentSR := contentModel.FindOne(r.Context(), filterAssociateContent, options.FindOne().SetProjection(bson.D{
-			{"hide_discuss", 1},
-			{"only_user_id_show_discuss", 1},
-		}))
-
-		if associateContentSR.Err() != nil {
-			log.Error(associateContentSR.Err())
-			response.JSON(rw, http.StatusServiceUnavailable, nil, "503000")
-			return
-		}
-
-		var associateContent model.Content
-		if err := associateContentSR.Decode(&associateContent); err != nil {
-			log.Error(err)
-			response.JSON(rw, http.StatusServiceUnavailable, nil, "503001")
-			return
-		} else {
-			if associateContent.HideDetail {
-				if len(associateContent.OnlyUserIDShowDetail) == 0 || (len(associateContent.OnlyUserIDShowDetail) > 0 && !help.NewSlice(help.NewSlice(associateContent.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(userID.Hex())) {
-					response.JSON(rw, http.StatusForbidden, nil, "403000")
-					return
-				}
-			}
-		}
-
-		filter = append(filter, contentModel.FilterByAssociateID(requestCL.AssociateID)...)
-	}
-
-	if requestCL.EmptyCategoryID {
-		filter = append(filter, contentModel.FilterByCategoryID(primitive.NilObjectID)...)
-	} else {
-		if requestCL.CategoryID != primitive.NilObjectID {
-			filter = append(filter, contentModel.FilterByCategoryID(requestCL.CategoryID)...)
-		}
-	}
-
-	if requestCL.EmptySubjectID {
-		filter = append(filter, contentModel.FilterBySubjectID(primitive.NilObjectID)...)
-	} else {
-		if requestCL.SubjectID != primitive.NilObjectID {
-			filter = append(filter, contentModel.FilterBySubjectID(requestCL.SubjectID)...)
-		}
-	}
-
-	if requestCL.LimitUserAtLeastLevel > 0 {
-		filter = append(filter, contentModel.FilterByGteLimitUserAtLeastLevel(requestCL.LimitUserAtLeastLevel)...)
-	}
-
-	if len(requestCL.LimitUserRole) > 0 {
-		filter = append(filter, contentModel.FilterByLimitUserRole(requestCL.LimitUserRole)...)
-	}
-
-	if len(requestCL.LimitUserTag) > 0 {
-		filter = append(filter, contentModel.FilterByLimitUserTag(requestCL.LimitUserTag)...)
-	}
-
-	if requestCL.DiscussTotalGte > 0 {
-		filter = append(filter, contentModel.FilterByGteDiscussEstimateTotal(requestCL.DiscussTotalGte)...)
-	}
-
-	if requestCL.DiscussTotalLte > 0 {
-		filter = append(filter, contentModel.FilterByLteDiscussEstimateTotal(requestCL.DiscussTotalLte)...)
-	}
-
-	if requestCL.DiscussTotalZero {
-		filter = append(filter, contentModel.FilterByDiscussEstimateTotal(0)...)
-	}
-
-	if requestCL.ValueGte > 0 {
-		filter = append(filter, contentModel.FilterByGteValue(requestCL.ValueGte)...)
-	}
-
-	if requestCL.ValueLte > 0 {
-		filter = append(filter, contentModel.FilterByLteValue(requestCL.ValueLte)...)
-	}
-
-	if requestCL.ValueZero {
-		filter = append(filter, contentModel.FilterByValue(0)...)
-	}
-
-	if !requestCL.StartTime.Time.IsZero() {
-		filter = append(filter, contentModel.FilterByGteStartTime(requestCL.StartTime.Time)...)
-	}
-
-	if !requestCL.EndTime.Time.IsZero() {
-		filter = append(filter, contentModel.FilterByGteStartTime(requestCL.EndTime.Time)...)
-	}
-
-	if requestCL.InTime {
-		now := time.Now()
-		filter = append(filter, contentModel.FilterByGteStartTime(now)...)
-		filter = append(filter, contentModel.FilterByGteStartTime(now)...)
-	}
-
-	if len(requestCL.Tags) > 0 {
-		filter = append(filter, bson.E{
-			"tags", bson.D{
-				{"$in", requestCL.Tags},
-			},
-		})
-	}
-
-	if coordinates != geometry.NilPointCoordinates {
-		filter = append(filter, contentModel.FilterByLocation(geometry.NewPoint(coordinates), requestCL.MaxDistance, requestCL.MinDistance)...)
-	}
-
-	cnt, _ := contentModel.CountDocuments(r.Context(), filter)
-	pg := pagination.Parse(r, cnt)
-
-	if cur, err := contentModel.Aggregate(r.Context(), mongo.Pipeline{
-		{{"$match", filter}},
+	pipeline := mongo.Pipeline{
 		{{"$project", bson.D{
 			{"publish_user_id", 1},
 			{"type", 1},
@@ -686,25 +535,25 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			{"bestest", 1},
 			{"reliable", 1},
 			{"in_readed_user", bson.D{
-				{"$in", bson.A{userID, `$readed_user`}},
+				{"$in", bson.A{claims.UserID, `$readed_user`}},
 			}},
 			{"readed_user_total", bson.D{
 				{"$size", `$readed_user`},
 			}},
 			{"in_wanted_user", bson.D{
-				{"$in", bson.A{userID, `$wanted_user`}},
+				{"$in", bson.A{claims.UserID, `$wanted_user`}},
 			}},
 			{"wanted_user_total", bson.D{
 				{"$size", `$wanted_user`},
 			}},
 			{"in_liked_user", bson.D{
-				{"$in", bson.A{userID, `$liked_user`}},
+				{"$in", bson.A{claims.UserID, `$liked_user`}},
 			}},
 			{"liked_user_total", bson.D{
 				{"$size", `$liked_user`},
 			}},
 			{"in_hated_user", bson.D{
-				{"$in", bson.A{userID, `$hated_user`}},
+				{"$in", bson.A{claims.UserID, `$hated_user`}},
 			}},
 			{"hated_user_total", bson.D{
 				{"$size", `$hated_user`},
@@ -716,15 +565,186 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			{"extra_data", 1},
 			{"status", 1},
 			{"discuss_estimate_total", 1},
+			{"discuss_estimate_evaluation_total", 1},
 			{"create_time", 1},
 			{"update_time", 1},
 		}}},
 		{{"$sort", bson.D{
 			{"create_time", -1},
 		}}},
-		{{"$skip", pg.SkipNum}},
-		{{"$limit", pg.PageSize}},
-	}); err != nil {
+	}
+
+	var cnt int64
+
+	if requestCL.ID != primitive.NilObjectID {
+		pipeline = append(pipeline, bson.D{
+			{"$limit", 1},
+		})
+
+		filter = append(filter, contentModel.FilterByID(requestCL.ID)...)
+		cnt = 1
+	} else {
+		coordinates := geometry.PointCoordinates{
+			requestCL.Longitude, requestCL.Latitude,
+		}
+
+		if len(requestCL.Types) > 0 {
+			filter = append(filter, contentModel.FilterByTypes(requestCL.Types)...)
+		}
+
+		if requestCL.PublishType > 0 {
+			filter = append(filter, contentModel.FilterByPublishType(requestCL.PublishType)...)
+		}
+
+		if requestCL.Visibility == predefined.VisibilityTypeSelf {
+			filter = append(filter, contentModel.FilterByPublishUserID(claims.UserID)...)
+		} else {
+			if len(requestCL.PublishUserID) > 0 {
+				filter = append(filter, contentModel.FilterByPublishUserIDs(requestCL.PublishUserID)...)
+			}
+
+			if len(requestCL.ExcludePublishUserID) > 0 {
+				filter = append(filter, contentModel.FilterByExcludePublishUserIDs(requestCL.ExcludePublishUserID)...)
+			}
+
+			if requestCL.Visibility != predefined.VisibilityTypeAll {
+				filter = append(filter, contentModel.FilterByVisibilityOrAll(requestCL.Visibility)...)
+			} else {
+				filter = append(filter, contentModel.FilterByVisibility(requestCL.Visibility)...)
+			}
+		}
+
+		if requestCL.AssociateType > 0 {
+			filter = append(filter, contentModel.FilterByAssociateType(requestCL.AssociateType)...)
+		}
+
+		if requestCL.AssociateID != primitive.NilObjectID {
+			//判断关联是否有限制
+			filterAssociateContent := contentModel.FilterNormalContent()
+			filterAssociateContent = append(filterAssociateContent, contentModel.FilterByID(requestCL.AssociateID)...)
+			associateContentSR := contentModel.FindOne(r.Context(), filterAssociateContent, options.FindOne().SetProjection(bson.D{
+				{"hide_discuss", 1},
+				{"only_user_id_show_discuss", 1},
+			}))
+
+			if associateContentSR.Err() != nil {
+				log.Error(associateContentSR.Err())
+				response.JSON(rw, http.StatusServiceUnavailable, nil, "503000")
+				return
+			}
+
+			var associateContent model.Content
+			if err := associateContentSR.Decode(&associateContent); err != nil {
+				log.Error(err)
+				response.JSON(rw, http.StatusServiceUnavailable, nil, "503001")
+				return
+			} else {
+				if associateContent.HideDetail {
+					if len(associateContent.OnlyUserIDShowDetail) == 0 || (len(associateContent.OnlyUserIDShowDetail) > 0 && !help.NewSlice(help.NewSlice(associateContent.OnlyUserIDShowDetail).ObjectIDToStrings()).CheckItem(claims.UserID.Hex())) {
+						response.JSON(rw, http.StatusForbidden, nil, "403000")
+						return
+					}
+				}
+			}
+
+			filter = append(filter, contentModel.FilterByAssociateID(requestCL.AssociateID)...)
+		}
+
+		if requestCL.EmptyCategoryID {
+			filter = append(filter, contentModel.FilterByCategoryID(primitive.NilObjectID)...)
+		} else {
+			if requestCL.CategoryID != primitive.NilObjectID {
+				filter = append(filter, contentModel.FilterByCategoryID(requestCL.CategoryID)...)
+			}
+		}
+
+		if requestCL.EmptySubjectID {
+			filter = append(filter, contentModel.FilterBySubjectID(primitive.NilObjectID)...)
+		} else {
+			if requestCL.SubjectID != primitive.NilObjectID {
+				filter = append(filter, contentModel.FilterBySubjectID(requestCL.SubjectID)...)
+			}
+		}
+
+		if requestCL.LimitUserAtLeastLevel > 0 {
+			filter = append(filter, contentModel.FilterByGteLimitUserAtLeastLevel(requestCL.LimitUserAtLeastLevel)...)
+		}
+
+		if len(requestCL.LimitUserRole) > 0 {
+			filter = append(filter, contentModel.FilterByLimitUserRole(requestCL.LimitUserRole)...)
+		}
+
+		if len(requestCL.LimitUserTag) > 0 {
+			filter = append(filter, contentModel.FilterByLimitUserTag(requestCL.LimitUserTag)...)
+		}
+
+		if requestCL.DiscussTotalGte > 0 {
+			filter = append(filter, contentModel.FilterByGteDiscussEstimateTotal(requestCL.DiscussTotalGte)...)
+		}
+
+		if requestCL.DiscussTotalLte > 0 {
+			filter = append(filter, contentModel.FilterByLteDiscussEstimateTotal(requestCL.DiscussTotalLte)...)
+		}
+
+		if requestCL.DiscussTotalZero {
+			filter = append(filter, contentModel.FilterByDiscussEstimateTotal(0)...)
+		}
+
+		if requestCL.ValueGte > 0 {
+			filter = append(filter, contentModel.FilterByGteValue(requestCL.ValueGte)...)
+		}
+
+		if requestCL.ValueLte > 0 {
+			filter = append(filter, contentModel.FilterByLteValue(requestCL.ValueLte)...)
+		}
+
+		if requestCL.ValueZero {
+			filter = append(filter, contentModel.FilterByValue(0)...)
+		}
+
+		if !requestCL.StartTime.Time.IsZero() {
+			filter = append(filter, contentModel.FilterByGteStartTime(requestCL.StartTime.Time)...)
+		}
+
+		if !requestCL.EndTime.Time.IsZero() {
+			filter = append(filter, contentModel.FilterByGteStartTime(requestCL.EndTime.Time)...)
+		}
+
+		if requestCL.InTime {
+			now := time.Now()
+			filter = append(filter, contentModel.FilterByGteStartTime(now)...)
+			filter = append(filter, contentModel.FilterByGteStartTime(now)...)
+		}
+
+		if len(requestCL.Tags) > 0 {
+			filter = append(filter, bson.E{
+				"tags", bson.D{
+					{"$in", requestCL.Tags},
+				},
+			})
+		}
+
+		if coordinates != geometry.NilPointCoordinates {
+			filter = append(filter, contentModel.FilterByLocation(geometry.NewPoint(coordinates), requestCL.MaxDistance, requestCL.MinDistance)...)
+		}
+
+		cnt, _ = contentModel.CountDocuments(r.Context(), filter)
+		pg := pagination.Parse(r, cnt)
+
+		pipeline = append(pipeline, bson.D{
+			{"$skip", pg.SkipNum},
+		})
+
+		pipeline = append(pipeline, bson.D{
+			{"$limit", pg.PageSize},
+		})
+	}
+
+	pipeline = append(pipeline, bson.D{
+		{"$match", filter},
+	})
+
+	if cur, err := contentModel.Aggregate(r.Context(), pipeline); err != nil {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
@@ -739,104 +759,6 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 			}
 
 			response.JSON(rw, 0, rpr, "")
-		}
-	}
-}
-
-func (self *Service) Route_GET_Public(rw http.ResponseWriter, r *http.Request) {
-	claims := request.GetClaims(r)
-	if claims == nil {
-		response.JSON(rw, http.StatusUnauthorized, nil, "")
-		return
-	}
-
-	userID, _ := primitive.ObjectIDFromHex(claims.Audience)
-
-	if userID == primitive.NilObjectID {
-		response.JSON(rw, http.StatusUnauthorized, nil, "")
-		return
-	}
-
-	var requestCI predefined.RequestServeContentPublic
-	if err := validator.FormStruct(&requestCI, r.URL.Query()); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	contentModel := content.NewModel(self.M)
-	match := contentModel.FilterByID(requestCI.ID)
-	match = append(match, contentModel.FilterNormalContent()...)
-	if cur, err := contentModel.Aggregate(r.Context(), mongo.Pipeline{
-		{{"$match", match}},
-		{{"$project", bson.D{
-			{"publish_user_id", 1},
-			{"type", 1},
-			{"publish_type", 1},
-			{"associate_type", 1},
-			{"associate_id", 1},
-			{"category_id", 1},
-			{"subject_id", 1},
-			{"author", 1},
-			{"title", 1},
-			{"cover", 1},
-			{"description", 1},
-			{"user_tags", 1},
-			{"visibility", 1},
-			{"value", 1},
-			{"copy", 1},
-			{"bestest", 1},
-			{"reliable", 1},
-			{"in_readed_user", bson.D{
-				{"$in", bson.A{userID, `$readed_user`}},
-			}},
-			{"readed_user_total", bson.D{
-				{"$size", `$readed_user`},
-			}},
-			{"in_wanted_user", bson.D{
-				{"$in", bson.A{userID, `$wanted_user`}},
-			}},
-			{"wanted_user_total", bson.D{
-				{"$size", `$wanted_user`},
-			}},
-			{"in_liked_user", bson.D{
-				{"$in", bson.A{userID, `$liked_user`}},
-			}},
-			{"liked_user_total", bson.D{
-				{"$size", `$liked_user`},
-			}},
-			{"in_hated_user", bson.D{
-				{"$in", bson.A{userID, `$hated_user`}},
-			}},
-			{"hated_user_total", bson.D{
-				{"$size", `$hated_user`},
-			}},
-			{"guise", 1},
-			{"anti_guise_user", 1},
-			{"start_time", 1},
-			{"end_time", 1},
-			{"extra_data", 1},
-			{"status", 1},
-			{"discuss_estimate_total", 1},
-			{"create_time", 1},
-			{"update_time", 1},
-		}}},
-		{{"$limit", 1}},
-	}); err != nil {
-		log.Error(err)
-		response.JSON(rw, http.StatusServiceUnavailable, nil, "503000")
-	} else {
-		var contentDetail help.M
-		if !cur.Next(r.Context()) {
-			response.JSON(rw, http.StatusServiceUnavailable, nil, "503001")
-			return
-		}
-
-		if err := cur.Decode(&contentDetail); err != nil {
-			log.Error(err)
-			response.JSON(rw, http.StatusServiceUnavailable, nil, "503002")
-		} else {
-			cur.Close(r.Context())
-			response.JSON(rw, 0, contentDetail, "")
 		}
 	}
 }
