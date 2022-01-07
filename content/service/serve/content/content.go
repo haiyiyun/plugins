@@ -518,73 +518,71 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 	contentModel := content.NewModel(self.M)
 	filter := contentModel.FilterNormalContent()
 
-	pipeline := mongo.Pipeline{
-		{{"$project", bson.D{
-			{"publish_user_id", 1},
-			{"type", 1},
-			{"publish_type", 1},
-			{"associate_type", 1},
-			{"associate_id", 1},
-			{"category_id", 1},
-			{"subject_id", 1},
-			{"author", 1},
-			{"title", 1},
-			{"cover", 1},
-			{"description", 1},
-			{"user_tags", 1},
-			{"visibility", 1},
-			{"value", 1},
-			{"copy", 1},
-			{"bestest", 1},
-			{"reliable", 1},
-			{"in_readed_user", bson.D{
-				{"$in", bson.A{claims.UserID, `$readed_user`}},
-			}},
-			{"readed_user_total", bson.D{
-				{"$size", `$readed_user`},
-			}},
-			{"in_wanted_user", bson.D{
-				{"$in", bson.A{claims.UserID, `$wanted_user`}},
-			}},
-			{"wanted_user_total", bson.D{
-				{"$size", `$wanted_user`},
-			}},
-			{"in_liked_user", bson.D{
-				{"$in", bson.A{claims.UserID, `$liked_user`}},
-			}},
-			{"liked_user_total", bson.D{
-				{"$size", `$liked_user`},
-			}},
-			{"in_hated_user", bson.D{
-				{"$in", bson.A{claims.UserID, `$hated_user`}},
-			}},
-			{"hated_user_total", bson.D{
-				{"$size", `$hated_user`},
-			}},
-			{"guise", 1},
-			{"anti_guise_user", 1},
-			{"start_time", 1},
-			{"end_time", 1},
-			{"extra_data", 1},
-			{"status", 1},
-			{"discuss_estimate_total", 1},
-			{"discuss_estimate_evaluation_total", 1},
-			{"create_time", 1},
-			{"update_time", 1},
-		}}},
-		{{"$sort", bson.D{
-			{"create_time", -1},
-		}}},
+	project := bson.D{
+		{"publish_user_id", 1},
+		{"type", 1},
+		{"publish_type", 1},
+		{"associate_type", 1},
+		{"associate_id", 1},
+		{"category_id", 1},
+		{"subject_id", 1},
+		{"author", 1},
+		{"title", 1},
+		{"cover", 1},
+		{"description", 1},
+		{"user_tags", 1},
+		{"visibility", 1},
+		{"value", 1},
+		{"copy", 1},
+		{"bestest", 1},
+		{"reliable", 1},
+		{"in_readed_user", bson.D{
+			{"$in", bson.A{claims.UserID, `$readed_user`}},
+		}},
+		{"readed_user_total", bson.D{
+			{"$size", `$readed_user`},
+		}},
+		{"in_wanted_user", bson.D{
+			{"$in", bson.A{claims.UserID, `$wanted_user`}},
+		}},
+		{"wanted_user_total", bson.D{
+			{"$size", `$wanted_user`},
+		}},
+		{"in_liked_user", bson.D{
+			{"$in", bson.A{claims.UserID, `$liked_user`}},
+		}},
+		{"liked_user_total", bson.D{
+			{"$size", `$liked_user`},
+		}},
+		{"in_hated_user", bson.D{
+			{"$in", bson.A{claims.UserID, `$hated_user`}},
+		}},
+		{"hated_user_total", bson.D{
+			{"$size", `$hated_user`},
+		}},
+		{"guise", 1},
+		{"anti_guise_user", 1},
+		{"start_time", 1},
+		{"end_time", 1},
+		{"extra_data", 1},
+		{"status", 1},
+		{"discuss_estimate_total", 1},
+		{"discuss_estimate_evaluation_total", 1},
+		{"create_time", 1},
+		{"update_time", 1},
+	}
+
+	var limit int64
+	var skip int64
+	sort := bson.D{
+		{"create_time", -1},
 	}
 
 	var cnt int64
 
 	if requestCL.ID != primitive.NilObjectID {
-		pipeline = append(pipeline, bson.D{
-			{"$limit", 1},
-		})
-
 		filter = append(filter, contentModel.FilterByID(requestCL.ID)...)
+		limit = 1
 		cnt = 1
 	} else {
 		coordinates := geometry.PointCoordinates{
@@ -733,21 +731,17 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 
 		cnt, _ = contentModel.CountDocuments(r.Context(), filter)
 		pg := pagination.Parse(r, cnt)
-
-		pipeline = append(pipeline, bson.D{
-			{"$skip", pg.SkipNum},
-		})
-
-		pipeline = append(pipeline, bson.D{
-			{"$limit", pg.PageSize},
-		})
+		limit = pg.PageSize
+		skip = pg.SkipNum
 	}
 
-	pipeline = append(pipeline, bson.D{
-		{"$match", filter},
-	})
-
-	if cur, err := contentModel.Aggregate(r.Context(), pipeline); err != nil {
+	if cur, err := contentModel.Aggregate(r.Context(), mongo.Pipeline{
+		{{"$match", filter}},
+		{{"$project", project}},
+		{{"$sort", sort}},
+		{{"$skip", skip}},
+		{{"$limit", limit}},
+	}); err != nil {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
