@@ -19,17 +19,29 @@ func (self *Model) FilterByRelationship(typ int, userID, objectID primitive.Obje
 	}
 }
 
-func (self *Model) FilterByUserWithType(userID primitive.ObjectID, typ int) bson.D {
+func (self *Model) FilterByUser(userID primitive.ObjectID) bson.D {
 	return bson.D{
 		{"user_id", userID},
+	}
+}
+
+func (self *Model) FilterByType(typ int) bson.D {
+	return bson.D{
 		{"type", typ},
 	}
 }
 
-func (self *Model) FilterByObjectIDWithType(objectID primitive.ObjectID, typ int) bson.D {
+func (self *Model) FilterByTypes(types []int) bson.D {
+	return bson.D{
+		{"type", bson.D{
+			{"$in", types},
+		}},
+	}
+}
+
+func (self *Model) FilterByObjectID(objectID primitive.ObjectID) bson.D {
 	return bson.D{
 		{"object_id", objectID},
-		{"type", typ},
 	}
 }
 
@@ -42,6 +54,14 @@ func (self *Model) FilterByObjectOwnerUserID(objectOwnerUserID primitive.ObjectI
 func (self *Model) FilterByExtensionID(extensionID primitive.ObjectID) bson.D {
 	return bson.D{
 		{"extension_id", extensionID},
+	}
+}
+
+func (self *Model) FilterByExtensionIDs(extensionIDs []primitive.ObjectID) bson.D {
+	return bson.D{
+		{"extension_id", bson.D{
+			{"$in", extensionIDs},
+		}},
 	}
 }
 

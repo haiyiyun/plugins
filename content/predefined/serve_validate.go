@@ -303,6 +303,10 @@ type RequestServeFollowType struct {
 	Type int `form:"type" validate:"oneof=1 2 3 4 100 101"`
 }
 
+type RequestServeFollowTypes struct {
+	Types []int `form:"type" validate:"gte=0,dive,oneof=1 2 3 4 100 101"`
+}
+
 type RequestServeFollowRelationshipCreate struct {
 	RequestServeFollowType
 	RequestServeObjectIDRequired
@@ -317,27 +321,19 @@ type RequestServeFollowRelationshipDelete struct {
 }
 
 type RequestServeFollowRelationshipList struct {
-	RequestServeFollowType
 	RequestServeUserID
+	RequestServeFollowTypes
+	ObjectOwnerUserID primitive.ObjectID   `form:"object_owner_user_id"`
+	ExtensionIDs      []primitive.ObjectID `form:"extension_id"`
+	OnlyTotal         bool                 `form:"only_total,omitempty"`
 }
 
 type RequestServeFollowBeRelationshipList struct {
-	RequestServeFollowType
 	RequestServeObjectIDRequired
-}
-
-type RequestServeFollowRelationshipTotal struct {
-	RequestServeFollowType
-	RequestServeUserID
-	ObjectOwnerUserID primitive.ObjectID `form:"object_owner_user_id"`
-	ExtensionID       primitive.ObjectID `form:"extension_id"`
-}
-
-type RequestServeFollowBeRelationshipTotal struct {
-	RequestServeFollowType
-	RequestServeObjectID
-	ObjectOwnerUserID primitive.ObjectID `form:"object_owner_user_id"`
-	ExtensionID       primitive.ObjectID `form:"extension_id"`
+	RequestServeFollowTypes
+	ObjectOwnerUserID primitive.ObjectID   `form:"object_owner_user_id"`
+	ExtensionIDs      []primitive.ObjectID `form:"extension_id"`
+	OnlyTotal         bool                 `form:"only_total,omitempty"`
 }
 
 type RequestServeFollowContentTypes struct {

@@ -339,7 +339,8 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			frModel := follow_relationship.NewModel(mgo)
 
 			//关注人处理
-			filter := frModel.FilterByObjectIDWithType(userID, predefined.FollowTypeUser)
+			filter := frModel.FilterByObjectID(userID)
+			filter = append(filter, frModel.FilterByType(predefined.FollowTypeUser)...)
 			ctx := context.Background()
 			if cur, err := frModel.Find(ctx, filter, options.Find().SetProjection(bson.D{
 				{"_id", 1},
@@ -381,7 +382,8 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 
 			//关注主题处理
 			if subjectID != primitive.NilObjectID {
-				filterSID := frModel.FilterByObjectIDWithType(subjectID, predefined.FollowTypeSubject)
+				filterSID := frModel.FilterByObjectID(subjectID)
+				filterSID = append(filterSID, frModel.FilterByType(predefined.FollowTypeSubject)...)
 				ctxSID := context.Background()
 				if cur, err := frModel.Find(ctxSID, filterSID, options.Find().SetProjection(bson.D{
 					{"_id", 1},
@@ -426,7 +428,8 @@ func (self *Service) Route_POST_Create(rw http.ResponseWriter, r *http.Request) 
 			if associateID != primitive.NilObjectID {
 				//关联类型过滤
 				if associateType != predefined.ContentAssociateTypeSelf && associateType != predefined.ContentAssociateTypeForward {
-					filterAID := frModel.FilterByObjectIDWithType(associateID, publishType)
+					filterAID := frModel.FilterByObjectID(associateID)
+					filterAID = append(filterAID, frModel.FilterByType(publishType)...)
 					ctxAID := context.Background()
 					if cur, err := frModel.Find(ctxAID, filterAID, options.Find().SetProjection(bson.D{
 						{"_id", 1},

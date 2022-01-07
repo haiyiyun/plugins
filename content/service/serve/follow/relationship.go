@@ -101,9 +101,27 @@ func (self *Service) Route_GET_Relationships(rw http.ResponseWriter, r *http.Req
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByUserWithType(requestSFRL.UserID, requestSFRL.Type)
+	filter := relModel.FilterByUser(requestSFRL.UserID)
+
+	if len(requestSFRL.Types) > 0 {
+		filter = append(filter, relModel.FilterByTypes(requestSFRL.Types)...)
+	}
+
+	if requestSFRL.ObjectOwnerUserID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByObjectOwnerUserID(requestSFRL.ObjectOwnerUserID)...)
+	}
+
+	if len(requestSFRL.ExtensionIDs) > 0 {
+		filter = append(filter, relModel.FilterByExtensionIDs(requestSFRL.ExtensionIDs)...)
+	}
 
 	cnt, _ := relModel.CountDocuments(r.Context(), filter)
+
+	if requestSFRL.OnlyTotal {
+		response.JSON(rw, 0, cnt, "")
+		return
+	}
+
 	pg := pagination.Parse(r, cnt)
 
 	projection := bson.D{
@@ -153,9 +171,27 @@ func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.R
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByObjectIDWithType(requestSFRL.ObjectID, requestSFRL.Type)
+	filter := relModel.FilterByObjectID(requestSFRL.ObjectID)
+
+	if len(requestSFRL.Types) > 0 {
+		filter = append(filter, relModel.FilterByTypes(requestSFRL.Types)...)
+	}
+
+	if requestSFRL.ObjectOwnerUserID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByObjectOwnerUserID(requestSFRL.ObjectOwnerUserID)...)
+	}
+
+	if len(requestSFRL.ExtensionIDs) > 0 {
+		filter = append(filter, relModel.FilterByExtensionIDs(requestSFRL.ExtensionIDs)...)
+	}
 
 	cnt, _ := relModel.CountDocuments(r.Context(), filter)
+
+	if requestSFRL.OnlyTotal {
+		response.JSON(rw, 0, cnt, "")
+		return
+	}
+
 	pg := pagination.Parse(r, cnt)
 
 	projection := bson.D{
@@ -188,69 +224,5 @@ func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.R
 
 			response.JSON(rw, 0, rpr, "")
 		}
-	}
-}
-
-func (self *Service) Route_GET_RelationshipTotal(rw http.ResponseWriter, r *http.Request) {
-	claims := request.GetClaims(r)
-	if claims == nil {
-		response.JSON(rw, http.StatusUnauthorized, nil, "")
-		return
-	}
-
-	var requestSFRT predefined.RequestServeFollowRelationshipTotal
-	if err := validator.FormStruct(&requestSFRT, r.URL.Query()); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByUserWithType(requestSFRT.UserID, requestSFRT.Type)
-
-	if requestSFRT.ObjectOwnerUserID != primitive.NilObjectID {
-		filter = append(filter, relModel.FilterByObjectOwnerUserID(requestSFRT.ObjectOwnerUserID)...)
-	}
-
-	if requestSFRT.ExtensionID != primitive.NilObjectID {
-		filter = append(filter, relModel.FilterByExtensionID(requestSFRT.ExtensionID)...)
-	}
-
-	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
-		log.Error(err)
-		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
-	} else {
-		response.JSON(rw, 0, cnt, "")
-	}
-}
-
-func (self *Service) Route_GET_BeRelationshipTotal(rw http.ResponseWriter, r *http.Request) {
-	claims := request.GetClaims(r)
-	if claims == nil {
-		response.JSON(rw, http.StatusUnauthorized, nil, "")
-		return
-	}
-
-	var requestSFBRT predefined.RequestServeFollowBeRelationshipTotal
-	if err := validator.FormStruct(&requestSFBRT, r.URL.Query()); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
-		return
-	}
-
-	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByObjectIDWithType(requestSFBRT.ObjectID, requestSFBRT.Type)
-
-	if requestSFBRT.ObjectOwnerUserID != primitive.NilObjectID {
-		filter = append(filter, relModel.FilterByObjectOwnerUserID(requestSFBRT.ObjectOwnerUserID)...)
-	}
-
-	if requestSFBRT.ExtensionID != primitive.NilObjectID {
-		filter = append(filter, relModel.FilterByExtensionID(requestSFBRT.ExtensionID)...)
-	}
-
-	if cnt, err := relModel.CountDocuments(r.Context(), filter); err != nil {
-		log.Error(err)
-		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
-	} else {
-		response.JSON(rw, 0, cnt, "")
 	}
 }
