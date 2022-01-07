@@ -19,12 +19,6 @@ func (self *Model) FilterByRelationship(typ int, userID, objectID primitive.Obje
 	}
 }
 
-func (self *Model) FilterByExtensionID(extensionID primitive.ObjectID) bson.D {
-	return bson.D{
-		{"extension_id", extensionID},
-	}
-}
-
 func (self *Model) FilterByUserWithType(userID primitive.ObjectID, typ int) bson.D {
 	return bson.D{
 		{"user_id", userID},
@@ -39,7 +33,19 @@ func (self *Model) FilterByObjectIDWithType(objectID primitive.ObjectID, typ int
 	}
 }
 
-func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, objectID primitive.ObjectID, stealth bool, extensionID primitive.ObjectID) (primitive.ObjectID, error) {
+func (self *Model) FilterByObjectOwnerUserID(objectOwnerUserID primitive.ObjectID) bson.D {
+	return bson.D{
+		{"object_owner_user_id", objectOwnerUserID},
+	}
+}
+
+func (self *Model) FilterByExtensionID(extensionID primitive.ObjectID) bson.D {
+	return bson.D{
+		{"extension_id", extensionID},
+	}
+}
+
+func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, objectID, ObjectOwnerUserID primitive.ObjectID, stealth bool, extensionID primitive.ObjectID) (primitive.ObjectID, error) {
 	var id primitive.ObjectID
 	err := self.UseSession(ctx, func(sctx mongo.SessionContext) error {
 		if err := sctx.StartTransaction(); err != nil {
@@ -75,11 +81,12 @@ func (self *Model) CreateRelationship(ctx context.Context, typ int, userID, obje
 		}
 
 		rel := &model.FollowRelationship{
-			Type:     typ,
-			UserID:   userID,
-			ObjectID: objectID,
-			Mutual:   mutual,
-			Stealth:  stealth,
+			Type:              typ,
+			UserID:            userID,
+			ObjectID:          objectID,
+			ObjectOwnerUserID: ObjectOwnerUserID,
+			Mutual:            mutual,
+			Stealth:           stealth,
 		}
 
 		if extensionID != primitive.NilObjectID {

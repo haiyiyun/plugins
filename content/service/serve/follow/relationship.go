@@ -33,7 +33,7 @@ func (self *Service) Route_POST_Relationship(rw http.ResponseWriter, r *http.Req
 
 	relModel := follow_relationship.NewModel(self.M)
 
-	if _, err := relModel.CreateRelationship(r.Context(), requestSFRC.Type, claims.UserID, requestSFRC.ObjectID, requestSFRC.Stealth, requestSFRC.ExtensionID); err != nil {
+	if _, err := relModel.CreateRelationship(r.Context(), requestSFRC.Type, claims.UserID, requestSFRC.ObjectID, requestSFRC.ObjectOwnerUserID, requestSFRC.Stealth, requestSFRC.ExtensionID); err != nil {
 		log.Error(err)
 		response.JSON(rw, http.StatusServiceUnavailable, nil, "")
 	} else {
@@ -111,6 +111,7 @@ func (self *Service) Route_GET_Relationships(rw http.ResponseWriter, r *http.Req
 		{"type", 1},
 		{"user_id", 1},
 		{"object_id", 1},
+		{"object_owner_user_id", 1},
 		{"extension_id", 1},
 		{"mutual", 1},
 		{"create_time", 1},
@@ -162,6 +163,7 @@ func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.R
 		{"type", 1},
 		{"user_id", 1},
 		{"object_id", 1},
+		{"object_owner_user_id", 1},
 		{"extension_id", 1},
 		{"mutual", 1},
 		{"create_time", 1},
@@ -205,6 +207,10 @@ func (self *Service) Route_GET_RelationshipTotal(rw http.ResponseWriter, r *http
 	relModel := follow_relationship.NewModel(self.M)
 	filter := relModel.FilterByUserWithType(requestSFRT.UserID, requestSFRT.Type)
 
+	if requestSFRT.ObjectOwnerUserID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByObjectOwnerUserID(requestSFRT.ObjectOwnerUserID)...)
+	}
+
 	if requestSFRT.ExtensionID != primitive.NilObjectID {
 		filter = append(filter, relModel.FilterByExtensionID(requestSFRT.ExtensionID)...)
 	}
@@ -232,6 +238,10 @@ func (self *Service) Route_GET_BeRelationshipTotal(rw http.ResponseWriter, r *ht
 
 	relModel := follow_relationship.NewModel(self.M)
 	filter := relModel.FilterByObjectIDWithType(requestSFBRT.ObjectID, requestSFBRT.Type)
+
+	if requestSFBRT.ObjectOwnerUserID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByObjectOwnerUserID(requestSFBRT.ObjectOwnerUserID)...)
+	}
 
 	if requestSFBRT.ExtensionID != primitive.NilObjectID {
 		filter = append(filter, relModel.FilterByExtensionID(requestSFBRT.ExtensionID)...)

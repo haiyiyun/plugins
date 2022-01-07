@@ -306,8 +306,9 @@ type RequestServeFollowType struct {
 type RequestServeFollowRelationshipCreate struct {
 	RequestServeFollowType
 	RequestServeObjectIDRequired
-	Stealth     bool               `form:"stealth"`
-	ExtensionID primitive.ObjectID `form:"extension_id"`
+	ObjectOwnerUserID primitive.ObjectID `form:"object_owner_user_id"`
+	Stealth           bool               `form:"stealth"`
+	ExtensionID       primitive.ObjectID `form:"extension_id"`
 }
 
 type RequestServeFollowRelationshipDelete struct {
@@ -328,13 +329,15 @@ type RequestServeFollowBeRelationshipList struct {
 type RequestServeFollowRelationshipTotal struct {
 	RequestServeFollowType
 	RequestServeUserID
-	ExtensionID primitive.ObjectID `form:"extension_id"`
+	ObjectOwnerUserID primitive.ObjectID `form:"object_owner_user_id"`
+	ExtensionID       primitive.ObjectID `form:"extension_id"`
 }
 
 type RequestServeFollowBeRelationshipTotal struct {
 	RequestServeFollowType
-	RequestServeObjectIDRequired
-	ExtensionID primitive.ObjectID `form:"extension_id"`
+	RequestServeObjectID
+	ObjectOwnerUserID primitive.ObjectID `form:"object_owner_user_id"`
+	ExtensionID       primitive.ObjectID `form:"extension_id"`
 }
 
 type RequestServeFollowContentTypes struct {

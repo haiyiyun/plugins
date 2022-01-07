@@ -28,12 +28,6 @@ var (
 			},
 			{
 				bson.D{
-					{"extension_id", 1},
-				},
-				options.Index(),
-			},
-			{
-				bson.D{
 					{"type", 1},
 				},
 				options.Index(),
@@ -53,6 +47,12 @@ var (
 			},
 			{
 				bson.D{
+					{"object_owner_user_id", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
 					{"mutual", 1},
 				},
 				options.Index(),
@@ -60,6 +60,12 @@ var (
 			{
 				bson.D{
 					{"stealth", 1},
+				},
+				options.Index(),
+			},
+			{
+				bson.D{
+					{"extension_id", 1},
 				},
 				options.Index(),
 			},
