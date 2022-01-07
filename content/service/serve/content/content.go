@@ -710,13 +710,13 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		if !requestCL.EndTime.Time.IsZero() {
-			filter = append(filter, contentModel.FilterByGteStartTime(requestCL.EndTime.Time)...)
+			filter = append(filter, contentModel.FilterByLteEndTime(requestCL.EndTime.Time)...)
 		}
 
 		if requestCL.InTime {
 			now := time.Now()
 			filter = append(filter, contentModel.FilterByGteStartTime(now)...)
-			filter = append(filter, contentModel.FilterByGteStartTime(now)...)
+			filter = append(filter, contentModel.FilterByLteEndTime(now)...)
 		}
 
 		if len(requestCL.Tags) > 0 {
