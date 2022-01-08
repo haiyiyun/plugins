@@ -704,17 +704,17 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		if !requestCL.StartTime.Time.IsZero() {
-			filter = append(filter, contentModel.FilterByGteStartTime(requestCL.StartTime.Time)...)
+			filter = append(filter, contentModel.FilterByStartTimeLte(requestCL.StartTime.Time)...)
 		}
 
 		if !requestCL.EndTime.Time.IsZero() {
-			filter = append(filter, contentModel.FilterByLteEndTime(requestCL.EndTime.Time)...)
+			filter = append(filter, contentModel.FilterByEndTimeGte(requestCL.EndTime.Time)...)
 		}
 
 		if requestCL.InTime {
 			now := time.Now()
-			filter = append(filter, contentModel.FilterByGteStartTime(now)...)
-			filter = append(filter, contentModel.FilterByLteEndTime(now)...)
+			filter = append(filter, contentModel.FilterByStartTimeLte(now)...)
+			filter = append(filter, contentModel.FilterByEndTimeGte(now)...)
 		}
 
 		if len(requestCL.Tags) > 0 {

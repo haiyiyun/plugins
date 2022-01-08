@@ -232,7 +232,7 @@ func (self *Model) FilterByGteLimitUserAtLeastLevel(limitUserAtLeastLevel int) b
 	return filter
 }
 
-func (self *Model) FilterByGteStartTime(startTime time.Time) bson.D {
+func (self *Model) FilterByStartTimeGte(startTime time.Time) bson.D {
 	filter := bson.D{
 		{"start_time", bson.D{
 			{"$gte", startTime},
@@ -242,7 +242,27 @@ func (self *Model) FilterByGteStartTime(startTime time.Time) bson.D {
 	return filter
 }
 
-func (self *Model) FilterByLteEndTime(endTime time.Time) bson.D {
+func (self *Model) FilterByStartTimeLte(startTime time.Time) bson.D {
+	filter := bson.D{
+		{"start_time", bson.D{
+			{"$lte", startTime},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByEndTimeGte(endTime time.Time) bson.D {
+	filter := bson.D{
+		{"end_time", bson.D{
+			{"$gte", endTime},
+		}},
+	}
+
+	return filter
+}
+
+func (self *Model) FilterByEndTimeLte(endTime time.Time) bson.D {
 	filter := bson.D{
 		{"end_time", bson.D{
 			{"$lte", endTime},
