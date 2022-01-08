@@ -18,25 +18,25 @@ import (
 )
 
 func init() {
-	baseConfFile := flag.String("config.plugins.user_profile.serve.base", "../config/plugins/user_profile/base.conf", "base config file")
-	var baseConf base.Config
-	config.Files(*baseConfFile).Load(&baseConf)
-
-	baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
-	baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
-	webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })
-
-	baseDB.M().InitCollection(schema.Audit)
-	baseDB.M().InitCollection(schema.Profile)
-	baseDB.M().InitCollection(schema.ProfileAudit)
-
-	baseService := base.NewService(&baseConf, baseCache, baseDB)
-
 	serveConfFile := flag.String("config.user_profile.serve", "../config/plugins/user_profile/serve.conf", "serve config file")
 	var serveConf serve.Config
 	config.Files(*serveConfFile).Load(&serveConf)
 
 	if serveConf.WebRouter {
+		baseConfFile := flag.String("config.plugins.user_profile.serve.base", "../config/plugins/user_profile/base.conf", "base config file")
+		var baseConf base.Config
+		config.Files(*baseConfFile).Load(&baseConf)
+
+		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
+		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
+		webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })
+
+		baseDB.M().InitCollection(schema.Audit)
+		baseDB.M().InitCollection(schema.Profile)
+		baseDB.M().InitCollection(schema.ProfileAudit)
+
+		baseService := base.NewService(&baseConf, baseCache, baseDB)
+
 		serveConf.Config = baseConf
 		serveService := serve.NewService(&serveConf, baseService)
 

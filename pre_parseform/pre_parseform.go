@@ -11,7 +11,7 @@ import (
 func init() {
 	webrouter.Injector("pre_parseform", "", 99, func(rw http.ResponseWriter, req *http.Request) (abort bool) {
 		switch req.Method {
-		case "GET":
+		case "GET", "DELETE":
 			switch req.Header.Get("Content-Type") {
 			case "application/x-www-form-urlencoded":
 				if bBody, err := request.GetBody(req); err != nil {

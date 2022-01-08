@@ -15,6 +15,7 @@ type CacheConfig struct {
 }
 
 type BaseConfig struct {
+	URBAC                bool                `json:"urbac"`
 	CheckRight           bool                `json:"check_right"`
 	TokenByUrlQuery      bool                `json:"token_by_url_query"`
 	TokenByUrlQueryName  string              `json:"token_by_url_query_name"`

@@ -5,9 +5,7 @@ import (
 )
 
 type LogConfig struct {
-	Log               bool   `json:"log"`
-	WebRouter         bool   `json:"web_router"`
-	WebRouterRootPath string `json:"web_router_root_path"`
+	Log bool `json:"log"`
 }
 
 type Config struct {

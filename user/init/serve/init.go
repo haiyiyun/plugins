@@ -24,16 +24,16 @@ func init() {
 	var baseConf base.Config
 	config.Files(*baseConfFile).Load(&baseConf)
 
-	baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
-	baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
-	webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })
-
-	baseDB.M().InitCollection(schema.User)
-	baseDB.M().InitCollection(schema.Token)
-
-	baseService := base.NewService(&baseConf, baseCache, baseDB)
-
 	if baseConf.CheckLogin {
+		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
+		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
+		webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })
+
+		baseDB.M().InitCollection(schema.User)
+		baseDB.M().InitCollection(schema.Token)
+
+		baseService := base.NewService(&baseConf, baseCache, baseDB)
+
 		webrouter.Injector("user", "", 996, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
 			reqPath := r.URL.Path
 			checkLogin := true
@@ -52,30 +52,30 @@ func init() {
 
 			return
 		})
-	}
 
-	serveConfFile := flag.String("config.user.serve", "../config/plugins/user/serve.conf", "serve config file")
-	var serveConf serve.Config
-	config.Files(*serveConfFile).Load(&serveConf)
+		serveConfFile := flag.String("config.user.serve", "../config/plugins/user/serve.conf", "serve config file")
+		var serveConf serve.Config
+		config.Files(*serveConfFile).Load(&serveConf)
 
-	if serveConf.WebRouter {
-		serveConf.Config = baseConf
-		serveService := serve.NewService(&serveConf, baseService)
-		if serveConf.EnableProfile {
-			baseDB.M().InitCollection(schema.Profile)
+		if serveConf.WebRouter {
+			serveConf.Config = baseConf
+			serveService := serve.NewService(&serveConf, baseService)
+			if serveConf.EnableProfile {
+				baseDB.M().InitCollection(schema.Profile)
+			}
+
+			//Init Begin
+			userAuthService := userAuth.NewService(serveService)
+			userUserService := userUser.NewService(serveService)
+			//Init End
+
+			//Go Begin
+			//Go End
+
+			//Register Begin
+			webrouter.Register(serveConf.WebRouterRootPath+"auth/", userAuthService)
+			webrouter.Register(serveConf.WebRouterRootPath+"user/", userUserService)
+			//Register End
 		}
-
-		//Init Begin
-		userAuthService := userAuth.NewService(serveService)
-		userUserService := userUser.NewService(serveService)
-		//Init End
-
-		//Go Begin
-		//Go End
-
-		//Register Begin
-		webrouter.Register(serveConf.WebRouterRootPath+"auth/", userAuthService)
-		webrouter.Register(serveConf.WebRouterRootPath+"user/", userUserService)
-		//Register End
 	}
 }

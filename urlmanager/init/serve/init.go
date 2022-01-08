@@ -17,7 +17,7 @@ func init() {
 	urlManagerConfFile := cmdflag.String("config.plugins.urlmanager", "../config/plugins/urlmanager/urlmanager.conf", "urlmanager config file")
 	config, err := ioutil.ReadFile(filepath.Clean(*urlManagerConfFile))
 	if err != nil {
-		log.Error("readfile config/urlmanager faild:", err)
+		log.Error("readfile config.plugins.urlmanager faild:", err)
 		os.Exit(-1)
 	}
 
