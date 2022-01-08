@@ -604,15 +604,15 @@ func (self *Service) Route_GET_List(rw http.ResponseWriter, r *http.Request) {
 				filter = append(filter, contentModel.FilterByPublishUserIDs(requestCL.PublishUserID)...)
 			}
 
-			if len(requestCL.ExcludePublishUserID) > 0 {
-				filter = append(filter, contentModel.FilterByExcludePublishUserIDs(requestCL.ExcludePublishUserID)...)
-			}
-
 			if requestCL.Visibility != predefined.VisibilityTypeAll {
 				filter = append(filter, contentModel.FilterByVisibilityOrAll(requestCL.Visibility)...)
 			} else {
 				filter = append(filter, contentModel.FilterByVisibility(requestCL.Visibility)...)
 			}
+		}
+
+		if len(requestCL.ExcludePublishUserID) > 0 {
+			filter = append(filter, contentModel.FilterByExcludePublishUserIDs(requestCL.ExcludePublishUserID)...)
 		}
 
 		if requestCL.AssociateType > 0 {
