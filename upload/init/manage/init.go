@@ -44,6 +44,12 @@ func init() {
 		baseService := base.NewService(&baseConf, baseCache, baseDB)
 
 		manageConf.Config = baseConf
+
+		if manageConf.MaxUploadFileSize == 0 {
+			//如果没设置则使用默认32M
+			manageConf.MaxUploadFileSize = 32 << 20
+		}
+
 		if manageConf.BuildInFileServer && manageConf.AllowDownloadLocal {
 			webrouter.Handle(manageConf.DownloadLocalUrlDirectory, http.StripPrefix(manageConf.DownloadLocalUrlDirectory, http.FileServer(http.Dir(baseConf.UploadDirectory))))
 		}

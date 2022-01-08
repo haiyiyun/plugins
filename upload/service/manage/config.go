@@ -11,6 +11,7 @@ type UploadConfig struct {
 	PublishDownloadUrl        bool   `json:"publish_download_url"`
 	DownloadLocalUrlDirectory string `json:"download_local_url_directory"`
 	AllowDownloadLocal        bool   `json:"allow_download_local"`
+	MaxUploadFileSize         int64  `json:"max_file_size"`
 	CheckUser                 bool   `json:"check_user"`
 }
 
