@@ -224,7 +224,7 @@ type RequestServeContentCreate struct {
 type RequestServeContentList struct {
 	RequestServeID
 	RequestServeContentTypes
-	RequestServeContentPublishType
+	PublishType int `form:"publish_type" validate:"required_without=ID,oneof=1 2 3 4"`
 	RequestServeContentVisibility
 	RequestServeTags
 	RequestServePublishUserIDs
