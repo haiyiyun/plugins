@@ -329,7 +329,7 @@ type RequestServeFollowRelationshipList struct {
 }
 
 type RequestServeFollowBeRelationshipList struct {
-	RequestServeObjectIDRequired
+	ObjectID primitive.ObjectID `form:"object_id" validate:"required_without=ObjectOwnerUserID"`
 	RequestServeFollowTypes
 	ObjectOwnerUserID primitive.ObjectID   `form:"object_owner_user_id"`
 	ExtensionIDs      []primitive.ObjectID `form:"extension_id"`

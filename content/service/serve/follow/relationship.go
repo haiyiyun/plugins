@@ -171,7 +171,11 @@ func (self *Service) Route_GET_BeRelationships(rw http.ResponseWriter, r *http.R
 	}
 
 	relModel := follow_relationship.NewModel(self.M)
-	filter := relModel.FilterByObjectID(requestSFRL.ObjectID)
+	filter := bson.D{}
+
+	if requestSFRL.ObjectID != primitive.NilObjectID {
+		filter = append(filter, relModel.FilterByObjectID(requestSFRL.ObjectID)...)
+	}
 
 	if len(requestSFRL.Types) > 0 {
 		filter = append(filter, relModel.FilterByTypes(requestSFRL.Types)...)
