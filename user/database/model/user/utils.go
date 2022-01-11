@@ -398,9 +398,7 @@ func (self *Model) UpdateRoleIncExperience(cxt context.Context, userID primitive
 func (self *Model) DeleteRole(cxt context.Context, userID primitive.ObjectID, role string) error {
 	_, err := self.Pull(cxt, self.FilterByID(userID), bson.D{
 		{"roles", bson.D{
-			{"$elemMatch", bson.D{
-				{"role", role},
-			}},
+			{"role", role},
 		}},
 	})
 
@@ -502,9 +500,7 @@ func (self *Model) UpdateTagIncExperience(cxt context.Context, userID primitive.
 func (self *Model) DeleteTag(cxt context.Context, userID primitive.ObjectID, tag string) error {
 	_, err := self.Pull(cxt, self.FilterByID(userID), bson.D{
 		{"tags", bson.D{
-			{"$elemMatch", bson.D{
-				{"tag", tag},
-			}},
+			{"tag", tag},
 		}},
 	})
 
