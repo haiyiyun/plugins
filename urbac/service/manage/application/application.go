@@ -485,6 +485,8 @@ func (self *Service) Route_POST_CreateVirtualApplication(rw http.ResponseWriter,
 }
 
 func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
 	responseMsg := "创建应用失败"
 
 	var requestMCA predefined.RequestManageNamePath
@@ -588,6 +590,8 @@ func (self *Service) Route_POST_CreateCodeApplication(rw http.ResponseWriter, r 
 }
 
 func (self *Service) Route_POST_ReadCodeApplication(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
 	responseMsg := "获取应用信息失败"
 
 	var requestMCA predefined.RequestManageNamePath
