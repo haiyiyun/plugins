@@ -163,7 +163,7 @@ func (self *Service) GetApplications(userID primitive.ObjectID, checkRole bool) 
 	return appMapIs
 }
 
-//自然顺序排序，值越大排越后面
+// 自然顺序排序，值越大排越后面
 func (self *Service) SortApps(apps map[string]model.Application) []help.M {
 	aApps := []help.M{}
 	for _, va := range apps {
@@ -199,7 +199,7 @@ func (self *Service) SortApps(apps map[string]model.Application) []help.M {
 	return aApps
 }
 
-//前端通过name进行路由加载，所以name必须唯一，故在添加virtual application时，需要保证同级下的name必须唯一
+// 前端通过name进行路由加载，所以name必须唯一，故在添加virtual application时，需要保证同级下的name必须唯一
 func (self *Service) GetRoute(appsSorted []help.M) []help.M {
 	routeList := []help.M{}
 	if len(self.Config.DefaultRoute) > 0 {
@@ -275,6 +275,11 @@ func (self *Service) GetRoute(appsSorted []help.M) []help.M {
 											if !help.NewSlice(httpMethod).CheckPartItem("GET", "") {
 												continue
 											}
+										}
+
+										//如果action隐藏菜单就不提供前端路由
+										if action["meta"].(help.M)["hide_menu"].(bool) == true {
+											continue
 										}
 
 										if aPath, ok := action["path"].(string); ok {
