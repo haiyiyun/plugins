@@ -23,7 +23,7 @@ func init() {
 	var manageConf manage.Config
 	config.Files(*manageConfFile).Load(&manageConf)
 
-	if manageConf.Log {
+	if manageConf.Log || manageConf.WebRouter {
 		baseConfFile := flag.String("config.plugins.log.manage.base", "../config/plugins/log/base.conf", "base config file")
 		var baseConf base.Config
 		config.Files(*baseConfFile).Load(&baseConf)
@@ -36,53 +36,55 @@ func init() {
 
 		baseService := base.NewService(&baseConf, baseCache, baseDB)
 
-		webrouter.Injector("loglogin", "", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			if logID := baseService.LogRequestLogin(r); logID != primitive.NilObjectID {
-				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
-					lrw.SetGetResData(true)
-					lrw.SetData("log_id", logID)
+		if manageConf.Log {
+			webrouter.Injector("loglogin", "", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+				if logID := baseService.LogRequestLogin(r); logID != primitive.NilObjectID {
+					if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+						lrw.SetGetResData(true)
+						lrw.SetData("log_id", logID)
+					}
 				}
-			}
 
-			return
-		})
+				return
+			})
 
-		webrouter.Injector("logauth", "loglogin", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			if logID := baseService.LogRequestAuth(r); logID != primitive.NilObjectID {
-				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
-					lrw.SetGetResData(true)
-					lrw.SetData("log_id", logID)
+			webrouter.Injector("logauth", "loglogin", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+				if logID := baseService.LogRequestAuth(r); logID != primitive.NilObjectID {
+					if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+						lrw.SetGetResData(true)
+						lrw.SetData("log_id", logID)
+					}
 				}
-			}
 
-			return
-		})
+				return
+			})
 
-		webrouter.Injector("logoperate", "logauth", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			if logID := baseService.LogRequestOperate(r); logID != primitive.NilObjectID {
-				if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
-					lrw.SetGetResData(true)
-					lrw.SetData("log_id", logID)
+			webrouter.Injector("logoperate", "logauth", 997, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+				if logID := baseService.LogRequestOperate(r); logID != primitive.NilObjectID {
+					if lrw, ok := rw.(*webrouter.ResponseWriter); ok {
+						lrw.SetGetResData(true)
+						lrw.SetData("log_id", logID)
+					}
 				}
-			}
 
-			return
-		})
+				return
+			})
 
-		webrouter.Releasor("loglogin", "logauth", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			baseService.LogResponseLogin(rw, r)
-			return
-		})
+			webrouter.Releasor("loglogin", "logauth", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+				baseService.LogResponseLogin(rw, r)
+				return
+			})
 
-		webrouter.Releasor("logauth", "logoperate", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			baseService.LogResponseAuth(rw, r)
-			return
-		})
+			webrouter.Releasor("logauth", "logoperate", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+				baseService.LogResponseAuth(rw, r)
+				return
+			})
 
-		webrouter.Releasor("logoperate", "urbac", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
-			baseService.LogResponseOperate(rw, r)
-			return
-		})
+			webrouter.Releasor("logoperate", "urbac", 1, func(rw http.ResponseWriter, r *http.Request) (abort bool) {
+				baseService.LogResponseOperate(rw, r)
+				return
+			})
+		}
 
 		if manageConf.WebRouter {
 			manageConf.Config = baseConf
