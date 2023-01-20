@@ -103,7 +103,7 @@ type RequestManageUserCreate struct {
 	Email    string `form:"email" validate:"email"`
 	RequestManageEnable
 	RequestManagePassword
-	Description string `form:"description" validate:"required"`
+	Description string `form:"description"`
 }
 
 type RequestManageUserID struct {
