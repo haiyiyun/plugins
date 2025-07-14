@@ -1,14 +1,14 @@
 module github.com/haiyiyun/plugins/templatefunc
 
-go 1.17
+go 1.24.5
 
 require (
-	github.com/haiyiyun/template v0.0.0-20211115101226-658156e90fbb
-	github.com/haiyiyun/utils v0.0.0-20220108040900-3f7aeeafa0fe
+	github.com/haiyiyun/template v0.0.0-20250714025207-37b2b56aaa1b
+	github.com/haiyiyun/utils v0.0.0-20250714030319-0020d33a185d
 )
 
 require (
-	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c // indirect
-	github.com/haiyiyun/uuid v0.0.0-20211115101403-e9c2d7112f99 // indirect
-	go.mongodb.org/mongo-driver v1.8.1 // indirect
+	github.com/haiyiyun/log v0.0.0-20250714021242-243291bf2f88 // indirect
+	github.com/haiyiyun/uuid v0.0.0-20250714025316-0cd7ec9ae801 // indirect
+	go.mongodb.org/mongo-driver v1.17.4 // indirect
 )

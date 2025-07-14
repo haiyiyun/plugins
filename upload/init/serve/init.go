@@ -35,6 +35,9 @@ func init() {
 			log.Fatal("upload directory must exist and only manually create")
 		}
 
+		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)
+		os.Setenv("HYY_CACHE_URL", baseConf.CacheUrl)
+
 		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
 		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
 		webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })

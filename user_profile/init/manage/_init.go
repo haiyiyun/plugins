@@ -3,6 +3,7 @@ package manage
 import (
 	"context"
 	"flag"
+	"os"
 
 	"github.com/haiyiyun/plugins/user_profile/database/schema"
 	"github.com/haiyiyun/plugins/user_profile/service/base"
@@ -17,7 +18,7 @@ import (
 )
 
 func init() {
-	manageConfFile := flag.String("config.user_profile.manage", "../config/plugins/user_profile/manage.conf", "manage config file")
+	manageConfFile := flag.String("config.plugins.user_profile.manage", "../config/plugins/user_profile/manage.conf", "manage config file")
 	var manageConf manage.Config
 	config.Files(*manageConfFile).Load(&manageConf)
 
@@ -25,6 +26,9 @@ func init() {
 		baseConfFile := flag.String("config.plugins.user_profile.manage.base", "../config/plugins/user_profile/base.conf", "base config file")
 		var baseConf base.Config
 		config.Files(*baseConfFile).Load(&baseConf)
+
+		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)
+		os.Setenv("HYY_CACHE_URL", baseConf.CacheUrl)
 
 		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
 		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))

@@ -17,12 +17,12 @@ import (
 )
 
 func init() {
-	manageConfFile := flag.String("config.webrouter_plugin_template.manage", "../config/plugins/webrouter_plugin_template/manage.conf", "manage config file")
+	manageConfFile := flag.String("config.plugins.user.manage", "../config/plugins/user/manage.conf", "manage config file")
 	var manageConf manage.Config
 	config.Files(*manageConfFile).Load(&manageConf)
 
 	if manageConf.WebRouter {
-		baseConfFile := flag.String("config.plugins.webrouter_plugin_template.manage.base", "../config/plugins/webrouter_plugin_template/base.conf", "base config file")
+		baseConfFile := flag.String("config.plugins.user.manage.base", "../config/plugins/user/base.conf", "base config file")
 		var baseConf base.Config
 		config.Files(*baseConfFile).Load(&baseConf)
 

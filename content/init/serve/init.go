@@ -3,6 +3,7 @@ package serve
 import (
 	"context"
 	"flag"
+	"os"
 
 	"github.com/haiyiyun/plugins/content/database/schema"
 	"github.com/haiyiyun/plugins/content/service/base"
@@ -21,7 +22,7 @@ import (
 )
 
 func init() {
-	serveConfFile := flag.String("config.content.serve", "../config/plugins/content/serve.conf", "serve config file")
+	serveConfFile := flag.String("config.plugins.content.serve", "../config/plugins/content/serve.conf", "serve config file")
 	var serveConf serve.Config
 	config.Files(*serveConfFile).Load(&serveConf)
 
@@ -29,6 +30,9 @@ func init() {
 		baseConfFile := flag.String("config.plugins.content.serve.base", "../config/plugins/content/base.conf", "base config file")
 		var baseConf base.Config
 		config.Files(*baseConfFile).Load(&baseConf)
+
+		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)
+		os.Setenv("HYY_CACHE_URL", baseConf.CacheUrl)
 
 		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
 		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))

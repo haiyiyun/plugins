@@ -1,8 +1,8 @@
 module github.com/haiyiyun/plugins/urlmanager
 
-go 1.17
+go 1.24.5
 
 require (
-	github.com/haiyiyun/log v0.0.0-20211115100502-be01af77681c
-	github.com/haiyiyun/webrouter v0.0.0-20211125101311-e49551c30619
+	github.com/haiyiyun/log v0.0.0-20250714021242-243291bf2f88
+	github.com/haiyiyun/webrouter v0.0.0-20250714030435-4a329d81f352
 )

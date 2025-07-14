@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"net/http"
+	"os"
 
 	"github.com/haiyiyun/plugins/urbac/database/schema"
 	"github.com/haiyiyun/plugins/urbac/service/base"
@@ -29,6 +30,9 @@ func init() {
 	config.Files(*baseConfFile).Load(&baseConf)
 
 	if baseConf.URBAC {
+		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)
+		os.Setenv("HYY_CACHE_URL", baseConf.CacheUrl)
+
 		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
 		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
 		webrouter.SetCloser(func() { baseDB.Disconnect(context.TODO()) })

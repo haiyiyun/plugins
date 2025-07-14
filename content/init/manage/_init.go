@@ -3,6 +3,7 @@ package manage
 import (
 	"context"
 	"flag"
+	"os"
 
 	"github.com/haiyiyun/plugins/content/database/schema"
 	"github.com/haiyiyun/plugins/content/service/base"
@@ -16,14 +17,17 @@ import (
 )
 
 func init() {
-	manageConfFile := flag.String("config.webrouter_plugin_template.manage", "../config/plugins/webrouter_plugin_template/manage.conf", "manage config file")
+	manageConfFile := flag.String("config.plugins.content.manage", "../config/plugins/content/manage.conf", "manage config file")
 	var manageConf manage.Config
 	config.Files(*manageConfFile).Load(&manageConf)
 
 	if manageConf.WebRouter {
-		baseConfFile := flag.String("config.plugins.webrouter_plugin_template.manage.base", "../config/plugins/webrouter_plugin_template/base.conf", "base config file")
+		baseConfFile := flag.String("config.plugins.content.manage.base", "../config/plugins/content/base.conf", "base config file")
 		var baseConf base.Config
 		config.Files(*baseConfFile).Load(&baseConf)
+
+		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)
+		os.Setenv("HYY_CACHE_URL", baseConf.CacheUrl)
 
 		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
 		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
