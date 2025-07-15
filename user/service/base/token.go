@@ -185,8 +185,8 @@ func (self *Service) GetClaims(r *http.Request) (claims *predefined.JWTTokenClai
 func (self *Service) GetValidClaims(r *http.Request) (claims *predefined.JWTTokenClaims, u model.User) {
 	if tokenString, found := self.BearerAuth(r); found {
 		cacheKey := "claims.valid." + tokenString
-		if claimsAndUserI, found := self.Cache.Get(cacheKey); found {
-			claimsAndUser := claimsAndUserI.(help.M)
+		var claimsAndUser help.M
+		if found, _ := self.Cache.Get(cacheKey, &claimsAndUser); found {
 			claims = claimsAndUser["claims"].(*predefined.JWTTokenClaims)
 			u = claimsAndUser["user"].(model.User)
 		} else {

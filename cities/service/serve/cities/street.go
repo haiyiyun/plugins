@@ -14,12 +14,12 @@ func (self *Service) Route_GET_Street(rw http.ResponseWriter, req *http.Request)
 
 	if areaID != "" {
 		cacheKey := "cities.street." + areaID
-		if streets, found := self.Cache.Get(cacheKey); found {
+		streets := []model.Street{}
+		if found, _ := self.Cache.Get(cacheKey, &streets); found {
 			response.JSON(rw, 0, streets, "")
 			return
 		} else {
 			streetModel := street.NewModel(self.M)
-			streets := []model.Street{}
 			if cur, err := streetModel.Find(req.Context(), bson.D{
 				{"area_id", areaID},
 			}); err == nil {

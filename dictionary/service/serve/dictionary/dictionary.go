@@ -17,7 +17,8 @@ func (self *Service) Route_GET_Lookup(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	cacheKey := "dictionary." + requestLookup.Key + "." + requestLookup.Structure + "." + requestLookup.Want
-	if dict, found := self.Cache.Get(cacheKey); !requestLookup.Flush && found {
+	var dict interface{}
+	if found, _ := self.Cache.Get(cacheKey, &dict); !requestLookup.Flush && found {
 		response.JSON(rw, 0, dict, "")
 		return
 	} else {

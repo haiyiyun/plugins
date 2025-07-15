@@ -14,12 +14,12 @@ func (self *Service) Route_GET_Village(rw http.ResponseWriter, req *http.Request
 
 	if streetID != "" {
 		cacheKey := "cities.village." + streetID
-		if villages, found := self.Cache.Get(cacheKey); found {
+		villages := []model.Village{}
+		if found, _ := self.Cache.Get(cacheKey, &villages); found {
 			response.JSON(rw, 0, villages, "")
 			return
 		} else {
 			villageModel := village.NewModel(self.M)
-			villages := []model.Village{}
 			if cur, err := villageModel.Find(req.Context(), bson.D{
 				{"street_id", streetID},
 			}); err == nil {

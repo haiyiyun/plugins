@@ -4,8 +4,8 @@ github.com/haiyiyun/log v0.0.0-20250714021242-243291bf2f88 h1:K0c5SzBlwtvDLoRykK
 github.com/haiyiyun/log v0.0.0-20250714021242-243291bf2f88/go.mod h1:REISaucR2styQ62sk//GZEiv8pQNcOEkCjR0J/fG4bg=
 github.com/haiyiyun/template v0.0.0-20250714025207-37b2b56aaa1b h1:Sc494Yxv+DJek5RYGSRC0UzxBeoO36Gt+NI5cXrQHLI=
 github.com/haiyiyun/template v0.0.0-20250714025207-37b2b56aaa1b/go.mod h1:1iLGtgAMi8/THyevcBNAcE0ZRIP105TKSoZ/6t95mq8=
-github.com/haiyiyun/utils v0.0.0-20250714030319-0020d33a185d h1:5L6kqZOrn//8flmt86VbEC/HyDbysnoZ3D/D9T9YlZc=
-github.com/haiyiyun/utils v0.0.0-20250714030319-0020d33a185d/go.mod h1:0wWdZF3KjUkwB7S4fthu0+s80dOb7wgrwsLxsmLt0TE=
+github.com/haiyiyun/utils v0.0.0-20250714043253-272fb3079e5c h1:lbmBxXZ1+dOKPeFutyYEPEbwaJMdxAM+Pmdu6Q/WxKo=
+github.com/haiyiyun/utils v0.0.0-20250714043253-272fb3079e5c/go.mod h1:6Y1J9W100TomulEMTUK5A89OGmlUyo8SrZRtOsI1iJk=
 github.com/haiyiyun/uuid v0.0.0-20250714025316-0cd7ec9ae801 h1:wDEXb81l7Yutg1GGJ7O3SQgOiOIoc7KjkYPbRoUfFzY=
 github.com/haiyiyun/uuid v0.0.0-20250714025316-0cd7ec9ae801/go.mod h1:HMZKdmFUjiCWhA92aiDGME/gwcX0viOEi6SdOMxMy5E=
 go.mongodb.org/mongo-driver v1.17.4 h1:jUorfmVzljjr0FLzYQsGP8cgN/qzzxlY9Vh0C9KFXVw=

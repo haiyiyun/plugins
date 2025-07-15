@@ -14,12 +14,12 @@ func (self *Service) Route_GET_Area(rw http.ResponseWriter, req *http.Request) {
 
 	if cityID != "" {
 		cacheKey := "cities.area." + cityID
-		if areas, found := self.Cache.Get(cacheKey); found {
+		areas := []model.Area{}
+		if found, _ := self.Cache.Get(cacheKey, &areas); found {
 			response.JSON(rw, 0, areas, "")
 			return
 		} else {
 			areaModel := area.NewModel(self.M)
-			areas := []model.Area{}
 			if cur, err := areaModel.Find(req.Context(), bson.D{
 				{"city_id", cityID},
 			}); err == nil {

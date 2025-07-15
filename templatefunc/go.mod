@@ -4,7 +4,7 @@ go 1.24.5
 
 require (
 	github.com/haiyiyun/template v0.0.0-20250714025207-37b2b56aaa1b
-	github.com/haiyiyun/utils v0.0.0-20250714030319-0020d33a185d
+	github.com/haiyiyun/utils v0.0.0-20250714043253-272fb3079e5c
 )
 
 require (

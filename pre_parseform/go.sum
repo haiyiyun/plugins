@@ -6,10 +6,10 @@ github.com/haiyiyun/log v0.0.0-20250714021242-243291bf2f88 h1:K0c5SzBlwtvDLoRykK
 github.com/haiyiyun/log v0.0.0-20250714021242-243291bf2f88/go.mod h1:REISaucR2styQ62sk//GZEiv8pQNcOEkCjR0J/fG4bg=
 github.com/haiyiyun/mongodb v0.0.0-20250714024937-af0b2494660a h1:X2BhbayWa7S+h0aNPlcr02UatqLE+07TNysSaMTxUN0=
 github.com/haiyiyun/mongodb v0.0.0-20250714024937-af0b2494660a/go.mod h1:mJjQLEA/+cPpUhIrLRurEboKSPtM91+XSk3T7FpVAk8=
-github.com/haiyiyun/plugins/user v0.0.0-20230120122813-2f699304561d h1:2DIt7nRaj2P/ClKNMQt7hMG2FKCMSIfSxFTIeMAFCTM=
-github.com/haiyiyun/plugins/user v0.0.0-20230120122813-2f699304561d/go.mod h1:bzlZArHga1Sc9bpAeRwvgOh6seqjZCpDpvbsxkppwIo=
-github.com/haiyiyun/utils v0.0.0-20250714030319-0020d33a185d h1:5L6kqZOrn//8flmt86VbEC/HyDbysnoZ3D/D9T9YlZc=
-github.com/haiyiyun/utils v0.0.0-20250714030319-0020d33a185d/go.mod h1:0wWdZF3KjUkwB7S4fthu0+s80dOb7wgrwsLxsmLt0TE=
+github.com/haiyiyun/plugins/user v0.0.0-20250714041035-788266c8df11 h1:u1ZSg0DkTqYqpAZxDYo0ANiYVXv5JVNNYdv4C9/7Xm4=
+github.com/haiyiyun/plugins/user v0.0.0-20250714041035-788266c8df11/go.mod h1:/quDNL078qtMSrQAx3okNuL+ytR5O5EG3qLa+LYMTu0=
+github.com/haiyiyun/utils v0.0.0-20250714043253-272fb3079e5c h1:lbmBxXZ1+dOKPeFutyYEPEbwaJMdxAM+Pmdu6Q/WxKo=
+github.com/haiyiyun/utils v0.0.0-20250714043253-272fb3079e5c/go.mod h1:6Y1J9W100TomulEMTUK5A89OGmlUyo8SrZRtOsI1iJk=
 github.com/haiyiyun/uuid v0.0.0-20250714025316-0cd7ec9ae801 h1:wDEXb81l7Yutg1GGJ7O3SQgOiOIoc7KjkYPbRoUfFzY=
 github.com/haiyiyun/uuid v0.0.0-20250714025316-0cd7ec9ae801/go.mod h1:HMZKdmFUjiCWhA92aiDGME/gwcX0viOEi6SdOMxMy5E=
 github.com/haiyiyun/webrouter v0.0.0-20250714030435-4a329d81f352 h1:SqaVAYwTlyZlvlRWPaGzfjGuwTWKRoMX9QE/vwQkoQw=

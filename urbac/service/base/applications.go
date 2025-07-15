@@ -19,8 +19,8 @@ import (
 
 func (self *Service) GetApplications(userID primitive.ObjectID, checkRole bool) help.M {
 	cacheKey := "applications.info." + userID.Hex()
-	if appI, found := self.Cache.Get(cacheKey); found {
-		appMapIs := appI.(help.M)
+	var appMapIs help.M
+	if found, _ := self.Cache.Get(cacheKey, &appMapIs); found {
 		return appMapIs
 	}
 
@@ -151,7 +151,7 @@ func (self *Service) GetApplications(userID primitive.ObjectID, checkRole bool) 
 	appsSorted := self.SortApps(apps)
 	permissionCode := self.GetPermissionCode(appsSorted)
 	appRoute := self.GetRoute(appsSorted)
-	appMapIs := help.M{
+	appMapIs = help.M{
 		"map":             apps,
 		"sorted":          appsSorted,
 		"permission_code": permissionCode,
