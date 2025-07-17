@@ -10,6 +10,8 @@ type MongodbConfig struct {
 type CacheConfig struct {
 	CacheType              string          `json:"cache_type"`
 	CacheUrl               string          `json:"cache_url"`
+	CacheShardCount        string          `json:"cache_shard_count"`
+	CacheUStrictTypeCheck  string          `json:"cache_strict_type_check"`
 	CacheDefaultExpiration config.Duration `json:"cache_default_expiration"`
 	CacheCleanupInterval   config.Duration `json:"cache_cleanup_interval"`
 }

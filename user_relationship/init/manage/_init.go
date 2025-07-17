@@ -29,6 +29,8 @@ func init() {
 
 		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)
 		os.Setenv("HYY_CACHE_URL", baseConf.CacheUrl)
+		os.Setenv("HYY_SHARD_COUNT", baseConf.CacheShardCount)
+		os.Setenv("HYY_STRICT_TYPE_CHECK", baseConf.CacheUStrictTypeCheck)
 
 		baseCache := cache.New(baseConf.CacheDefaultExpiration.Duration, baseConf.CacheCleanupInterval.Duration)
 		baseDB := mongodb.NewMongoPool("", baseConf.MongoDatabaseName, 100, options.Client().ApplyURI(baseConf.MongoDNS))
