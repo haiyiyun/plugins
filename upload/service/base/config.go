@@ -62,13 +62,14 @@ type TencentConfig struct {
 }
 
 type QiniuConfig struct {
-	QiniuAccessKey     string `json:"qiniu_access_key"`
-	QiniuSecretKey     string `json:"qiniu_secret_key"`
-	QiniuBucketName    string `json:"qiniu_bucket_name"`
-	QiniuBaseURL       string `json:"qiniu_base_url"`
-	QiniuUseHTTPS      bool   `json:"qiniu_use_https"`       // 是否使用HTTPS
-	QiniuUseCdnDomains bool   `json:"qiniu_use_cdn_domains"` // 是否使用CDN加速上传
-	QiniuDisableUpload bool   `json:"qiniu_disable_upload"`  // 是否禁用上传
+	QiniuAccessKey       string `json:"qiniu_access_key"`
+	QiniuSecretKey       string `json:"qiniu_secret_key"`
+	QiniuBucketName      string `json:"qiniu_bucket_name"`
+	QiniuBaseURL         string `json:"qiniu_base_url"`
+	QiniuUseHTTPS        bool   `json:"qiniu_use_https"`        // 是否使用HTTPS
+	QiniuUseCdnDomains   bool   `json:"qiniu_use_cdn_domains"`  // 是否使用CDN加速上传
+	QiniuDisableUpload   bool   `json:"qiniu_disable_upload"`   // 是否禁用上传
+	QiniuDisableDownload bool   `json:"qiniu_disable_download"` // 是否禁用下载
 }
 
 type Config struct {

@@ -7,6 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
+	_ "github.com/haiyiyun/plugins/upload/service/aliyun"   // 导入阿里云存储
+	_ "github.com/haiyiyun/plugins/upload/service/local"    // 导入本地存储
+	_ "github.com/haiyiyun/plugins/upload/service/qiniuyun" // 导入七牛云存储
+	_ "github.com/haiyiyun/plugins/upload/service/tencent"  // 导入腾讯云存储
+
 	"github.com/haiyiyun/plugins/upload/database/schema"
 	"github.com/haiyiyun/plugins/upload/service/base"
 	"github.com/haiyiyun/plugins/upload/service/serve"
@@ -33,6 +38,11 @@ func init() {
 		uploadDir := filepath.Clean(baseConf.UploadDirectory)
 		if _, err := os.Stat(uploadDir); err != nil {
 			log.Fatal("upload directory must exist and only manually create")
+		}
+
+		// 验证必要的配置项
+		if baseConf.StorageType == "" {
+			log.Fatal("storage_type must be configured")
 		}
 
 		os.Setenv("HYY_CACHE_TYPE", baseConf.CacheType)

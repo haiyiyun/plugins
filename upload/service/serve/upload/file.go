@@ -2,6 +2,7 @@ package upload
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/haiyiyun/log"
 	"github.com/haiyiyun/plugins/upload/database/model"
@@ -17,7 +18,7 @@ import (
 func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 	var requestUID predefined.RequestServeUploadID
 	if err := validator.FormStruct(&requestUID, r.URL.Query()); err != nil {
-		response.JSON(rw, http.StatusBadRequest, nil, err.Error())
+		response.JSON(rw, http.StatusBadRequest, nil, "无效的文件ID参数: "+err.Error())
 		return
 	}
 
@@ -25,15 +26,20 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 	sr := uploadModel.FindOne(r.Context(), uploadModel.FilterByID(requestUID.ID))
 	var uploadFile model.Upload
 	if err := sr.Decode(&uploadFile); err != nil {
-		response.JSON(rw, http.StatusNotFound, nil, "")
+		response.JSON(rw, http.StatusNotFound, nil, "文件不存在或已被删除")
 		return
 	} else {
 		switch uploadFile.Storage {
 		case predefined.UploadStorageLocal:
 			if self.AllowDownloadLocal {
-				http.ServeFile(rw, r, self.Config.UploadDirectory+uploadFile.Path)
+				fullPath := self.Config.UploadDirectory + uploadFile.Path
+				if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+					response.JSON(rw, http.StatusNotFound, nil, "本地文件不存在")
+					return
+				}
+				http.ServeFile(rw, r, fullPath)
 			} else {
-				response.JSON(rw, http.StatusServiceUnavailable, nil, "")
+				response.JSON(rw, http.StatusServiceUnavailable, nil, "本地文件下载功能已禁用")
 			}
 		case predefined.UploadStorageAliyun:
 			// 阿里云OSS下载处理
@@ -51,13 +57,13 @@ func (self *Service) Route_GET_File(rw http.ResponseWriter, r *http.Request) {
 			http.Redirect(rw, r, uploadFile.URL, http.StatusFound)
 		case predefined.UploadStorageQiniu:
 			// 七牛云下载处理
-			if self.Config.QiniuDisableUpload { // 复用禁用上传标志
+			if self.Config.QiniuDisableDownload { // 使用正确的下载禁用标志
 				response.JSON(rw, http.StatusServiceUnavailable, nil, "七牛云下载功能已禁用")
 				return
 			}
 			http.Redirect(rw, r, uploadFile.URL, http.StatusFound)
 		default:
-			response.JSON(rw, http.StatusServiceUnavailable, nil, "不支持的存储类型")
+			response.JSON(rw, http.StatusServiceUnavailable, nil, "不支持的存储类型: "+uploadFile.Storage)
 		}
 	}
 }

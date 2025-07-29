@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"bufio"
@@ -20,6 +21,16 @@ import (
 	"github.com/haiyiyun/plugins/upload/predefined"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+// 全局随机数生成器，线程安全
+var (
+	globalRand *rand.Rand
+	randMutex  sync.Mutex
+)
+
+func init() {
+	globalRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
 
 // 全局魔数映射表，按文件扩展名组织
 var magicNumbers = map[string][][]byte{
@@ -241,8 +252,10 @@ func (self *Service) generateUploadName(contentType, originalFileName string) (f
 			err = os.MkdirAll(fileDir, 0755)
 		}
 
-		random := rand.New(rand.NewSource(now.UnixNano()))
-		fileName = fmt.Sprintf("%v", random.Uint64())
+		// 使用线程安全的随机数生成器
+		randMutex.Lock()
+		fileName = fmt.Sprintf("%v", globalRand.Uint64())
+		randMutex.Unlock()
 	} else {
 		err = errors.New("parse Content-Type failed")
 	}
@@ -254,8 +267,15 @@ func (self *Service) relativePath(sPath string) (newPath string) {
 	uploadDir := filepath.Clean(self.Config.UploadDirectory)
 	newPath = sPath
 
-	// 防止路径遍历攻击
-	if strings.Contains(sPath, "..") || strings.HasPrefix(sPath, "/") {
+	// 防止路径遍历攻击 - 增强安全检查
+	if strings.Contains(sPath, "..") || strings.HasPrefix(sPath, "/") ||
+		strings.Contains(sPath, "\\") || strings.Contains(sPath, "//") {
+		return ""
+	}
+
+	// 确保路径在允许的目录内
+	cleanPath := filepath.Clean(sPath)
+	if !strings.HasPrefix(cleanPath, uploadDir) {
 		return ""
 	}
 
@@ -301,7 +321,13 @@ func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode 
 			if createErr != nil {
 				return nil, createErr
 			}
-			defer dst.Close()
+			defer func() {
+				dst.Close()
+				// 如果发生错误，删除可能创建的文件
+				if err != nil {
+					os.Remove(filePath)
+				}
+			}()
 
 			// 使用缓冲写入提升大文件性能
 			bufferedWriter := bufio.NewWriterSize(dst, 4*1024*1024) // 4MB buffer
@@ -329,6 +355,11 @@ func (self *Service) saveFormFile(r *http.Request, fileFormName string, bEncode 
 			size, copyErr := io.Copy(bufferedWriter, f)
 			if copyErr != nil {
 				return nil, copyErr
+			}
+
+			// 确保缓冲区数据写入磁盘
+			if err = bufferedWriter.Flush(); err != nil {
+				return nil, err
 			}
 
 			// 总文件大小 = 头部大小 + 剩余内容大小
